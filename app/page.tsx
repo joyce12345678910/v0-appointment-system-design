@@ -203,7 +203,9 @@ export default function HomePage() {
                   </div>
                   <div>
                     <h3 className="font-bold text-gray-900 mb-1">Address</h3>
-                    <p className="text-gray-600">Tactay Billedo Medical Center, Quezon City, Philippines</p>
+                    <p className="text-gray-600">
+                      2nd Floor Shell Santo Domingo Building, National Highway, Santo Domingo, Philippines, 2729
+                    </p>
                     <a
                       href="https://share.google.com/JvtaNORpcUr4mRMWO"
                       target="_blank"
@@ -223,7 +225,7 @@ export default function HomePage() {
                   </div>
                   <div>
                     <h3 className="font-bold text-gray-900 mb-1">Phone</h3>
-                    <p className="text-gray-600">(+63) 2 1234 5678</p>
+                    <p className="text-gray-600">0917 568 0416</p>
                   </div>
                 </div>
 
@@ -234,7 +236,7 @@ export default function HomePage() {
                   </div>
                   <div>
                     <h3 className="font-bold text-gray-900 mb-1">Email</h3>
-                    <p className="text-gray-600">info@tactaybilledo.com</p>
+                    <p className="text-gray-600">mttactay.billedo@gmail.com</p>
                   </div>
                 </div>
               </div>

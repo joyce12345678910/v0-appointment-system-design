@@ -22,11 +22,19 @@ export default function BookAppointmentPage() {
   const [appointmentType, setAppointmentType] = useState("")
   const [reason, setReason] = useState("")
   const [isLoading, setIsLoading] = useState(false)
+  const [availableTimeSlots, setAvailableTimeSlots] = useState<string[]>([])
+  const [loadingSlots, setLoadingSlots] = useState(false)
   const router = useRouter()
 
   useEffect(() => {
     fetchDoctors()
   }, [])
+
+  useEffect(() => {
+    if (selectedDoctor && appointmentDate) {
+      fetchAvailableTimeSlots()
+    }
+  }, [selectedDoctor, appointmentDate])
 
   const fetchDoctors = async () => {
     const supabase = createClient()
@@ -34,6 +42,43 @@ export default function BookAppointmentPage() {
 
     if (data) {
       setDoctors(data)
+    }
+  }
+
+  const fetchAvailableTimeSlots = async () => {
+    const supabase = createClient()
+    setLoadingSlots(true)
+
+    try {
+      const { data: appointments, error } = await supabase
+        .from("appointments")
+        .select("appointment_time")
+        .eq("doctor_id", selectedDoctor)
+        .eq("appointment_date", appointmentDate)
+        .in("status", ["pending", "approved"])
+
+      if (error) throw error
+
+      const slots = []
+      for (let hour = 8; hour < 17; hour++) {
+        const timeString = `${hour.toString().padStart(2, "0")}:00`
+        slots.push(timeString)
+      }
+
+      const bookedTimes = appointments?.map((apt) => apt.appointment_time) || []
+
+      const available = slots.filter((slot) => !bookedTimes.includes(slot))
+
+      setAvailableTimeSlots(available)
+    } catch (error) {
+      console.error("Error fetching available slots:", error)
+      toast({
+        title: "Error",
+        description: "Failed to load available time slots",
+        variant: "destructive",
+      })
+    } finally {
+      setLoadingSlots(false)
     }
   }
 
@@ -79,7 +124,6 @@ export default function BookAppointmentPage() {
     }
   }
 
-  // Get minimum date (today)
   const today = new Date().toISOString().split("T")[0]
 
   return (
@@ -144,13 +188,31 @@ export default function BookAppointmentPage() {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="time">Preferred Time</Label>
-                <Input
-                  id="time"
-                  type="time"
-                  value={appointmentTime}
-                  onChange={(e) => setAppointmentTime(e.target.value)}
-                  required
-                />
+                {availableTimeSlots.length > 0 ? (
+                  <Select
+                    value={appointmentTime}
+                    onValueChange={setAppointmentTime}
+                    disabled={!selectedDoctor || !appointmentDate || loadingSlots}
+                    required
+                  >
+                    <SelectTrigger>
+                      <SelectValue
+                        placeholder={loadingSlots ? "Loading available slots..." : "Select available time"}
+                      />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {availableTimeSlots.map((slot) => (
+                        <SelectItem key={slot} value={slot}>
+                          {slot}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                ) : (
+                  <div className="w-full px-3 py-2 border border-input bg-background rounded-md text-sm text-muted-foreground">
+                    {loadingSlots ? "Loading available slots..." : "No available slots for this date"}
+                  </div>
+                )}
               </div>
             </div>
 
