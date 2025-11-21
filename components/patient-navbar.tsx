@@ -38,7 +38,7 @@ export function PatientNavbar() {
   const confirmLogout = async () => {
     const supabase = createClient()
     await supabase.auth.signOut()
-    router.push("/auth/login")
+    router.push("/")
   }
 
   return (
@@ -127,7 +127,7 @@ export function PatientNavbar() {
           <AlertDialogHeader>
             <AlertDialogTitle>Logout</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to logout? You will be redirected to the login page.
+              Are you sure you want to logout? You will be redirected to the landing page.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <div className="flex gap-3 justify-end">
