@@ -57,7 +57,7 @@ export default function HomePage() {
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div className="space-y-8">
               <div className="space-y-4">
-                <h1 className="text-5xl md:text-7xl font-bold text-balance leading-tight">Your Health, Our Priority</h1>
+                <h1 className="text-5xl md:text-7xl font-bold text-balance leading-tight">Your Smile, Our Priority</h1>
                 <p className="text-xl text-blue-100 text-pretty leading-relaxed">
                   Experience seamless healthcare with expert doctors, secure appointments, and comprehensive medical
                   records all in one trusted platform.
