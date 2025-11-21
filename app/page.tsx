@@ -7,13 +7,13 @@ import { MapPin, Facebook, Phone, Mail, Clock } from "lucide-react"
 export default function HomePage() {
   const doctors = [
     {
-      name: "Dr. Maria Santos",
-      specialty: "General Practitioner",
+      name: "Dr. LYKA CAYABCABO",
+      specialty: "LEGWAK",
       image: "/doctor-female-2.png",
     },
     {
-      name: "Dr. Juan Dela Cruz",
-      specialty: "Cardiologist",
+      name: "Dr. ADRIAN UBARRE",
+      specialty: "MANAKI",
       image: "/male-cardiologist-doctor-portrait.jpg",
     },
   ]
@@ -191,7 +191,7 @@ export default function HomePage() {
               <div>
                 <h2 className="text-4xl font-bold text-gray-900 mb-6">Visit Us Today</h2>
                 <p className="text-gray-600 text-lg mb-8">
-                  Located in the heart of the city, we welcome you to our modern medical facility.
+                  Located in the Municipality os Santo Domingo, we welcome you to our modern medical facility.
                 </p>
               </div>
 
@@ -347,6 +347,7 @@ export default function HomePage() {
           </div>
           <div className="border-t border-gray-800 pt-8 text-center text-sm">
             <p>&copy; 2025 Tactay Billedo Medical Center. All rights reserved.</p>
+            <p>ADRIAN UBARRE</p>
           </div>
         </div>
       </footer>
