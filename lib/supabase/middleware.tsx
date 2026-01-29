@@ -9,47 +9,56 @@ export async function updateSession(request: NextRequest) {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
   const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
+  // If Supabase credentials are missing, allow all requests (including landing page)
   if (!supabaseUrl || !supabaseKey) {
     return supabaseResponse
   }
 
-  // With Fluid compute, don't put this client in a global environment
-  // variable. Always create a new one on each request.
-  const supabase = createServerClient(supabaseUrl, supabaseKey, {
-    cookies: {
-      getAll() {
-        return request.cookies.getAll()
+  try {
+    // With Fluid compute, don't put this client in a global environment
+    // variable. Always create a new one on each request.
+    const supabase = createServerClient(supabaseUrl, supabaseKey, {
+      cookies: {
+        getAll() {
+          return request.cookies.getAll()
+        },
+        setAll(cookiesToSet) {
+          cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
+          supabaseResponse = NextResponse.next({
+            request,
+          })
+          cookiesToSet.forEach(({ name, value, options }) => supabaseResponse.cookies.set(name, value, options))
+        },
       },
-      setAll(cookiesToSet) {
-        cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
-        supabaseResponse = NextResponse.next({
-          request,
-        })
-        cookiesToSet.forEach(({ name, value, options }) => supabaseResponse.cookies.set(name, value, options))
-      },
-    },
-  })
+    })
 
-  // Do not run code between createServerClient and
-  // supabase.auth.getUser(). A simple mistake could make it very hard to debug
-  // issues with users being randomly logged out.
+    // Do not run code between createServerClient and
+    // supabase.auth.getUser(). A simple mistake could make it very hard to debug
+    // issues with users being randomly logged out.
 
-  // IMPORTANT: If you remove getUser() and you use server-side rendering
-  // with the Supabase client, your users may be randomly logged out.
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+    // IMPORTANT: If you remove getUser() and you use server-side rendering
+    // with the Supabase client, your users may be randomly logged out.
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
 
-  if (
-    request.nextUrl.pathname !== "/" &&
-    !user &&
-    !request.nextUrl.pathname.startsWith("/login") &&
-    !request.nextUrl.pathname.startsWith("/auth")
-  ) {
-    // no user, potentially respond by redirecting the user to the login page
-    const url = request.nextUrl.clone()
-    url.pathname = "/auth/login"
-    return NextResponse.redirect(url)
+    if (
+      request.nextUrl.pathname !== "/" &&
+      !user &&
+      !request.nextUrl.pathname.startsWith("/login") &&
+      !request.nextUrl.pathname.startsWith("/auth") &&
+      !request.nextUrl.pathname.startsWith("/forgot-password") &&
+      !request.nextUrl.pathname.startsWith("/sign-up") &&
+      !request.nextUrl.pathname.startsWith("/reset-password")
+    ) {
+      // no user, potentially respond by redirecting the user to the login page
+      const url = request.nextUrl.clone()
+      url.pathname = "/auth/login"
+      return NextResponse.redirect(url)
+    }
+  } catch (error) {
+    // If there's an error checking auth, allow the request
+    console.error("[v0] Auth check error:", error)
   }
 
   // IMPORTANT: You *must* return the supabaseResponse object as it is.
