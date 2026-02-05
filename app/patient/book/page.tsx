@@ -20,7 +20,6 @@ export default function BookAppointmentPage() {
   const [selectedDoctor, setSelectedDoctor] = useState("")
   const [appointmentDate, setAppointmentDate] = useState("")
   const [appointmentTime, setAppointmentTime] = useState("")
-  const [appointmentType, setAppointmentType] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const [availableTimeSlots, setAvailableTimeSlots] = useState<string[]>([])
   const [loadingSlots, setLoadingSlots] = useState(false)
@@ -136,6 +135,22 @@ export default function BookAppointmentPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    
+    console.log("[v0] Form submitted with:", {
+      selectedDoctor,
+      appointmentDate,
+      appointmentTime,
+    })
+
+    if (!selectedDoctor || !appointmentDate || !appointmentTime) {
+      toast({
+        title: "Validation Error",
+        description: "Please fill in all required fields",
+        variant: "destructive",
+      })
+      return
+    }
+
     setIsLoading(true)
 
     const supabase = createClient()
@@ -147,12 +162,17 @@ export default function BookAppointmentPage() {
 
       if (!user) throw new Error("Not authenticated")
 
+      console.log("[v0] Creating appointment with data:", {
+        doctor: selectedDoctor,
+        date: appointmentDate,
+        time: appointmentTime,
+      })
+
       const appointmentData: any = {
         patient_id: user.id,
         doctor_id: selectedDoctor,
         appointment_date: appointmentDate,
         appointment_time: appointmentTime,
-        appointment_type: appointmentType,
         status: "pending",
       }
 
@@ -164,7 +184,12 @@ export default function BookAppointmentPage() {
 
       const { error } = await supabase.from("appointments").insert(appointmentData)
 
-      if (error) throw error
+      if (error) {
+        console.error("[v0] Database error:", error)
+        throw error
+      }
+
+      console.log("[v0] Appointment created successfully")
 
       toast({
         title: "Appointment Requested",
@@ -173,9 +198,10 @@ export default function BookAppointmentPage() {
 
       router.push("/patient")
     } catch (error) {
+      console.error("[v0] Error booking appointment:", error)
       toast({
         title: "Error",
-        description: "Failed to book appointment. Please try again.",
+        description: error instanceof Error ? error.message : "Failed to book appointment. Please try again.",
         variant: "destructive",
       })
     } finally {
@@ -212,22 +238,6 @@ export default function BookAppointmentPage() {
                       Dr. {doctor.full_name} - {doctor.specialization}
                     </SelectItem>
                   ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Appointment Type */}
-            <div className="space-y-2">
-              <Label htmlFor="type">Appointment Type</Label>
-              <Select value={appointmentType} onValueChange={setAppointmentType} required>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select appointment type" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="consultation">Consultation</SelectItem>
-                  <SelectItem value="follow_up">Follow-up</SelectItem>
-                  <SelectItem value="emergency">Emergency</SelectItem>
-                  <SelectItem value="routine_checkup">Routine Checkup</SelectItem>
                 </SelectContent>
               </Select>
             </div>
