@@ -21,9 +21,10 @@ interface AppointmentActionsProps {
   appointmentId: string
   currentStatus: string
   appointmentDate?: string
+  onActionComplete?: () => void
 }
 
-export function AppointmentActions({ appointmentId, currentStatus, appointmentDate }: AppointmentActionsProps) {
+export function AppointmentActions({ appointmentId, currentStatus, appointmentDate, onActionComplete }: AppointmentActionsProps) {
   const [isApproveOpen, setIsApproveOpen] = useState(false)
   const [isRejectOpen, setIsRejectOpen] = useState(false)
   const [isDeleteOpen, setIsDeleteOpen] = useState(false)
@@ -61,7 +62,14 @@ export function AppointmentActions({ appointmentId, currentStatus, appointmentDa
       })
 
       setIsApproveOpen(false)
-      router.refresh()
+      setNotes("")
+      
+      // Refresh the appointments list
+      if (onActionComplete) {
+        onActionComplete()
+      } else {
+        router.refresh()
+      }
     } catch (error) {
       toast({
         title: "Error",
@@ -94,7 +102,14 @@ export function AppointmentActions({ appointmentId, currentStatus, appointmentDa
       })
 
       setIsRejectOpen(false)
-      router.refresh()
+      setNotes("")
+      
+      // Refresh the appointments list
+      if (onActionComplete) {
+        onActionComplete()
+      } else {
+        router.refresh()
+      }
     } catch (error) {
       toast({
         title: "Error",
@@ -115,13 +130,21 @@ export function AppointmentActions({ appointmentId, currentStatus, appointmentDa
 
       if (error) throw error
 
+      console.log("[v0] Appointment deleted successfully")
+      
       toast({
         title: "Appointment Deleted",
         description: "The appointment has been permanently deleted.",
       })
 
       setIsDeleteOpen(false)
-      router.refresh()
+      
+      // Refresh the appointments list
+      if (onActionComplete) {
+        onActionComplete()
+      } else {
+        router.refresh()
+      }
     } catch (error) {
       toast({
         title: "Error",
@@ -161,7 +184,13 @@ export function AppointmentActions({ appointmentId, currentStatus, appointmentDa
 
       setIsCompleteOpen(false)
       setNotes("")
-      router.refresh()
+      
+      // Refresh the appointments list
+      if (onActionComplete) {
+        onActionComplete()
+      } else {
+        router.refresh()
+      }
     } catch (error) {
       toast({
         title: "Error",
