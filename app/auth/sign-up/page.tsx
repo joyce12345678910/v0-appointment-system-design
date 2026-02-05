@@ -33,34 +33,44 @@ export default function SignUpPage() {
         throw new Error("Please enter a valid email address")
       }
 
-      // Send verification code to email
-      const response = await fetch("/api/auth/send-verification-code", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
-      })
-
-      const data = await response.json()
-
-      if (!response.ok) {
-        throw new Error(data.error || "Failed to send verification code")
+      // Validate password
+      if (password.length < 6) {
+        throw new Error("Password must be at least 6 characters")
       }
 
-      // Store sign-up data in session storage for later use
-      sessionStorage.setItem(
-        "pendingSignUp",
-        JSON.stringify({
-          email,
-          password,
-          fullName,
-          phone,
-          dateOfBirth,
-          address,
-        })
-      )
+      const supabase = createClient()
 
-      // Redirect to verification page
-      router.push(`/auth/verify-email?email=${encodeURIComponent(email)}`)
+      // Create user account directly
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            full_name: fullName,
+            role: "patient",
+          },
+        },
+      })
+
+      if (authError) throw authError
+
+      if (!authData.user) {
+        throw new Error("Failed to create account")
+      }
+
+      // Create profile with additional information
+      const { error: profileError } = await supabase.from("profiles").upsert({
+        id: authData.user.id,
+        full_name: fullName,
+        phone: phone || null,
+        date_of_birth: dateOfBirth || null,
+        address: address || null,
+        role: "patient",
+      })
+
+      if (profileError) throw profileError
+
+      router.push("/auth/sign-up-success")
     } catch (error: unknown) {
       setError(error instanceof Error ? error.message : "An error occurred during sign-up")
     } finally {
@@ -76,13 +86,6 @@ export default function SignUpPage() {
           <h1 className="text-4xl font-bold text-white mb-2">Tactay Billedo</h1>
           <p className="text-blue-100 text-lg">Dental Clinic</p>
           <p className="text-blue-100 text-sm mt-1">Appointment System</p>
-        </div>
-
-        {/* Info Banner */}
-        <div className="mb-4 bg-blue-50 border border-blue-200 rounded-lg p-3">
-          <p className="text-sm text-blue-900">
-            <strong>Note:</strong> You'll receive a 6-digit verification code. Check your email inbox (or spam folder) after signing up.
-          </p>
         </div>
 
         {/* Sign Up Card */}
