@@ -59,77 +59,83 @@ export default function DoctorsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      {/* Header */}
+      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 bg-gradient-to-r from-blue-50 to-white p-6 rounded-xl border border-blue-100">
         <div>
-          <h1 className="text-3xl font-bold">Doctors</h1>
-          <p className="text-muted-foreground">Manage doctor profiles and availability</p>
+          <h1 className="text-3xl font-bold text-blue-900">Doctors</h1>
+          <p className="text-blue-600 mt-1">Manage doctor profiles and availability</p>
         </div>
         <AddDoctorDialog />
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>All Doctors</CardTitle>
-          <CardDescription>Total doctors: {doctors.length}</CardDescription>
+      <Card className="border-blue-100">
+        <CardHeader className="bg-gradient-to-r from-blue-50 to-white border-b border-blue-100">
+          <CardTitle className="text-blue-900">All Doctors</CardTitle>
+          <CardDescription className="text-blue-600">Total doctors: {doctors.length}</CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="pt-6">
           {/* Search */}
           <div className="mb-6">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-blue-400" />
               <Input
                 placeholder="Search by name, specialization, or email..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10"
+                className="pl-10 border-blue-200 focus:border-blue-500"
               />
             </div>
           </div>
 
           {/* Doctors List */}
           {isLoading ? (
-            <p className="text-center text-muted-foreground py-8">Loading doctors...</p>
+            <div className="text-center py-12">
+              <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+              <p className="text-gray-600 mt-4">Loading doctors...</p>
+            </div>
           ) : filteredDoctors.length > 0 ? (
-            <div className="grid gap-4 md:grid-cols-2">
+            <div className="grid gap-5 md:grid-cols-2">
               {filteredDoctors.map((doctor) => (
-                <Card key={doctor.id}>
-                  <CardHeader>
+                <Card key={doctor.id} className="bg-gradient-to-br from-blue-50 to-white border-2 border-blue-100 hover:border-blue-300 hover:shadow-md transition-all">
+                  <CardHeader className="bg-gradient-to-r from-blue-50 to-white border-b border-blue-100">
                     <div className="flex items-start justify-between">
-                      <div className="space-y-1">
-                        <CardTitle className="text-lg">Dr. {doctor.full_name}</CardTitle>
-                        <CardDescription>{doctor.specialization}</CardDescription>
+                      <div className="space-y-2">
+                        <CardTitle className="text-lg text-blue-900">Dr. {doctor.full_name}</CardTitle>
+                        <CardDescription className="text-blue-600 font-medium">{doctor.specialization}</CardDescription>
                       </div>
-                      <Badge variant={doctor.available ? "default" : "secondary"}>
+                      <Badge className={`${doctor.available ? "bg-green-100 text-green-700 border border-green-200" : "bg-red-100 text-red-700 border border-red-200"} font-semibold`}>
                         {doctor.available ? "Available" : "Unavailable"}
                       </Badge>
                     </div>
                   </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="space-y-2 text-sm">
-                      <div className="flex items-center gap-2 text-muted-foreground">
-                        <Mail className="h-4 w-4" />
-                        {doctor.email}
+                  <CardContent className="space-y-4 pt-4">
+                    <div className="space-y-3">
+                      <div className="bg-white border border-blue-100 rounded-lg p-3 flex items-center gap-3">
+                        <Mail className="h-4 w-4 text-blue-600" />
+                        <span className="text-sm text-gray-700">{doctor.email}</span>
                       </div>
-                      <div className="flex items-center gap-2 text-muted-foreground">
-                        <Phone className="h-4 w-4" />
-                        {doctor.phone}
+                      <div className="bg-white border border-blue-100 rounded-lg p-3 flex items-center gap-3">
+                        <Phone className="h-4 w-4 text-blue-600" />
+                        <span className="text-sm text-gray-700">{doctor.phone}</span>
                       </div>
-                      <div className="flex items-center gap-2 text-muted-foreground">
-                        <Award className="h-4 w-4" />
-                        License: {doctor.license_number}
+                      <div className="bg-white border border-blue-100 rounded-lg p-3 flex items-center gap-3">
+                        <Award className="h-4 w-4 text-blue-600" />
+                        <span className="text-sm text-gray-700">License: {doctor.license_number}</span>
                       </div>
                     </div>
 
                     {(doctor.years_of_experience || doctor.consultation_fee) && (
-                      <div className="flex gap-4 text-sm">
+                      <div className="bg-white border border-blue-100 rounded-lg p-4 space-y-2">
                         {doctor.years_of_experience && (
-                          <div>
-                            <span className="font-medium">Experience:</span> {doctor.years_of_experience} years
+                          <div className="text-sm">
+                            <span className="font-semibold text-gray-900">Experience:</span>
+                            <span className="text-gray-700 ml-2">{doctor.years_of_experience} years</span>
                           </div>
                         )}
                         {doctor.consultation_fee && (
-                          <div>
-                            <span className="font-medium">Fee:</span> ₱{doctor.consultation_fee.toFixed(2)}
+                          <div className="text-sm">
+                            <span className="font-semibold text-gray-900">Consultation Fee:</span>
+                            <span className="text-blue-600 ml-2 font-bold">₱{doctor.consultation_fee.toFixed(2)}</span>
                           </div>
                         )}
                       </div>
@@ -144,7 +150,10 @@ export default function DoctorsPage() {
               ))}
             </div>
           ) : (
-            <p className="text-center text-muted-foreground py-8">No doctors found</p>
+            <div className="text-center py-12">
+              <Award className="h-12 w-12 text-blue-300 mx-auto mb-4" />
+              <p className="text-gray-600 font-medium">No doctors found</p>
+            </div>
           )}
         </CardContent>
       </Card>

@@ -96,75 +96,93 @@ export default function PatientProfilePage() {
   if (isFetching) {
     return (
       <div className="max-w-2xl mx-auto">
-        <p className="text-center text-muted-foreground">Loading profile...</p>
+        <div className="flex justify-center items-center py-12">
+          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+          <p className="text-gray-600 ml-4">Loading profile...</p>
+        </div>
       </div>
     )
   }
 
   return (
     <div className="max-w-2xl mx-auto space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold">Profile</h1>
-        <p className="text-muted-foreground">Manage your personal information</p>
+      {/* Header */}
+      <div className="bg-gradient-to-r from-blue-50 to-white p-6 rounded-xl border border-blue-100">
+        <h1 className="text-3xl font-bold text-blue-900">Profile</h1>
+        <p className="text-blue-600 mt-1">Manage your personal information</p>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Personal Information</CardTitle>
-          <CardDescription>Update your profile details</CardDescription>
+      <Card className="border-blue-100">
+        <CardHeader className="bg-gradient-to-r from-blue-50 to-white border-b border-blue-100">
+          <CardTitle className="text-blue-900">Personal Information</CardTitle>
+          <CardDescription className="text-blue-600">Update your profile details</CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="pt-6">
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input id="email" type="email" value={profile?.email || ""} disabled />
-              <p className="text-xs text-muted-foreground">Email cannot be changed</p>
+              <Label htmlFor="email" className="text-blue-900 font-semibold">Email</Label>
+              <Input 
+                id="email" 
+                type="email" 
+                value={profile?.email || ""} 
+                disabled 
+                className="border-blue-200 bg-blue-50 text-gray-600"
+              />
+              <p className="text-xs text-blue-600">Email cannot be changed</p>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="fullName">Full Name</Label>
+              <Label htmlFor="fullName" className="text-blue-900 font-semibold">Full Name</Label>
               <Input
                 id="fullName"
                 type="text"
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
                 required
+                className="border-blue-200 focus:border-blue-500"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="phone">Phone Number</Label>
+              <Label htmlFor="phone" className="text-blue-900 font-semibold">Phone Number</Label>
               <Input
                 id="phone"
                 type="tel"
                 placeholder="+63-917-123-4567"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
+                className="border-blue-200 focus:border-blue-500"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="dateOfBirth">Date of Birth</Label>
+              <Label htmlFor="dateOfBirth" className="text-blue-900 font-semibold">Date of Birth</Label>
               <Input
                 id="dateOfBirth"
                 type="date"
                 value={dateOfBirth}
                 onChange={(e) => setDateOfBirth(e.target.value)}
+                className="border-blue-200 focus:border-blue-500"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="address">Address</Label>
+              <Label htmlFor="address" className="text-blue-900 font-semibold">Address</Label>
               <Input
                 id="address"
                 type="text"
                 placeholder="123 Main St, Manila"
                 value={address}
                 onChange={(e) => setAddress(e.target.value)}
+                className="border-blue-200 focus:border-blue-500"
               />
             </div>
 
-            <Button type="submit" disabled={isLoading}>
+            <Button 
+              type="submit" 
+              disabled={isLoading}
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold"
+            >
               {isLoading ? "Saving..." : "Save Changes"}
             </Button>
           </form>

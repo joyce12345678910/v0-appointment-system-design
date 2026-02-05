@@ -43,20 +43,22 @@ export function PatientNavbar() {
 
   return (
     <>
-      <nav className="border-b bg-card">
+      <nav className="border-b-2 border-blue-100 bg-gradient-to-r from-blue-50 to-white shadow-sm">
         <div className="container mx-auto px-4">
           <div className="flex h-16 items-center justify-between">
             {/* Logo */}
-            <div className="flex items-center gap-2">
-              <Calendar className="h-6 w-6 text-blue-600" />
-              <div>
-                <h2 className="font-semibold text-lg">Tactay Billedo</h2>
-                <p className="text-xs text-muted-foreground">Patient Portal</p>
+            <Link href="/patient" className="flex items-center gap-3 group">
+              <div className="bg-gradient-to-br from-blue-600 to-blue-700 p-2 rounded-lg group-hover:shadow-lg transition-shadow">
+                <Calendar className="h-5 w-5 text-white" />
               </div>
-            </div>
+              <div>
+                <h2 className="font-bold text-lg text-blue-900">Tactay Billedo</h2>
+                <p className="text-xs text-blue-600">Patient Portal</p>
+              </div>
+            </Link>
 
             {/* Desktop Navigation */}
-            <div className="hidden md:flex items-center gap-1">
+            <div className="hidden md:flex items-center gap-2">
               {navigation.map((item) => {
                 const isActive = pathname === item.href
                 return (
@@ -64,18 +66,23 @@ export function PatientNavbar() {
                     key={item.name}
                     href={item.href}
                     className={cn(
-                      "flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+                      "flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-all",
                       isActive
-                        ? "bg-primary text-primary-foreground"
-                        : "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
+                        ? "bg-blue-600 text-white shadow-md"
+                        : "text-gray-700 hover:bg-blue-100 hover:text-blue-900",
                     )}
                   >
                     <item.icon className="h-4 w-4" />
-                    {item.name}
+                    <span>{item.name}</span>
                   </Link>
                 )
               })}
-              <Button variant="ghost" size="sm" onClick={handleLogout} className="ml-2">
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={handleLogout} 
+                className="ml-4 text-red-600 hover:bg-red-50 hover:text-red-700 border border-red-200"
+              >
                 <LogOut className="h-4 w-4 mr-2" />
                 Logout
               </Button>
@@ -85,12 +92,12 @@ export function PatientNavbar() {
             <div className="md:hidden">
               <Sheet open={isOpen} onOpenChange={setIsOpen}>
                 <SheetTrigger asChild>
-                  <Button variant="ghost" size="icon">
-                    <Menu className="h-5 w-5" />
+                  <Button variant="ghost" size="icon" className="hover:bg-blue-100">
+                    <Menu className="h-5 w-5 text-blue-600" />
                   </Button>
                 </SheetTrigger>
-                <SheetContent side="right">
-                  <div className="flex flex-col gap-4 mt-8">
+                <SheetContent side="right" className="bg-gradient-to-b from-blue-50 to-white">
+                  <div className="flex flex-col gap-3 mt-8">
                     {navigation.map((item) => {
                       const isActive = pathname === item.href
                       return (
@@ -99,10 +106,10 @@ export function PatientNavbar() {
                           href={item.href}
                           onClick={() => setIsOpen(false)}
                           className={cn(
-                            "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+                            "flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition-all",
                             isActive
-                              ? "bg-primary text-primary-foreground"
-                              : "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
+                              ? "bg-blue-600 text-white shadow-md"
+                              : "text-gray-700 hover:bg-blue-100 hover:text-blue-900",
                           )}
                         >
                           <item.icon className="h-5 w-5" />
@@ -110,7 +117,11 @@ export function PatientNavbar() {
                         </Link>
                       )
                     })}
-                    <Button variant="outline" onClick={handleLogout} className="justify-start gap-3 bg-transparent">
+                    <Button 
+                      variant="outline" 
+                      onClick={handleLogout} 
+                      className="justify-start gap-3 bg-transparent border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700 mt-4"
+                    >
                       <LogOut className="h-5 w-5" />
                       Logout
                     </Button>

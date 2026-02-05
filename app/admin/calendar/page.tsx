@@ -18,9 +18,10 @@ export default async function CalendarPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold">Calendar View</h1>
-        <p className="text-muted-foreground">Visual calendar of all appointments</p>
+      {/* Header */}
+      <div className="bg-gradient-to-r from-blue-50 to-white p-6 rounded-xl border border-blue-100">
+        <h1 className="text-3xl font-bold text-blue-900">Calendar View</h1>
+        <p className="text-blue-600 mt-1">Visual calendar of all appointments</p>
       </div>
 
       <CalendarView appointments={appointments || []} />
