@@ -13,7 +13,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/dialog"
+} from "@/components/ui/alert-dialog"
 import { ChevronDown, Trash2, UserX } from "lucide-react"
 import { toast } from "@/hooks/use-toast"
 
