@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server"
+import { sendVerificationCodeEmail } from "@/lib/email"
 import { NextRequest, NextResponse } from "next/server"
 
 function generateVerificationCode(): string {
@@ -13,6 +14,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Email is required" }, { status: 400 })
     }
 
+    // Validate email format
+    if (!email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
+      return NextResponse.json({ error: "Invalid email address" }, { status: 400 })
+    }
+
     const supabase = await createClient()
 
     // Generate 6-digit code
@@ -24,6 +30,7 @@ export async function POST(request: NextRequest) {
       email,
       code,
       expires_at: expiresAt.toISOString(),
+      verified: false,
     })
 
     if (dbError) {
@@ -31,15 +38,13 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Failed to generate verification code" }, { status: 500 })
     }
 
-    // Send email via Supabase
-    const { error: emailError } = await supabase.auth.admin.createUser({
-      email,
-      email_confirm: false,
-    })
+    // Send verification code via email
+    const emailSent = await sendVerificationCodeEmail(email, code)
 
-    // For now, just return the code (in production, send via email service)
-    // In real implementation, you'd use SendGrid, Mailgun, or similar
-    console.log(`Verification code for ${email}: ${code}`)
+    if (!emailSent) {
+      console.warn(`Warning: Verification code generated for ${email} but email delivery status unknown`)
+      // Still return success - code is stored in DB and can be used in dev mode
+    }
 
     return NextResponse.json({
       success: true,
