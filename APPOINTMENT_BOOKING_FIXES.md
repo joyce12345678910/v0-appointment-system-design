@@ -101,11 +101,11 @@ Added console logs to track:
 ### Issue: "Failed to book appointment" error
 
 **Check Console Logs:**
-```
+\`\`\`
 [v0] Form submitted with: {...}
 [v0] Creating appointment with data: {...}
 [v0] Database error: {...}
-```
+\`\`\`
 
 **Common Causes:**
 - Database connection issues
@@ -186,7 +186,7 @@ Added console logs to track:
 ## Technical Details
 
 ### Form Validation Logic
-```javascript
+\`\`\`javascript
 if (!selectedDoctor || !appointmentDate || !appointmentTime) {
   toast({
     title: "Validation Error",
@@ -195,10 +195,10 @@ if (!selectedDoctor || !appointmentDate || !appointmentTime) {
   })
   return
 }
-```
+\`\`\`
 
 ### Appointment Data Structure
-```javascript
+\`\`\`javascript
 {
   patient_id: user.id,           // From authenticated session
   doctor_id: selectedDoctor,     // From form
@@ -209,7 +209,7 @@ if (!selectedDoctor || !appointmentDate || !appointmentTime) {
   document_filename: string?,    // Optional
   document_uploaded_at: string?  // Optional
 }
-```
+\`\`\`
 
 ### Available Time Slots
 - Hours: 8:00 AM to 5:00 PM (08:00 - 17:00)

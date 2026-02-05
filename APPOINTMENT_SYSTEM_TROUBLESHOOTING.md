@@ -66,34 +66,34 @@ The appointment system requires users to be authenticated before booking appoint
 **Common Causes & Fixes:**
 
 #### A. JavaScript Errors
-```bash
+\`\`\`bash
 # Check browser console for errors
 # Look for: "Hydration", "Failed to fetch", "TypeError"
-```
+\`\`\`
 
 **Fix:** Clear browser cache and hard reload (Ctrl+Shift+R)
 
 #### B. Network Issues
-```bash
+\`\`\`bash
 # In Network tab, look for:
 # - Failed requests (red)
 # - CORS errors
 # - Timeout issues
-```
+\`\`\`
 
 **Fix:** Check internet connection and Supabase configuration
 
 #### C. React Hydration Mismatch
-```bash
+\`\`\`bash
 # Console error: "Hydration failed"
 # Console error: "Text content does not match"
-```
+\`\`\`
 
 **Fix:** Clear Next.js cache
-```bash
+\`\`\`bash
 rm -rf .next
 npm run dev
-```
+\`\`\`
 
 ---
 
@@ -106,10 +106,10 @@ npm run dev
 3. Check router push calls
 
 **Fix:**
-```typescript
+\`\`\`typescript
 // Verify in /lib/supabase/middleware.tsx
 // Ensure updateSession() is properly configured
-```
+\`\`\`
 
 **Manual Test:**
 1. Login with test credentials
@@ -124,14 +124,14 @@ npm run dev
 **Diagnostic Steps:**
 
 #### A. Check Form Validation
-```javascript
+\`\`\`javascript
 console.log("[v0] Form state:", {
   selectedDoctor,
   appointmentDate,
   appointmentTime,
   appointmentType
 })
-```
+\`\`\`
 
 **Common Issues:**
 - Missing required fields
@@ -139,11 +139,11 @@ console.log("[v0] Form state:", {
 - No available time slots
 
 #### B. Check Database Connection
-```javascript
+\`\`\`javascript
 // In handleSubmit function, add:
 console.log("[v0] User authenticated:", user)
 console.log("[v0] Submitting data:", appointmentData)
-```
+\`\`\`
 
 **Fix:** Verify Supabase environment variables:
 - `NEXT_PUBLIC_SUPABASE_URL`
@@ -153,10 +153,10 @@ console.log("[v0] Submitting data:", appointmentData)
 **Issue:** Row Level Security (RLS) blocking inserts
 
 **Fix:** Verify RLS policies allow authenticated users to insert appointments
-```sql
+\`\`\`sql
 -- Check in Supabase dashboard or run:
 SELECT * FROM pg_policies WHERE tablename = 'appointments';
-```
+\`\`\`
 
 ---
 
@@ -164,11 +164,11 @@ SELECT * FROM pg_policies WHERE tablename = 'appointments';
 **Symptoms:** Time dropdown shows "No available slots"
 
 **Diagnostic Steps:**
-```javascript
+\`\`\`javascript
 console.log("[v0] Selected doctor:", selectedDoctor)
 console.log("[v0] Selected date:", appointmentDate)
 console.log("[v0] Available slots:", availableTimeSlots)
-```
+\`\`\`
 
 **Common Causes:**
 
@@ -176,19 +176,19 @@ console.log("[v0] Available slots:", availableTimeSlots)
 **Fix:** Choose a different date or doctor
 
 #### B. Database Query Error
-```javascript
+\`\`\`javascript
 // Check console for Supabase errors
 // Look for: "Failed to load available time slots"
-```
+\`\`\`
 
 **Fix:** Verify appointments table structure and RLS policies
 
 #### C. Time Zone Issues
 **Fix:** Ensure date formatting matches database expectations
-```javascript
+\`\`\`javascript
 // Date should be in format: YYYY-MM-DD
 const formattedDate = new Date().toISOString().split('T')[0]
-```
+\`\`\`
 
 ---
 
@@ -203,17 +203,17 @@ const formattedDate = new Date().toISOString().split('T')[0]
 **Common Causes:**
 
 #### A. File Too Large
-```javascript
+\`\`\`javascript
 // Max size: 10MB (10,485,760 bytes)
 if (file.size > 10485760) {
   // Show error
 }
-```
+\`\`\`
 
 **Fix:** Compress or resize file before upload
 
 #### B. Invalid File Type
-```javascript
+\`\`\`javascript
 const validTypes = [
   'application/pdf',
   'image/jpeg',
@@ -221,7 +221,7 @@ const validTypes = [
   'application/msword',
   'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
 ]
-```
+\`\`\`
 
 **Fix:** Convert file to supported format
 
@@ -236,24 +236,24 @@ const validTypes = [
 ## Backend API Troubleshooting
 
 ### Test Upload Endpoint
-```bash
+\`\`\`bash
 curl -X POST http://localhost:3000/api/appointments/upload-document \
   -F "file=@test-document.pdf" \
   -H "Content-Type: multipart/form-data"
-```
+\`\`\`
 
 **Expected Response:**
-```json
+\`\`\`json
 {
   "url": "https://blob-url.vercel-storage.com/...",
   "filename": "test-document.pdf",
   "size": 12345,
   "type": "application/pdf"
 }
-```
+\`\`\`
 
 ### Test Appointment Creation
-```javascript
+\`\`\`javascript
 // In browser console (when logged in):
 const supabase = createClient()
 const { data, error } = await supabase
@@ -269,21 +269,21 @@ const { data, error } = await supabase
   .select()
 
 console.log('[v0] Result:', { data, error })
-```
+\`\`\`
 
 ---
 
 ## Performance Optimization
 
 ### Check Page Load Speed
-```javascript
+\`\`\`javascript
 // Add to /app/patient/book/page.tsx
 console.log('[v0] Page mounted at:', Date.now())
 
 useEffect(() => {
   console.log('[v0] Doctors loaded:', doctors.length)
 }, [doctors])
-```
+\`\`\`
 
 ### Optimize Database Queries
 - Ensure indexes exist on frequently queried columns
@@ -360,7 +360,7 @@ useEffect(() => {
 ## Developer Tools & Commands
 
 ### Clear All Caches
-```bash
+\`\`\`bash
 # Clear Next.js cache
 rm -rf .next
 
@@ -371,13 +371,13 @@ npm install
 # Clear browser cache
 # Chrome: Ctrl+Shift+Delete
 # Firefox: Ctrl+Shift+Delete
-```
+\`\`\`
 
 ### Restart Development Server
-```bash
+\`\`\`bash
 # Stop server: Ctrl+C
 npm run dev
-```
+\`\`\`
 
 ### View Database in Supabase Dashboard
 1. Go to Supabase project
@@ -386,13 +386,13 @@ npm run dev
 4. Verify data integrity
 
 ### Check Logs
-```bash
+\`\`\`bash
 # Server-side logs
 # Check Vercel deployment logs or terminal output
 
 # Client-side logs
 # Open browser DevTools > Console
-```
+\`\`\`
 
 ---
 

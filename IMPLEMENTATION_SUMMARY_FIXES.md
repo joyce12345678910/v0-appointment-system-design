@@ -37,9 +37,9 @@
 4. **Accountability:** Prevents anonymous bookings
 
 **User Flow:**
-```
+\`\`\`
 Landing Page → Register/Login → Patient Dashboard → Book Appointment → Form Submission → Admin Approval
-```
+\`\`\`
 
 **No Changes Needed:** The current authentication flow is working as designed and provides proper security for medical appointment booking.
 
@@ -77,7 +77,7 @@ Landing Page → Register/Login → Patient Dashboard → Book Appointment → F
 ### Manual Testing Steps:
 
 1. **Test Booking Flow:**
-   ```
+   \`\`\`
    1. Login as patient
    2. Navigate to "Book Appointment"
    3. Verify no "Reason for Visit" field
@@ -85,24 +85,24 @@ Landing Page → Register/Login → Patient Dashboard → Book Appointment → F
    5. Optionally upload document
    6. Submit successfully
    7. Verify appointment created in database
-   ```
+   \`\`\`
 
 2. **Test Authentication:**
-   ```
+   \`\`\`
    1. Try accessing /patient/book without login
    2. Verify redirect to login page
    3. Login successfully
    4. Verify redirect to patient dashboard
    5. Access booking page from dashboard
-   ```
+   \`\`\`
 
 3. **Test Admin Review:**
-   ```
+   \`\`\`
    1. Login as admin
    2. View pending appointments
    3. Verify appointments show without reason field
    4. Approve/cancel functionality works
-   ```
+   \`\`\`
 
 ---
 
@@ -127,13 +127,13 @@ Landing Page → Register/Login → Patient Dashboard → Book Appointment → F
 
 If issues arise, revert changes:
 
-```sql
+\`\`\`sql
 -- Rollback database change
 ALTER TABLE public.appointments 
 ALTER COLUMN reason SET NOT NULL;
-```
+\`\`\`
 
-```javascript
+\`\`\`javascript
 // Restore UI component in /app/patient/book/page.tsx
 // Add back between appointment type and document upload:
 <div className="space-y-2">
@@ -153,7 +153,7 @@ const [reason, setReason] = useState("")
 
 // Restore in submission:
 reason: reason,
-```
+\`\`\`
 
 ---
 
