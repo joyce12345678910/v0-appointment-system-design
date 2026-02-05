@@ -3,8 +3,6 @@
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Badge } from "@/components/ui/badge"
 import type { Appointment } from "@/lib/types"
-import { FileText, ExternalLink } from "lucide-react"
-import { Button } from "@/components/ui/button"
 
 interface AppointmentDetailsDialogProps {
   appointment: Appointment | null
@@ -90,39 +88,6 @@ export function AppointmentDetailsDialog({ appointment, open, onOpenChange }: Ap
             <h3 className="text-sm font-medium text-muted-foreground mb-2">Reason for Visit</h3>
             <p className="text-sm">{appointment.reason}</p>
           </div>
-
-          {/* Uploaded Document */}
-          {appointment.document_url && (
-            <div className="border-2 border-blue-200 bg-blue-50 rounded-lg p-4">
-              <h3 className="text-sm font-medium text-blue-900 mb-3">Uploaded Document</h3>
-              <div className="flex items-center justify-between bg-white border border-blue-100 rounded p-3">
-                <div className="flex items-center gap-3">
-                  <FileText className="h-5 w-5 text-blue-600" />
-                  <div className="min-w-0">
-                    <p className="font-medium text-sm text-blue-900 truncate">
-                      {appointment.document_file_name || "Document"}
-                    </p>
-                    {appointment.document_uploaded_at && (
-                      <p className="text-xs text-blue-600">
-                        Uploaded on {new Date(appointment.document_uploaded_at).toLocaleString()}
-                      </p>
-                    )}
-                  </div>
-                </div>
-                <a
-                  href={appointment.document_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex-shrink-0"
-                >
-                  <Button variant="outline" size="sm" className="border-blue-200 text-blue-600 hover:bg-blue-100 bg-transparent">
-                    <ExternalLink className="h-4 w-4" />
-                    <span className="sr-only">View document</span>
-                  </Button>
-                </a>
-              </div>
-            </div>
-          )}
 
           {/* Notes */}
           {appointment.notes && (

@@ -24,55 +24,31 @@ export default function SignUpPage() {
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault()
+    const supabase = createClient()
     setIsLoading(true)
     setError(null)
 
     try {
-      // Validate email format
-      if (!email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
-        throw new Error("Please enter a valid email address")
-      }
-
-      // Validate password
-      if (password.length < 6) {
-        throw new Error("Password must be at least 6 characters")
-      }
-
-      const supabase = createClient()
-
-      // Create user account directly
-      const { data: authData, error: authError } = await supabase.auth.signUp({
+      const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
+          emailRedirectTo: process.env.NEXT_PUBLIC_DEV_SUPABASE_REDIRECT_URL || `${window.location.origin}/patient`,
           data: {
             full_name: fullName,
-            role: "patient",
+            role: "patient", // Always default to patient role
           },
         },
       })
 
-      if (authError) throw authError
+      if (error) throw error
 
-      if (!authData.user) {
-        throw new Error("Failed to create account")
+      // Update profile with additional information after email confirmation
+      if (data.user) {
+        router.push("/auth/sign-up-success")
       }
-
-      // Create profile with additional information
-      const { error: profileError } = await supabase.from("profiles").upsert({
-        id: authData.user.id,
-        full_name: fullName,
-        phone: phone || null,
-        date_of_birth: dateOfBirth || null,
-        address: address || null,
-        role: "patient",
-      })
-
-      if (profileError) throw profileError
-
-      router.push("/auth/sign-up-success")
     } catch (error: unknown) {
-      setError(error instanceof Error ? error.message : "An error occurred during sign-up")
+      setError(error instanceof Error ? error.message : "An error occurred")
     } finally {
       setIsLoading(false)
     }

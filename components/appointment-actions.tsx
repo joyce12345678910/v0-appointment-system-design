@@ -36,35 +36,36 @@ export function AppointmentActions({ appointmentId, currentStatus, appointmentDa
 
   const handleApprove = async () => {
     setIsLoading(true)
+    const supabase = createClient()
 
     try {
-      const response = await fetch("/api/appointments/approve", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          appointmentId,
-          action: "approve",
-        }),
-      })
+      const {
+        data: { user },
+      } = await supabase.auth.getUser()
 
-      const data = await response.json()
+      const { error } = await supabase
+        .from("appointments")
+        .update({
+          status: "approved",
+          notes: notes || null,
+          approved_by: user?.id,
+          approved_at: new Date().toISOString(),
+        })
+        .eq("id", appointmentId)
 
-      if (!response.ok) {
-        throw new Error(data.error || "Failed to approve appointment")
-      }
+      if (error) throw error
 
       toast({
         title: "Appointment Approved",
-        description: "The appointment has been successfully approved. Confirmation email sent to patient.",
+        description: "The appointment has been successfully approved.",
       })
 
       setIsApproveOpen(false)
-      setNotes("")
       router.refresh()
-    } catch (error: unknown) {
+    } catch (error) {
       toast({
         title: "Error",
-        description: error instanceof Error ? error.message : "Failed to approve appointment. Please try again.",
+        description: "Failed to approve appointment. Please try again.",
         variant: "destructive",
       })
     } finally {
@@ -74,35 +75,30 @@ export function AppointmentActions({ appointmentId, currentStatus, appointmentDa
 
   const handleReject = async () => {
     setIsLoading(true)
+    const supabase = createClient()
 
     try {
-      const response = await fetch("/api/appointments/approve", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          appointmentId,
-          action: "reject",
-        }),
-      })
+      const { error } = await supabase
+        .from("appointments")
+        .update({
+          status: "cancelled",
+          notes: notes || "Rejected by admin",
+        })
+        .eq("id", appointmentId)
 
-      const data = await response.json()
-
-      if (!response.ok) {
-        throw new Error(data.error || "Failed to reject appointment")
-      }
+      if (error) throw error
 
       toast({
         title: "Appointment Rejected",
-        description: "The appointment has been cancelled. Notification email sent to patient.",
+        description: "The appointment has been cancelled.",
       })
 
       setIsRejectOpen(false)
-      setNotes("")
       router.refresh()
-    } catch (error: unknown) {
+    } catch (error) {
       toast({
         title: "Error",
-        description: error instanceof Error ? error.message : "Failed to reject appointment. Please try again.",
+        description: "Failed to reject appointment. Please try again.",
         variant: "destructive",
       })
     } finally {

@@ -22,9 +22,9 @@ export default async function PatientLayout({ children }: { children: React.Reac
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-white to-blue-50">
+    <div className="min-h-screen bg-background">
       <PatientNavbar />
-      <main className="container mx-auto max-w-7xl px-4 py-8 md:px-6 md:py-10">{children}</main>
+      <main className="container mx-auto p-6">{children}</main>
     </div>
   )
 }

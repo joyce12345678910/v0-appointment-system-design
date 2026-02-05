@@ -6,7 +6,6 @@ export interface Profile {
   phone?: string
   date_of_birth?: string
   address?: string
-  profile_photo_url?: string
   created_at: string
 }
 
@@ -35,9 +34,6 @@ export interface Appointment {
   notes?: string
   approved_by?: string
   approved_at?: string
-  document_url?: string
-  document_file_name?: string
-  document_uploaded_at?: string
   created_at: string
   patient?: Profile
   doctor?: Doctor
