@@ -21,7 +21,6 @@ export default function BookAppointmentPage() {
   const [appointmentDate, setAppointmentDate] = useState("")
   const [appointmentTime, setAppointmentTime] = useState("")
   const [appointmentType, setAppointmentType] = useState("")
-  const [reason, setReason] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const [availableTimeSlots, setAvailableTimeSlots] = useState<string[]>([])
   const [loadingSlots, setLoadingSlots] = useState(false)
@@ -154,7 +153,6 @@ export default function BookAppointmentPage() {
         appointment_date: appointmentDate,
         appointment_time: appointmentTime,
         appointment_type: appointmentType,
-        reason: reason,
         status: "pending",
       }
 
@@ -275,19 +273,6 @@ export default function BookAppointmentPage() {
                   </div>
                 )}
               </div>
-            </div>
-
-            {/* Reason */}
-            <div className="space-y-2">
-              <Label htmlFor="reason">Reason for Visit</Label>
-              <Textarea
-                id="reason"
-                placeholder="Please describe your symptoms or reason for the appointment..."
-                value={reason}
-                onChange={(e) => setReason(e.target.value)}
-                rows={4}
-                required
-              />
             </div>
 
             {/* Document Upload */}
