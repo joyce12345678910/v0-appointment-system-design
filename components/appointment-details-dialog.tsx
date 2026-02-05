@@ -2,7 +2,9 @@
 
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
 import type { Appointment } from "@/lib/types"
+import { FileText, ExternalLink } from "lucide-react"
 
 interface AppointmentDetailsDialogProps {
   appointment: Appointment | null
@@ -76,24 +78,57 @@ export function AppointmentDetailsDialog({ appointment, open, onOpenChange }: Ap
                 <p className="text-sm text-muted-foreground">Time</p>
                 <p className="font-medium">{appointment.appointment_time}</p>
               </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Type</p>
-                <p className="font-medium capitalize">{appointment.appointment_type.replace("_", " ")}</p>
-              </div>
+              {appointment.appointment_type && (
+                <div>
+                  <p className="text-sm text-muted-foreground">Type</p>
+                  <p className="font-medium capitalize">{appointment.appointment_type.replace("_", " ")}</p>
+                </div>
+              )}
             </div>
           </div>
 
           {/* Reason */}
-          <div>
-            <h3 className="text-sm font-medium text-muted-foreground mb-2">Reason for Visit</h3>
-            <p className="text-sm">{appointment.reason}</p>
-          </div>
+          {appointment.reason && (
+            <div>
+              <h3 className="text-sm font-medium text-muted-foreground mb-2">Reason for Visit</h3>
+              <p className="text-sm">{appointment.reason}</p>
+            </div>
+          )}
 
           {/* Notes */}
           {appointment.notes && (
             <div>
               <h3 className="text-sm font-medium text-muted-foreground mb-2">Notes</h3>
               <p className="text-sm">{appointment.notes}</p>
+            </div>
+          )}
+
+          {/* Uploaded Document */}
+          {appointment.document_url && (
+            <div>
+              <h3 className="text-sm font-medium text-muted-foreground mb-2">Supporting Document</h3>
+              <div className="flex items-center justify-between p-4 bg-primary/5 border border-primary/20 rounded-xl">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-primary/10 rounded-lg">
+                    <FileText className="h-5 w-5 text-primary" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium">{appointment.document_file_name}</p>
+                    <p className="text-xs text-muted-foreground">
+                      Uploaded {new Date(appointment.document_uploaded_at || "").toLocaleDateString()}
+                    </p>
+                  </div>
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="gap-2 bg-transparent"
+                  onClick={() => window.open(appointment.document_url, "_blank")}
+                >
+                  <ExternalLink className="h-4 w-4" />
+                  View
+                </Button>
+              </div>
             </div>
           )}
 

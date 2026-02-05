@@ -192,6 +192,7 @@ export default function AppointmentsPage() {
                               appointmentId={appointment.id}
                               currentStatus={appointment.status}
                               appointmentDate={appointment.appointment_date}
+                              onActionComplete={fetchAppointments}
                             />
                           </div>
                         </div>

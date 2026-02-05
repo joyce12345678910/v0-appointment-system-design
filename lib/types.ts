@@ -28,13 +28,16 @@ export interface Appointment {
   doctor_id: string
   appointment_date: string
   appointment_time: string
-  appointment_type: "consultation" | "follow_up" | "emergency" | "routine_checkup"
-  reason: string
+  appointment_type?: "consultation" | "follow_up" | "emergency" | "routine_checkup"
+  reason?: string
   status: "pending" | "approved" | "completed" | "cancelled"
   notes?: string
   approved_by?: string
   approved_at?: string
   created_at: string
+  document_url?: string
+  document_file_name?: string
+  document_uploaded_at?: string
   patient?: Profile
   doctor?: Doctor
 }
