@@ -115,9 +115,11 @@ export default async function PatientDashboardPage() {
                     <div className="flex items-start justify-between gap-4">
                       <div className="flex items-center gap-3">
                         <Badge className={`${getStatusColor(appointment.status)} capitalize`}>{appointment.status}</Badge>
-                        <span className="text-sm font-semibold text-blue-900 capitalize bg-blue-100 px-3 py-1 rounded-md">
-                          {appointment.appointment_type.replace("_", " ")}
-                        </span>
+                        {appointment.appointment_type && (
+                          <span className="text-sm font-semibold text-blue-900 capitalize bg-blue-100 px-3 py-1 rounded-md">
+                            {appointment.appointment_type.replace("_", " ")}
+                          </span>
+                        )}
                       </div>
                     </div>
 
@@ -169,18 +171,22 @@ export default async function PatientDashboardPage() {
                     </div>
 
                     {/* Appointment Details */}
-                    <div className="bg-white border border-blue-100 rounded-lg p-4 space-y-3">
-                      <div>
-                        <p className="text-sm font-semibold text-gray-600">Reason for Visit</p>
-                        <p className="text-sm text-gray-800 mt-1">{appointment.reason}</p>
+                    {(appointment.reason || appointment.notes) && (
+                      <div className="bg-white border border-blue-100 rounded-lg p-4 space-y-3">
+                        {appointment.reason && (
+                          <div>
+                            <p className="text-sm font-semibold text-gray-600">Reason for Visit</p>
+                            <p className="text-sm text-gray-800 mt-1">{appointment.reason}</p>
+                          </div>
+                        )}
+                        {appointment.notes && (
+                          <div className={appointment.reason ? "pt-3 border-t border-blue-50" : ""}>
+                            <p className="text-sm font-semibold text-gray-600">Additional Notes</p>
+                            <p className="text-sm text-gray-800 mt-1">{appointment.notes}</p>
+                          </div>
+                        )}
                       </div>
-                      {appointment.notes && (
-                        <div className="pt-3 border-t border-blue-50">
-                          <p className="text-sm font-semibold text-gray-600">Additional Notes</p>
-                          <p className="text-sm text-gray-800 mt-1">{appointment.notes}</p>
-                        </div>
-                      )}
-                    </div>
+                    )}
                   </div>
                 </div>
               ))}
