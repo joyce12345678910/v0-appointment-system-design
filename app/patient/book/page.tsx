@@ -178,7 +178,7 @@ export default function BookAppointmentPage() {
 
       if (uploadedDocument) {
         appointmentData.document_url = uploadedDocument.url
-        appointmentData.document_filename = uploadedDocument.filename
+        appointmentData.document_file_name = uploadedDocument.filename
         appointmentData.document_uploaded_at = new Date().toISOString()
       }
 

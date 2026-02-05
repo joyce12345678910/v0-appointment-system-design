@@ -78,18 +78,22 @@ export function AppointmentDetailsDialog({ appointment, open, onOpenChange }: Ap
                 <p className="text-sm text-muted-foreground">Time</p>
                 <p className="font-medium">{appointment.appointment_time}</p>
               </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Type</p>
-                <p className="font-medium capitalize">{appointment.appointment_type.replace("_", " ")}</p>
-              </div>
+              {appointment.appointment_type && (
+                <div>
+                  <p className="text-sm text-muted-foreground">Type</p>
+                  <p className="font-medium capitalize">{appointment.appointment_type.replace("_", " ")}</p>
+                </div>
+              )}
             </div>
           </div>
 
           {/* Reason */}
-          <div>
-            <h3 className="text-sm font-medium text-muted-foreground mb-2">Reason for Visit</h3>
-            <p className="text-sm">{appointment.reason}</p>
-          </div>
+          {appointment.reason && (
+            <div>
+              <h3 className="text-sm font-medium text-muted-foreground mb-2">Reason for Visit</h3>
+              <p className="text-sm">{appointment.reason}</p>
+            </div>
+          )}
 
           {/* Notes */}
           {appointment.notes && (
@@ -109,7 +113,7 @@ export function AppointmentDetailsDialog({ appointment, open, onOpenChange }: Ap
                     <FileText className="h-5 w-5 text-primary" />
                   </div>
                   <div>
-                    <p className="text-sm font-medium">{appointment.document_filename}</p>
+                    <p className="text-sm font-medium">{appointment.document_file_name}</p>
                     <p className="text-xs text-muted-foreground">
                       Uploaded {new Date(appointment.document_uploaded_at || "").toLocaleDateString()}
                     </p>
