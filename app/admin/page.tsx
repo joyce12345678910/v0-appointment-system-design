@@ -140,83 +140,106 @@ export default async function AdminDashboardPage() {
                 <TrendingUp className="h-5 w-5 text-blue-600" />
                 Recent Appointments
               </CardTitle>
-              <CardDescription className="text-blue-600">Latest appointment requests and status</CardDescription>
+              <CardDescription className="text-blue-600">Latest appointment requests and their status</CardDescription>
             </div>
           </div>
         </CardHeader>
         <CardContent className="pt-6">
           {recentAppointments && recentAppointments.length > 0 ? (
-            <div className="space-y-3">
+            <div className="space-y-4">
               {recentAppointments.map((appointment) => (
-                <div key={appointment.id} className="bg-gradient-to-r from-blue-50 to-white border-2 border-blue-100 rounded-lg p-4 hover:border-blue-300 hover:shadow-md transition">
-                  <div className="grid md:grid-cols-2 gap-4">
-                    {/* Patient Info */}
+                <div
+                  key={appointment.id}
+                  className="bg-white border-2 border-blue-100 rounded-xl p-5 hover:border-blue-300 hover:shadow-lg transition-all duration-200"
+                >
+                  {/* Status Badge - Top Right */}
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2">
+                        <Calendar className="h-5 w-5 text-blue-600" />
+                        <h3 className="font-semibold text-lg text-gray-900">
+                          {new Date(appointment.appointment_date).toLocaleDateString("en-US", {
+                            weekday: "short",
+                            month: "short",
+                            day: "numeric",
+                            year: "numeric",
+                          })}
+                        </h3>
+                      </div>
+                      <p className="text-sm text-gray-600 ml-7 mt-1">
+                        <Clock className="h-3 w-3 inline mr-1" />
+                        {appointment.appointment_time}
+                      </p>
+                    </div>
+                    <span
+                      className={`inline-flex items-center rounded-full px-3 py-1.5 text-xs font-semibold ${getStatusStyle(appointment.status)} capitalize`}
+                    >
+                      {appointment.status}
+                    </span>
+                  </div>
+
+                  {/* Patient & Doctor Info */}
+                  <div className="grid md:grid-cols-2 gap-6 mb-4">
+                    {/* Patient */}
                     <div className="space-y-2">
-                      <div className="flex items-center gap-2 mb-2">
-                        <Users className="h-4 w-4 text-blue-600" />
-                        <p className="font-semibold text-blue-900">{appointment.patient?.full_name}</p>
+                      <div className="flex items-center gap-2">
+                        <div className="p-2 bg-blue-50 rounded-lg">
+                          <Users className="h-4 w-4 text-blue-600" />
+                        </div>
+                        <div>
+                          <p className="text-xs text-gray-500 font-medium">Patient</p>
+                          <p className="font-semibold text-gray-900">{appointment.patient?.full_name || "N/A"}</p>
+                        </div>
                       </div>
-                      <div className="text-xs text-gray-600 space-y-1 ml-6">
-                        {appointment.patient?.phone && <p>📱 {appointment.patient.phone}</p>}
-                        {appointment.patient?.email && <p>✉️ {appointment.patient.email}</p>}
-                      </div>
+                      {appointment.patient?.phone && (
+                        <p className="text-xs text-gray-600 ml-11">{appointment.patient.phone}</p>
+                      )}
                     </div>
 
-                    {/* Doctor & Schedule Info */}
+                    {/* Doctor */}
                     <div className="space-y-2">
-                      <div className="flex items-center gap-2 mb-2">
-                        <Stethoscope className="h-4 w-4 text-cyan-600" />
-                        <p className="font-semibold text-cyan-900">Dr. {appointment.doctor?.full_name}</p>
+                      <div className="flex items-center gap-2">
+                        <div className="p-2 bg-cyan-50 rounded-lg">
+                          <Stethoscope className="h-4 w-4 text-cyan-600" />
+                        </div>
+                        <div>
+                          <p className="text-xs text-gray-500 font-medium">Doctor</p>
+                          <p className="font-semibold text-gray-900">Dr. {appointment.doctor?.full_name || "N/A"}</p>
+                        </div>
                       </div>
-                      <p className="text-xs text-gray-600 ml-6">{appointment.doctor?.specialization}</p>
-                      <div className="text-xs text-gray-600 ml-6 flex gap-4 mt-2">
-                        <span className="flex items-center gap-1">
-                          <Calendar className="h-3 w-3" />
-                          {new Date(appointment.appointment_date).toLocaleDateString()}
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <Clock className="h-3 w-3" />
-                          {appointment.appointment_time}
-                        </span>
-                      </div>
+                      {appointment.doctor?.specialization && (
+                        <p className="text-xs text-gray-600 ml-11">{appointment.doctor.specialization}</p>
+                      )}
                     </div>
                   </div>
 
-                  {/* Details and Status */}
-                  <div className="grid md:grid-cols-3 gap-3 mt-4 pt-4 border-t border-blue-100">
-                    {appointment.reason && (
-                      <div className="text-xs">
-                        <p className="font-semibold text-gray-700 mb-1">Reason</p>
-                        <p className="text-gray-600">{appointment.reason}</p>
-                      </div>
-                    )}
-                    {appointment.appointment_type && (
-                      <div className="text-xs">
-                        <p className="font-semibold text-gray-700 mb-1">Type</p>
-                        <p className="text-gray-600 capitalize">{appointment.appointment_type.replace("_", " ")}</p>
-                      </div>
-                    )}
-                    <div className={`flex items-end ${appointment.reason || appointment.appointment_type ? 'justify-end' : 'justify-start'}`}>
-                      <span className={`inline-flex items-center rounded-full px-3 py-1.5 text-xs font-semibold ${getStatusStyle(appointment.status)} capitalize`}>
-                        {appointment.status}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Notes if available */}
-                  {appointment.notes && (
-                    <div className="mt-3 pt-3 border-t border-blue-100">
-                      <p className="text-xs font-semibold text-gray-700 mb-1">Notes</p>
-                      <p className="text-xs text-gray-600">{appointment.notes}</p>
+                  {/* Additional Info */}
+                  {(appointment.reason || appointment.notes) && (
+                    <div className="pt-4 border-t border-gray-100 space-y-2">
+                      {appointment.reason && (
+                        <div>
+                          <p className="text-xs font-semibold text-gray-700 mb-1">Reason for Visit</p>
+                          <p className="text-sm text-gray-600">{appointment.reason}</p>
+                        </div>
+                      )}
+                      {appointment.notes && (
+                        <div>
+                          <p className="text-xs font-semibold text-gray-700 mb-1">Admin Notes</p>
+                          <p className="text-sm text-gray-600">{appointment.notes}</p>
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
               ))}
             </div>
           ) : (
-            <div className="text-center py-12">
-              <Calendar className="h-12 w-12 text-blue-300 mx-auto mb-4" />
-              <p className="text-gray-600 font-medium">No appointments yet</p>
+            <div className="text-center py-16">
+              <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-50 rounded-full mb-4">
+                <Calendar className="h-8 w-8 text-blue-300" />
+              </div>
+              <p className="text-gray-600 font-medium text-lg">No appointments yet</p>
+              <p className="text-gray-400 text-sm mt-1">New appointments will appear here</p>
             </div>
           )}
         </CardContent>
