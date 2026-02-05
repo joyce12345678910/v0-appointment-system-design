@@ -50,7 +50,6 @@ export async function sendVerificationCodeEmail(email: string, code: string): Pr
         `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n` +
         `📧 Email: ${email}\n` +
         `🔐 Code: ${code}\n` +
-        `⏱️  Expires in: 10 minutes\n` +
         `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`
     )
     return true
@@ -86,9 +85,7 @@ export async function sendVerificationCodeEmail(email: string, code: string): Pr
                 <p style="font-size: 48px; font-weight: 800; color: #0066cc; margin: 0; letter-spacing: 8px; font-family: 'Courier New', monospace;">${code}</p>
               </div>
               
-              <p style="color: #6b7280; font-size: 13px; margin: 20px 0; text-align: center;">
-                ⏱️ This code expires in <strong>10 minutes</strong>
-              </p>
+
               
               <div style="background: #fef3c7; border-left: 4px solid #f59e0b; padding: 15px; border-radius: 6px; margin: 20px 0;">
                 <p style="color: #92400e; font-size: 13px; margin: 0;">

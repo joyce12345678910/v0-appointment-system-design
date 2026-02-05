@@ -10,12 +10,11 @@ export default function SignUpSuccessPage() {
           <Card>
             <CardHeader>
               <CardTitle className="text-2xl">Registration Successful!</CardTitle>
-              <CardDescription>Check your email to confirm</CardDescription>
+              <CardDescription>Your account is ready to use</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <p className="text-sm text-muted-foreground">
-                We&apos;ve sent a confirmation email to your inbox. Please click the link in the email to verify your
-                account before signing in.
+                Your account has been created successfully. You can now log in and start booking appointments with our dental clinic.
               </p>
               <Button asChild className="w-full">
                 <Link href="/auth/login">Go to Login</Link>

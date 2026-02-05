@@ -28,6 +28,7 @@ export default function BookAppointmentPage() {
   const [uploadedDocument, setUploadedDocument] = useState<{ url: string; name: string } | null>(null)
   const [isUploadingDocument, setIsUploadingDocument] = useState(false)
   const [documentError, setDocumentError] = useState<string | null>(null)
+  const [uploadProgress, setUploadProgress] = useState(0)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const router = useRouter()
 
@@ -98,6 +99,7 @@ export default function BookAppointmentPage() {
 
     setDocumentError(null)
     setIsUploadingDocument(true)
+    setUploadProgress(0)
 
     try {
       // Validate file type
@@ -115,6 +117,17 @@ export default function BookAppointmentPage() {
         return
       }
 
+      // Simulate upload progress
+      const progressInterval = setInterval(() => {
+        setUploadProgress((prev) => {
+          if (prev >= 90) {
+            clearInterval(progressInterval)
+            return 90
+          }
+          return prev + Math.random() * 30
+        })
+      }, 200)
+
       // Upload to server
       const formData = new FormData()
       formData.append("file", file)
@@ -124,16 +137,22 @@ export default function BookAppointmentPage() {
         body: formData,
       })
 
+      clearInterval(progressInterval)
+
       const data = await response.json()
 
       if (!response.ok) {
         throw new Error(data.error || "Failed to upload document")
       }
 
+      setUploadProgress(100)
+
       setUploadedDocument({
         url: data.url,
         name: file.name,
       })
+
+      setTimeout(() => setUploadProgress(0), 1000)
     } catch (error) {
       const message = error instanceof Error ? error.message : "Failed to upload document"
       setDocumentError(message)
@@ -408,6 +427,18 @@ export default function BookAppointmentPage() {
                       </>
                     )}
                   </Button>
+                </div>
+              )}
+
+              {isUploadingDocument && uploadProgress > 0 && (
+                <div className="space-y-2">
+                  <div className="w-full bg-blue-100 rounded-full h-2 overflow-hidden">
+                    <div
+                      className="bg-blue-600 h-full transition-all duration-300"
+                      style={{ width: `${uploadProgress}%` }}
+                    />
+                  </div>
+                  <p className="text-xs text-blue-600 text-center font-medium">{Math.round(uploadProgress)}%</p>
                 </div>
               )}
 
