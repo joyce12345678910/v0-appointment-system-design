@@ -35,6 +35,9 @@ export interface Appointment {
   approved_by?: string
   approved_at?: string
   created_at: string
+  document_url?: string
+  document_filename?: string
+  document_uploaded_at?: string
   patient?: Profile
   doctor?: Doctor
 }
