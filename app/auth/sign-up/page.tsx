@@ -24,31 +24,45 @@ export default function SignUpPage() {
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault()
-    const supabase = createClient()
     setIsLoading(true)
     setError(null)
 
     try {
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          emailRedirectTo: process.env.NEXT_PUBLIC_DEV_SUPABASE_REDIRECT_URL || `${window.location.origin}/patient`,
-          data: {
-            full_name: fullName,
-            role: "patient", // Always default to patient role
-          },
-        },
+      // Validate email format
+      if (!email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
+        throw new Error("Please enter a valid email address")
+      }
+
+      // Send verification code to email
+      const response = await fetch("/api/auth/send-verification-code", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
       })
 
-      if (error) throw error
+      const data = await response.json()
 
-      // Update profile with additional information after email confirmation
-      if (data.user) {
-        router.push("/auth/sign-up-success")
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to send verification code")
       }
+
+      // Store sign-up data in session storage for later use
+      sessionStorage.setItem(
+        "pendingSignUp",
+        JSON.stringify({
+          email,
+          password,
+          fullName,
+          phone,
+          dateOfBirth,
+          address,
+        })
+      )
+
+      // Redirect to verification page
+      router.push(`/auth/verify-email?email=${encodeURIComponent(email)}`)
     } catch (error: unknown) {
-      setError(error instanceof Error ? error.message : "An error occurred")
+      setError(error instanceof Error ? error.message : "An error occurred during sign-up")
     } finally {
       setIsLoading(false)
     }

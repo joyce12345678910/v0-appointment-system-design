@@ -46,29 +46,34 @@ export default function BookAppointmentPage() {
   }
 
   const fetchAvailableTimeSlots = async () => {
-    const supabase = createClient()
     setLoadingSlots(true)
 
     try {
-      const { data: appointments, error } = await supabase
-        .from("appointments")
-        .select("appointment_time")
-        .eq("doctor_id", selectedDoctor)
-        .eq("appointment_date", appointmentDate)
-        .in("status", ["pending", "approved"])
-
-      if (error) throw error
-
       const slots = []
       for (let hour = 8; hour < 17; hour++) {
         const timeString = `${hour.toString().padStart(2, "0")}:00`
         slots.push(timeString)
       }
 
-      const bookedTimes = appointments?.map((apt) => apt.appointment_time) || []
+      // Check availability for each time slot
+      const availabilityChecks = await Promise.all(
+        slots.map(async (slot) => {
+          const response = await fetch("/api/appointments/check-availability", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              doctorId: selectedDoctor,
+              appointmentDate,
+              appointmentTime: slot,
+            }),
+          })
 
-      const available = slots.filter((slot) => !bookedTimes.includes(slot))
+          const data = await response.json()
+          return data.available ? slot : null
+        })
+      )
 
+      const available = availabilityChecks.filter((slot): slot is string => slot !== null)
       setAvailableTimeSlots(available)
     } catch (error) {
       console.error("Error fetching available slots:", error)
@@ -95,7 +100,14 @@ export default function BookAppointmentPage() {
 
       if (!user) throw new Error("Not authenticated")
 
-      const { error } = await supabase.from("appointments").insert({
+      // Get user profile for email
+      const { data: profile } = await supabase.from("profiles").select("*").eq("id", user.id).single()
+
+      // Get doctor info
+      const { data: doctor } = await supabase.from("doctors").select("*").eq("id", selectedDoctor).single()
+
+      // Insert appointment
+      const { error, data: appointmentData } = await supabase.from("appointments").insert({
         patient_id: user.id,
         doctor_id: selectedDoctor,
         appointment_date: appointmentDate,
@@ -103,13 +115,38 @@ export default function BookAppointmentPage() {
         appointment_type: appointmentType,
         reason: reason,
         status: "pending",
-      })
+      }).select().single()
 
       if (error) throw error
 
+      // Send confirmation email
+      if (profile?.email && doctor) {
+        await fetch("/api/email/send", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            templateName: "appointment_confirmation",
+            recipientEmail: profile.email,
+            recipientName: profile.full_name,
+            variables: {
+              full_name: profile.full_name,
+              doctor_name: doctor.full_name,
+              appointment_date: new Date(appointmentDate).toLocaleDateString("en-US", {
+                weekday: "long",
+                month: "long",
+                day: "numeric",
+                year: "numeric",
+              }),
+              appointment_time: appointmentTime,
+              appointment_type: appointmentType.replace("_", " "),
+            },
+          }),
+        }).catch((err) => console.error("Email send failed:", err))
+      }
+
       toast({
         title: "Appointment Requested",
-        description: "Your appointment request has been submitted. Please wait for admin approval.",
+        description: "Your appointment request has been submitted. Check your email for confirmation. Please wait for admin approval.",
       })
 
       router.push("/patient")
@@ -128,23 +165,24 @@ export default function BookAppointmentPage() {
 
   return (
     <div className="max-w-2xl mx-auto space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold">Book Appointment</h1>
-        <p className="text-muted-foreground">Schedule a new appointment with our doctors</p>
+      {/* Header */}
+      <div className="bg-gradient-to-r from-blue-50 to-white p-6 rounded-xl border border-blue-100">
+        <h1 className="text-3xl font-bold text-blue-900">Book Appointment</h1>
+        <p className="text-blue-600 mt-1">Schedule a new appointment with our doctors</p>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Appointment Details</CardTitle>
-          <CardDescription>Fill in the information below to request an appointment</CardDescription>
+      <Card className="border-blue-100">
+        <CardHeader className="bg-gradient-to-r from-blue-50 to-white border-b border-blue-100">
+          <CardTitle className="text-blue-900">Appointment Details</CardTitle>
+          <CardDescription className="text-blue-600">Fill in the information below to request an appointment</CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="pt-6">
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Doctor Selection */}
             <div className="space-y-2">
-              <Label htmlFor="doctor">Select Doctor</Label>
+              <Label htmlFor="doctor" className="text-blue-900 font-semibold">Select Doctor</Label>
               <Select value={selectedDoctor} onValueChange={setSelectedDoctor} required>
-                <SelectTrigger>
+                <SelectTrigger className="border-blue-200 focus:border-blue-500">
                   <SelectValue placeholder="Choose a doctor" />
                 </SelectTrigger>
                 <SelectContent>
@@ -159,9 +197,9 @@ export default function BookAppointmentPage() {
 
             {/* Appointment Type */}
             <div className="space-y-2">
-              <Label htmlFor="type">Appointment Type</Label>
+              <Label htmlFor="type" className="text-blue-900 font-semibold">Appointment Type</Label>
               <Select value={appointmentType} onValueChange={setAppointmentType} required>
-                <SelectTrigger>
+                <SelectTrigger className="border-blue-200 focus:border-blue-500">
                   <SelectValue placeholder="Select appointment type" />
                 </SelectTrigger>
                 <SelectContent>
@@ -176,18 +214,19 @@ export default function BookAppointmentPage() {
             {/* Date and Time */}
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="date">Preferred Date</Label>
+                <Label htmlFor="date" className="text-blue-900 font-semibold">Preferred Date</Label>
                 <Input
                   id="date"
                   type="date"
                   min={today}
                   value={appointmentDate}
                   onChange={(e) => setAppointmentDate(e.target.value)}
+                  className="border-blue-200 focus:border-blue-500"
                   required
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="time">Preferred Time</Label>
+                <Label htmlFor="time" className="text-blue-900 font-semibold">Preferred Time</Label>
                 {availableTimeSlots.length > 0 ? (
                   <Select
                     value={appointmentTime}
@@ -195,7 +234,7 @@ export default function BookAppointmentPage() {
                     disabled={!selectedDoctor || !appointmentDate || loadingSlots}
                     required
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className="border-blue-200 focus:border-blue-500">
                       <SelectValue
                         placeholder={loadingSlots ? "Loading available slots..." : "Select available time"}
                       />
@@ -209,7 +248,7 @@ export default function BookAppointmentPage() {
                     </SelectContent>
                   </Select>
                 ) : (
-                  <div className="w-full px-3 py-2 border border-input bg-background rounded-md text-sm text-muted-foreground">
+                  <div className="w-full px-3 py-2 border-2 border-blue-100 bg-blue-50 rounded-md text-sm text-blue-600 font-medium">
                     {loadingSlots ? "Loading available slots..." : "No available slots for this date"}
                   </div>
                 )}
@@ -218,23 +257,24 @@ export default function BookAppointmentPage() {
 
             {/* Reason */}
             <div className="space-y-2">
-              <Label htmlFor="reason">Reason for Visit</Label>
+              <Label htmlFor="reason" className="text-blue-900 font-semibold">Reason for Visit</Label>
               <Textarea
                 id="reason"
                 placeholder="Please describe your symptoms or reason for the appointment..."
                 value={reason}
                 onChange={(e) => setReason(e.target.value)}
                 rows={4}
+                className="border-blue-200 focus:border-blue-500"
                 required
               />
             </div>
 
             {/* Submit Button */}
-            <div className="flex gap-4">
-              <Button type="submit" disabled={isLoading} className="flex-1">
+            <div className="flex gap-4 pt-2">
+              <Button type="submit" disabled={isLoading} className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold">
                 {isLoading ? "Submitting..." : "Request Appointment"}
               </Button>
-              <Button type="button" variant="outline" onClick={() => router.back()} disabled={isLoading}>
+              <Button type="button" variant="outline" onClick={() => router.back()} disabled={isLoading} className="border-blue-200 text-blue-700 hover:bg-blue-50">
                 Cancel
               </Button>
             </div>
@@ -243,15 +283,27 @@ export default function BookAppointmentPage() {
       </Card>
 
       {/* Information Card */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Important Information</CardTitle>
+      <Card className="border-blue-100 bg-gradient-to-br from-blue-50 to-white">
+        <CardHeader className="border-b border-blue-100">
+          <CardTitle className="text-blue-900">Important Information</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-2 text-sm text-muted-foreground">
-          <p>• Your appointment request will be reviewed by our admin team</p>
-          <p>• You will be notified once your appointment is approved</p>
-          <p>• Please arrive 15 minutes before your scheduled time</p>
-          <p>• Bring any relevant medical documents or test results</p>
+        <CardContent className="pt-6 space-y-3 text-sm">
+          <div className="flex items-start gap-3">
+            <span className="text-blue-600 font-bold mt-1">•</span>
+            <p className="text-gray-700">Your appointment request will be reviewed by our admin team</p>
+          </div>
+          <div className="flex items-start gap-3">
+            <span className="text-blue-600 font-bold mt-1">•</span>
+            <p className="text-gray-700">You will receive email confirmation once your appointment is approved</p>
+          </div>
+          <div className="flex items-start gap-3">
+            <span className="text-blue-600 font-bold mt-1">•</span>
+            <p className="text-gray-700">Please arrive 15 minutes before your scheduled time</p>
+          </div>
+          <div className="flex items-start gap-3">
+            <span className="text-blue-600 font-bold mt-1">•</span>
+            <p className="text-gray-700">Bring any relevant medical documents or test results</p>
+          </div>
         </CardContent>
       </Card>
     </div>
