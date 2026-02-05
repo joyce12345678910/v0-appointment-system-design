@@ -162,36 +162,52 @@ export default function PatientsPage() {
             <div className="space-y-2">
               {patients.map((patient) => (
                 <div key={patient.id} className="border rounded-lg">
-                  <div className="flex items-center justify-between p-4 hover:bg-muted/50 transition-colors">
-                    <button
-                      onClick={() => handleExpandPatient(patient.id)}
-                      className="flex-1 flex items-center justify-between"
-                    >
-                      <div className="flex-1 text-left space-y-1">
-                        <p className="font-medium">{patient.full_name}</p>
-                        <p className="text-sm text-muted-foreground">{patient.email}</p>
-                        {patient.phone && <p className="text-xs text-muted-foreground">{patient.phone}</p>}
-                      </div>
-                      <div className="flex items-center gap-4">
-                        <div className="text-xs text-muted-foreground text-right">
-                          Joined {new Date(patient.created_at).toLocaleDateString()}
+                  <div className="p-4 hover:bg-muted/50 transition-colors">
+                    {/* Mobile: Stack layout, Desktop: Row layout */}
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+                      {/* Patient Info - Clickable to expand */}
+                      <button
+                        onClick={() => handleExpandPatient(patient.id)}
+                        className="flex-1 flex items-start sm:items-center justify-between gap-2 text-left"
+                      >
+                        <div className="flex-1 min-w-0 space-y-1">
+                          <p className="font-medium truncate">{patient.full_name}</p>
+                          <p className="text-sm text-muted-foreground truncate">{patient.email}</p>
+                          {patient.phone && <p className="text-xs text-muted-foreground">{patient.phone}</p>}
+                          <p className="text-xs text-muted-foreground sm:hidden">
+                            Joined {new Date(patient.created_at).toLocaleDateString()}
+                          </p>
                         </div>
+                        
+                        {/* Desktop: Date + Chevron */}
+                        <div className="hidden sm:flex items-center gap-4 flex-shrink-0">
+                          <div className="text-xs text-muted-foreground text-right">
+                            Joined {new Date(patient.created_at).toLocaleDateString()}
+                          </div>
+                          <ChevronDown
+                            className={`w-5 h-5 transition-transform ${expandedPatient === patient.id ? "rotate-180" : ""}`}
+                          />
+                        </div>
+                        
+                        {/* Mobile: Chevron only */}
                         <ChevronDown
-                          className={`w-5 h-5 transition-transform ${expandedPatient === patient.id ? "rotate-180" : ""}`}
+                          className={`w-5 h-5 sm:hidden transition-transform flex-shrink-0 ${expandedPatient === patient.id ? "rotate-180" : ""}`}
                         />
-                      </div>
-                    </button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        handleDeleteClick(patient)
-                      }}
-                      className="ml-2 hover:bg-red-50 hover:text-red-600 transition-colors rounded-full"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
+                      </button>
+
+                      {/* Delete Button - Fixed position on mobile */}
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          handleDeleteClick(patient)
+                        }}
+                        className="hover:bg-red-50 hover:text-red-600 transition-colors rounded-full self-start sm:self-center flex-shrink-0"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </div>
 
                   {expandedPatient === patient.id && (
