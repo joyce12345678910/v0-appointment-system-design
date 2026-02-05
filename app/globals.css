@@ -94,7 +94,6 @@
 }
 
 @theme inline {
-  /* Use actual font family names instead of undefined CSS variables */
   --font-sans: "Geist", system-ui, -apple-system, sans-serif;
   --font-mono: "Geist Mono", "Courier New", monospace;
   --color-background: var(--background);
