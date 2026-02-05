@@ -78,6 +78,13 @@ export default function SignUpPage() {
           <p className="text-blue-100 text-sm mt-1">Appointment System</p>
         </div>
 
+        {/* Info Banner */}
+        <div className="mb-4 bg-blue-50 border border-blue-200 rounded-lg p-3">
+          <p className="text-sm text-blue-900">
+            <strong>Note:</strong> You'll receive a 6-digit verification code. Check your email inbox (or spam folder) after signing up.
+          </p>
+        </div>
+
         {/* Sign Up Card */}
         <Card className="shadow-2xl border-0 bg-white">
           <CardHeader className="pb-4">

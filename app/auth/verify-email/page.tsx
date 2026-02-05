@@ -148,6 +148,13 @@ export default function VerifyEmailPage() {
           <p className="text-blue-100 text-sm mt-1">Appointment System</p>
         </div>
 
+        {/* Help Banner */}
+        <div className="mb-4 bg-blue-50 border border-blue-200 rounded-lg p-3">
+          <p className="text-sm text-blue-900">
+            <strong>Didn't see an email?</strong> Check your spam folder, or check your server console (development mode shows the code there).
+          </p>
+        </div>
+
         {/* Verification Card */}
         <Card className="shadow-2xl border-0 bg-white">
           <CardHeader className="pb-4">
