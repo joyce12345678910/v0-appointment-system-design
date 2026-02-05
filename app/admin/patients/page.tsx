@@ -3,29 +3,45 @@
 import { useEffect, useState } from "react"
 import { createClient } from "@/lib/supabase/client"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { ChevronDown } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/dialog"
+import { ChevronDown, Trash2, UserX } from "lucide-react"
+import { toast } from "@/hooks/use-toast"
 
 export default function PatientsPage() {
   const [patients, setPatients] = useState([])
   const [expandedPatient, setExpandedPatient] = useState<string | null>(null)
   const [medicalRecords, setMedicalRecords] = useState<Record<string, any[]>>({})
   const [loading, setLoading] = useState(true)
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+  const [patientToDelete, setPatientToDelete] = useState<any>(null)
+  const [isDeleting, setIsDeleting] = useState(false)
   const supabase = createClient()
 
   useEffect(() => {
-    const fetchPatients = async () => {
-      const { data } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("role", "patient")
-        .order("created_at", { ascending: false })
-
-      setPatients(data || [])
-      setLoading(false)
-    }
-
     fetchPatients()
   }, [])
+
+  const fetchPatients = async () => {
+    setLoading(true)
+    const { data } = await supabase
+      .from("profiles")
+      .select("*")
+      .eq("role", "patient")
+      .order("created_at", { ascending: false })
+
+    setPatients(data || [])
+    setLoading(false)
+  }
 
   const handleExpandPatient = async (patientId: string) => {
     if (expandedPatient === patientId) {
@@ -41,12 +57,79 @@ export default function PatientsPage() {
         .from("medical_records")
         .select("*")
         .eq("patient_id", patientId)
-        .order("date", { ascending: false })
+        .order("visit_date", { ascending: false })
 
       setMedicalRecords((prev) => ({
         ...prev,
         [patientId]: data || [],
       }))
+    }
+  }
+
+  const handleDeleteClick = (patient: any) => {
+    setPatientToDelete(patient)
+    setDeleteDialogOpen(true)
+  }
+
+  const handleDeleteConfirm = async () => {
+    if (!patientToDelete) return
+
+    setIsDeleting(true)
+
+    try {
+      console.log("[v0] Deleting patient:", patientToDelete.id)
+
+      // Delete related data first (cascade delete)
+      const { error: appointmentsError } = await supabase
+        .from("appointments")
+        .delete()
+        .eq("patient_id", patientToDelete.id)
+
+      if (appointmentsError) {
+        console.error("[v0] Error deleting appointments:", appointmentsError)
+        throw appointmentsError
+      }
+
+      const { error: recordsError } = await supabase
+        .from("medical_records")
+        .delete()
+        .eq("patient_id", patientToDelete.id)
+
+      if (recordsError) {
+        console.error("[v0] Error deleting medical records:", recordsError)
+        throw recordsError
+      }
+
+      // Delete the patient profile
+      const { error: profileError } = await supabase
+        .from("profiles")
+        .delete()
+        .eq("id", patientToDelete.id)
+
+      if (profileError) {
+        console.error("[v0] Error deleting profile:", profileError)
+        throw profileError
+      }
+
+      toast({
+        title: "Patient Deleted",
+        description: `${patientToDelete.full_name} has been successfully removed.`,
+      })
+
+      // Auto-refresh the patient list
+      await fetchPatients()
+      setExpandedPatient(null)
+    } catch (error) {
+      console.error("[v0] Delete error:", error)
+      toast({
+        title: "Delete Failed",
+        description: error instanceof Error ? error.message : "Failed to delete patient",
+        variant: "destructive",
+      })
+    } finally {
+      setIsDeleting(false)
+      setDeleteDialogOpen(false)
+      setPatientToDelete(null)
     }
   }
 
@@ -79,24 +162,37 @@ export default function PatientsPage() {
             <div className="space-y-2">
               {patients.map((patient) => (
                 <div key={patient.id} className="border rounded-lg">
-                  <button
-                    onClick={() => handleExpandPatient(patient.id)}
-                    className="w-full flex items-center justify-between p-4 hover:bg-muted/50 transition-colors"
-                  >
-                    <div className="flex-1 text-left space-y-1">
-                      <p className="font-medium">{patient.full_name}</p>
-                      <p className="text-sm text-muted-foreground">{patient.email}</p>
-                      {patient.phone && <p className="text-xs text-muted-foreground">{patient.phone}</p>}
-                    </div>
-                    <div className="flex items-center gap-4">
-                      <div className="text-xs text-muted-foreground text-right">
-                        Joined {new Date(patient.created_at).toLocaleDateString()}
+                  <div className="flex items-center justify-between p-4 hover:bg-muted/50 transition-colors">
+                    <button
+                      onClick={() => handleExpandPatient(patient.id)}
+                      className="flex-1 flex items-center justify-between"
+                    >
+                      <div className="flex-1 text-left space-y-1">
+                        <p className="font-medium">{patient.full_name}</p>
+                        <p className="text-sm text-muted-foreground">{patient.email}</p>
+                        {patient.phone && <p className="text-xs text-muted-foreground">{patient.phone}</p>}
                       </div>
-                      <ChevronDown
-                        className={`w-5 h-5 transition-transform ${expandedPatient === patient.id ? "rotate-180" : ""}`}
-                      />
-                    </div>
-                  </button>
+                      <div className="flex items-center gap-4">
+                        <div className="text-xs text-muted-foreground text-right">
+                          Joined {new Date(patient.created_at).toLocaleDateString()}
+                        </div>
+                        <ChevronDown
+                          className={`w-5 h-5 transition-transform ${expandedPatient === patient.id ? "rotate-180" : ""}`}
+                        />
+                      </div>
+                    </button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        handleDeleteClick(patient)
+                      }}
+                      className="ml-2 hover:bg-red-50 hover:text-red-600 transition-colors rounded-full"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
 
                   {expandedPatient === patient.id && (
                     <div className="border-t p-4 bg-muted/30 space-y-3">
@@ -142,6 +238,43 @@ export default function PatientsPage() {
           )}
         </CardContent>
       </Card>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent className="rounded-2xl">
+          <AlertDialogHeader>
+            <div className="flex items-center gap-3 mb-2">
+              <div className="p-2 bg-red-100 rounded-full">
+                <UserX className="h-5 w-5 text-red-600" />
+              </div>
+              <AlertDialogTitle className="text-xl">Delete Patient</AlertDialogTitle>
+            </div>
+            <AlertDialogDescription className="text-base">
+              Are you sure you want to delete <span className="font-semibold">{patientToDelete?.full_name}</span>?
+              <br />
+              <br />
+              This action cannot be undone. This will permanently delete:
+              <ul className="list-disc list-inside mt-2 space-y-1">
+                <li>Patient profile and account</li>
+                <li>All appointments</li>
+                <li>All medical records</li>
+              </ul>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="rounded-full" disabled={isDeleting}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteConfirm}
+              disabled={isDeleting}
+              className="bg-red-500 hover:bg-red-600 rounded-full"
+            >
+              {isDeleting ? "Deleting..." : "Delete Patient"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }
