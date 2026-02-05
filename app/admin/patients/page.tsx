@@ -249,17 +249,19 @@ export default function PatientsPage() {
               </div>
               <AlertDialogTitle className="text-xl">Delete Patient</AlertDialogTitle>
             </div>
-            <AlertDialogDescription className="text-base">
-              Are you sure you want to delete <span className="font-semibold">{patientToDelete?.full_name}</span>?
-              <br />
-              <br />
-              This action cannot be undone. This will permanently delete:
-              <ul className="list-disc list-inside mt-2 space-y-1">
-                <li>Patient profile and account</li>
-                <li>All appointments</li>
-                <li>All medical records</li>
-              </ul>
-            </AlertDialogDescription>
+            <div className="space-y-3">
+              <AlertDialogDescription className="text-base">
+                Are you sure you want to delete <span className="font-semibold">{patientToDelete?.full_name}</span>?
+              </AlertDialogDescription>
+              <div className="text-sm text-muted-foreground">
+                <p className="font-medium mb-2">This action cannot be undone. This will permanently delete:</p>
+                <ul className="list-disc list-inside space-y-1">
+                  <li>Patient profile and account</li>
+                  <li>All appointments</li>
+                  <li>All medical records</li>
+                </ul>
+              </div>
+            </div>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel className="rounded-full" disabled={isDeleting}>
