@@ -184,15 +184,19 @@ export default async function AdminDashboardPage() {
 
                   {/* Details and Status */}
                   <div className="grid md:grid-cols-3 gap-3 mt-4 pt-4 border-t border-blue-100">
-                    <div className="text-xs">
-                      <p className="font-semibold text-gray-700 mb-1">Reason</p>
-                      <p className="text-gray-600">{appointment.reason}</p>
-                    </div>
-                    <div className="text-xs">
-                      <p className="font-semibold text-gray-700 mb-1">Type</p>
-                      <p className="text-gray-600 capitalize">{appointment.appointment_type.replace("_", " ")}</p>
-                    </div>
-                    <div className="flex items-end justify-end">
+                    {appointment.reason && (
+                      <div className="text-xs">
+                        <p className="font-semibold text-gray-700 mb-1">Reason</p>
+                        <p className="text-gray-600">{appointment.reason}</p>
+                      </div>
+                    )}
+                    {appointment.appointment_type && (
+                      <div className="text-xs">
+                        <p className="font-semibold text-gray-700 mb-1">Type</p>
+                        <p className="text-gray-600 capitalize">{appointment.appointment_type.replace("_", " ")}</p>
+                      </div>
+                    )}
+                    <div className={`flex items-end ${appointment.reason || appointment.appointment_type ? 'justify-end' : 'justify-start'}`}>
                       <span className={`inline-flex items-center rounded-full px-3 py-1.5 text-xs font-semibold ${getStatusStyle(appointment.status)} capitalize`}>
                         {appointment.status}
                       </span>
