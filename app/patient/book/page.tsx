@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { useRouter } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -13,6 +13,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import type { Doctor } from "@/lib/types"
 import { toast } from "@/hooks/use-toast"
+import { Upload, CheckCircle, AlertCircle, X } from "lucide-react"
 
 export default function BookAppointmentPage() {
   const [doctors, setDoctors] = useState<Doctor[]>([])
@@ -24,6 +25,10 @@ export default function BookAppointmentPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [availableTimeSlots, setAvailableTimeSlots] = useState<string[]>([])
   const [loadingSlots, setLoadingSlots] = useState(false)
+  const [uploadedDocument, setUploadedDocument] = useState<{ url: string; name: string } | null>(null)
+  const [isUploadingDocument, setIsUploadingDocument] = useState(false)
+  const [documentError, setDocumentError] = useState<string | null>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
   const router = useRouter()
 
   useEffect(() => {
@@ -87,8 +92,74 @@ export default function BookAppointmentPage() {
     }
   }
 
+  const handleDocumentUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    setDocumentError(null)
+    setIsUploadingDocument(true)
+
+    try {
+      // Validate file type
+      const allowedTypes = ["image/jpeg", "image/png", "image/webp", "application/pdf"]
+      if (!allowedTypes.includes(file.type)) {
+        setDocumentError("Only JPEG, PNG, WebP, and PDF files are allowed")
+        setIsUploadingDocument(false)
+        return
+      }
+
+      // Validate file size (5MB max)
+      if (file.size > 5 * 1024 * 1024) {
+        setDocumentError("File size must be less than 5MB")
+        setIsUploadingDocument(false)
+        return
+      }
+
+      // Upload to server
+      const formData = new FormData()
+      formData.append("file", file)
+
+      const response = await fetch("/api/appointments/upload-document", {
+        method: "POST",
+        body: formData,
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to upload document")
+      }
+
+      setUploadedDocument({
+        url: data.url,
+        name: file.name,
+      })
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Failed to upload document"
+      setDocumentError(message)
+      toast({
+        title: "Upload Error",
+        description: message,
+        variant: "destructive",
+      })
+    } finally {
+      setIsUploadingDocument(false)
+    }
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+
+    // Validate document upload
+    if (!uploadedDocument) {
+      toast({
+        title: "Missing Document",
+        description: "Please upload a valid ID, referral slip, or required document before submitting your appointment request.",
+        variant: "destructive",
+      })
+      return
+    }
+
     setIsLoading(true)
 
     const supabase = createClient()
@@ -106,7 +177,7 @@ export default function BookAppointmentPage() {
       // Get doctor info
       const { data: doctor } = await supabase.from("doctors").select("*").eq("id", selectedDoctor).single()
 
-      // Insert appointment
+      // Insert appointment with document
       const { error, data: appointmentData } = await supabase.from("appointments").insert({
         patient_id: user.id,
         doctor_id: selectedDoctor,
@@ -115,6 +186,9 @@ export default function BookAppointmentPage() {
         appointment_type: appointmentType,
         reason: reason,
         status: "pending",
+        document_url: uploadedDocument.url,
+        document_file_name: uploadedDocument.name,
+        document_uploaded_at: new Date().toISOString(),
       }).select().single()
 
       if (error) throw error
@@ -146,7 +220,7 @@ export default function BookAppointmentPage() {
 
       toast({
         title: "Appointment Requested",
-        description: "Your appointment request has been submitted. Check your email for confirmation. Please wait for admin approval.",
+        description: "Your appointment request has been submitted with your document. Check your email for confirmation. Please wait for admin approval.",
       })
 
       router.push("/patient")
@@ -267,6 +341,82 @@ export default function BookAppointmentPage() {
                 className="border-blue-200 focus:border-blue-500"
                 required
               />
+            </div>
+
+            {/* Document Upload */}
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <Label className="text-blue-900 font-semibold">
+                  Upload Document <span className="text-red-600">*</span>
+                </Label>
+                <span className="text-xs text-gray-600">Required</span>
+              </div>
+              <p className="text-xs text-gray-600">
+                Please upload a clear photo of your ID, referral slip, or required medical document for verification
+              </p>
+
+              {uploadedDocument ? (
+                <div className="border-2 border-green-200 bg-green-50 rounded-lg p-4 space-y-3">
+                  <div className="flex items-start gap-3">
+                    <CheckCircle className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
+                    <div className="flex-1 min-w-0">
+                      <p className="font-semibold text-green-900">Document Uploaded</p>
+                      <p className="text-sm text-green-700 break-words">{uploadedDocument.name}</p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setUploadedDocument(null)
+                        if (fileInputRef.current) fileInputRef.current.value = ""
+                      }}
+                      className="text-green-600 hover:text-green-700"
+                    >
+                      <X className="h-5 w-5" />
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className="border-2 border-dashed border-blue-200 bg-blue-50 rounded-lg p-6 text-center space-y-3 hover:border-blue-400 transition-colors">
+                  <Upload className="h-8 w-8 text-blue-600 mx-auto" />
+                  <div>
+                    <p className="text-sm font-semibold text-blue-900">Click to upload or drag and drop</p>
+                    <p className="text-xs text-blue-600">PNG, JPG, WebP, or PDF (Max 5MB)</p>
+                  </div>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp,application/pdf"
+                    onChange={handleDocumentUpload}
+                    disabled={isUploadingDocument}
+                    className="hidden"
+                  />
+                  <Button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={isUploadingDocument}
+                    className="bg-blue-600 hover:bg-blue-700 text-white"
+                  >
+                    {isUploadingDocument ? (
+                      <>
+                        <span className="inline-block animate-spin mr-2">⏳</span>
+                        Uploading...
+                      </>
+                    ) : (
+                      <>
+                        <Upload className="h-4 w-4 mr-2" />
+                        Select File
+                      </>
+                    )}
+                  </Button>
+                </div>
+              )}
+
+              {documentError && (
+                <div className="border-2 border-red-200 bg-red-50 rounded-lg p-3 flex items-start gap-2">
+                  <AlertCircle className="h-5 w-5 text-red-600 flex-shrink-0 mt-0.5" />
+                  <p className="text-sm text-red-700">{documentError}</p>
+                </div>
+              )}
             </div>
 
             {/* Submit Button */}

@@ -12,7 +12,7 @@ import { Input } from "@/components/ui/input"
 import { AppointmentActions } from "@/components/appointment-actions"
 import { AppointmentDetailsDialog } from "@/components/appointment-details-dialog"
 import type { Appointment } from "@/lib/types"
-import { Eye, Search } from "lucide-react"
+import { Eye, Search, FileText } from "lucide-react"
 
 export default function AppointmentsPage() {
   const [appointments, setAppointments] = useState<Appointment[]>([])
@@ -180,6 +180,12 @@ export default function AppointmentsPage() {
                             <Badge className={`${getStatusColor(appointment.status)} border capitalize font-semibold`}>
                               {appointment.status}
                             </Badge>
+                            {appointment.document_url && (
+                              <Badge className="bg-green-100 text-green-800 border border-green-200 font-semibold flex items-center gap-1">
+                                <FileText className="h-3 w-3" />
+                                Document
+                              </Badge>
+                            )}
                             <span className="text-xs md:text-sm text-gray-600 whitespace-nowrap bg-gray-100 px-3 py-1 rounded-full">
                               {new Date(appointment.appointment_date).toLocaleDateString()} at{" "}
                               {appointment.appointment_time}
