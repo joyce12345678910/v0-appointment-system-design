@@ -6,8 +6,8 @@ import { Analytics } from '@vercel/analytics/next'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: 'Appointment System',
-  description: 'Healthcare Appointment Management System',
+  title: 'Tactay-Billedo',
+  description: 'Tactay-Billedo Dental & Medical Clinic',
   generator: 'v0.app',
   icons: {
     icon: '/favicon.png',

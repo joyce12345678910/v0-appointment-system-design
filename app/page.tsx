@@ -23,7 +23,7 @@ export default function HomePage() {
       {/* Navigation Bar */}
       <nav className="sticky top-0 bg-white border-b border-gray-200 z-50">
         <div className="container mx-auto max-w-7xl px-4 py-4 flex items-center justify-between">
-          <div className="text-2xl font-bold text-blue-600">Tactay Billedo</div>
+          <div className="text-2xl font-bold text-blue-600">Tactay-Billedo</div>
           <div className="hidden md:flex gap-8 items-center">
             <a href="#doctors" className="text-gray-700 hover:text-blue-600 transition">
               Doctors
@@ -114,7 +114,7 @@ export default function HomePage() {
       <div className="py-20 px-4 bg-gray-50">
         <div className="container mx-auto max-w-7xl">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">Why Choose Tactay Billedo?</h2>
+            <h2 className="text-4xl font-bold text-gray-900 mb-4">Why Choose Tactay-Billedo?</h2>
             <p className="text-lg text-gray-600 max-w-2xl mx-auto">
               We combine professional healthcare expertise with cutting-edge technology
             </p>
@@ -289,7 +289,7 @@ export default function HomePage() {
         <div className="container mx-auto max-w-7xl">
           <div className="grid md:grid-cols-4 gap-8 mb-8">
             <div>
-              <h3 className="text-white font-bold mb-4">Tactay Billedo</h3>
+              <h3 className="text-white font-bold mb-4">Tactay-Billedo</h3>
               <p className="text-sm">Providing excellent healthcare services since 2015</p>
             </div>
             <div>
@@ -346,7 +346,7 @@ export default function HomePage() {
             </div>
           </div>
           <div className="border-t border-gray-800 pt-8 text-center text-sm">
-            <p>&copy; 2025 Tactay Billedo Medical Center. All rights reserved.</p>
+            <p>&copy; 2025 Tactay-Billedo Medical Center. All rights reserved.</p>
             <p>ADRIAN UBARRE</p>
           </div>
         </div>
