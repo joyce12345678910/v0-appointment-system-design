@@ -84,8 +84,8 @@ export default function ResetPasswordPage() {
       <div className="w-full max-w-sm">
         <div className="flex flex-col gap-6">
           <div className="flex flex-col items-center gap-2 text-center">
-            <h1 className="text-3xl font-bold text-blue-900">Tactay Billedo</h1>
-            <p className="text-sm text-muted-foreground">Medical Appointment System</p>
+            <h1 className="text-3xl font-bold text-blue-900">Tactay-Billedo Clinic</h1>
+            <p className="text-sm text-muted-foreground">Dental & Medical Appointment System</p>
           </div>
           <Card>
             <CardHeader>
