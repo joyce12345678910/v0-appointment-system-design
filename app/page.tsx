@@ -154,24 +154,42 @@ export default function HomePage() {
                 </div>
               </div>
 
-              {/* Mobile Feature Cards */}
-              <div className="flex flex-wrap gap-3 lg:hidden pt-2">
-                <div className="bg-white rounded-xl shadow-lg p-3 flex items-center gap-2">
-                  <div className="w-10 h-10 bg-emerald-100 rounded-full flex items-center justify-center">
-                    <Calendar className="h-5 w-5 text-emerald-600" />
-                  </div>
-                  <div>
-                    <p className="font-semibold text-gray-900 text-sm">Easy Booking</p>
-                    <p className="text-xs text-gray-500">Online 24/7</p>
-                  </div>
+              {/* Mobile Logo and Feature Cards */}
+              <div className="lg:hidden pt-6">
+                {/* Mobile Logo with Decorative Background */}
+                <div className="relative flex justify-center mb-6">
+                  {/* Decorative Circles */}
+                  <div className="absolute w-64 h-64 rounded-full bg-gradient-to-br from-emerald-100 to-green-50 opacity-60"></div>
+                  <div className="absolute w-52 h-52 rounded-full bg-gradient-to-tr from-green-100 to-teal-50 opacity-60"></div>
+                  <div className="absolute w-44 h-44 rounded-full border-2 border-emerald-200/50"></div>
+                  
+                  {/* The Logo */}
+                  <img
+                    src="/tactay-billedo-logo.png"
+                    alt="Tactay-Billedo Dental Clinic"
+                    className="relative z-10 w-56 h-auto drop-shadow-xl"
+                  />
                 </div>
-                <div className="bg-white rounded-xl shadow-lg p-3 flex items-center gap-2">
-                  <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
-                    <Shield className="h-5 w-5 text-green-600" />
+                
+                {/* Feature Cards Row */}
+                <div className="flex flex-wrap justify-center gap-3">
+                  <div className="bg-white rounded-xl shadow-lg p-3 flex items-center gap-2">
+                    <div className="w-10 h-10 bg-emerald-100 rounded-full flex items-center justify-center">
+                      <Calendar className="h-5 w-5 text-emerald-600" />
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-900 text-sm">Easy Booking</p>
+                      <p className="text-xs text-gray-500">Online 24/7</p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="font-semibold text-gray-900 text-sm">Safe & Secure</p>
-                    <p className="text-xs text-gray-500">Data protected</p>
+                  <div className="bg-white rounded-xl shadow-lg p-3 flex items-center gap-2">
+                    <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+                      <Shield className="h-5 w-5 text-green-600" />
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-900 text-sm">Safe & Secure</p>
+                      <p className="text-xs text-gray-500">Data protected</p>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -303,11 +321,36 @@ export default function HomePage() {
         <div className="container mx-auto max-w-7xl">
           <div className="grid lg:grid-cols-2 gap-16 items-center">
             <div className="relative">
-              <div className="relative z-10 rounded-3xl overflow-hidden shadow-2xl">
+              {/* Modern Logo Display with Decorative Background */}
+              <div className="relative z-10 rounded-3xl overflow-hidden bg-gradient-to-br from-emerald-50 via-white to-green-50 p-8 shadow-2xl">
+                {/* Decorative Circles Background */}
+                <div className="absolute inset-0 flex items-center justify-center overflow-hidden">
+                  <div className="absolute w-80 h-80 rounded-full bg-gradient-to-br from-emerald-100 to-green-50 opacity-50"></div>
+                  <div className="absolute w-64 h-64 rounded-full bg-gradient-to-tr from-green-100 to-teal-50 opacity-50"></div>
+                  <div className="absolute w-48 h-48 rounded-full border-4 border-emerald-200/30"></div>
+                </div>
+                
+                {/* Dot Pattern */}
+                <div className="absolute top-4 right-4 w-16 h-16 opacity-20">
+                  <div className="grid grid-cols-4 gap-1">
+                    {[...Array(16)].map((_, i) => (
+                      <div key={i} className="w-1.5 h-1.5 rounded-full bg-emerald-500"></div>
+                    ))}
+                  </div>
+                </div>
+                <div className="absolute bottom-4 left-4 w-12 h-12 opacity-20">
+                  <div className="grid grid-cols-3 gap-1">
+                    {[...Array(9)].map((_, i) => (
+                      <div key={i} className="w-1.5 h-1.5 rounded-full bg-green-500"></div>
+                    ))}
+                  </div>
+                </div>
+                
+                {/* The Logo */}
                 <img
-                  src="/smiling-professional-doctor-with-modern-background.jpg"
-                  alt="Our Clinic"
-                  className="w-full h-[500px] object-cover"
+                  src="/tactay-billedo-logo.png"
+                  alt="Tactay-Billedo Dental Clinic"
+                  className="relative z-10 w-full max-w-sm mx-auto h-auto drop-shadow-xl"
                 />
               </div>
               <div className="absolute -bottom-6 -right-6 w-48 h-48 bg-emerald-500 rounded-3xl -z-10"></div>
