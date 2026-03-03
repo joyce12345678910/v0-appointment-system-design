@@ -1,7 +1,6 @@
 "use client"
 
 import type React from "react"
-
 import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -36,14 +35,13 @@ export default function SignUpPage() {
           emailRedirectTo: process.env.NEXT_PUBLIC_DEV_SUPABASE_REDIRECT_URL || `${window.location.origin}/patient`,
           data: {
             full_name: fullName,
-            role: "patient", // Always default to patient role
+            role: "patient",
           },
         },
       })
 
       if (error) throw error
 
-      // Update profile with additional information after email confirmation
       if (data.user) {
         router.push("/auth/sign-up-success")
       }
@@ -55,23 +53,53 @@ export default function SignUpPage() {
   }
 
   return (
-    <div className="min-h-screen w-full bg-gradient-to-br from-blue-600 via-blue-500 to-cyan-500 flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
-        {/* Header */}
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-white mb-2">Tactay Billedo</h1>
-          <p className="text-blue-100 text-lg">Dental Clinic</p>
-          <p className="text-blue-100 text-sm mt-1">Appointment System</p>
+    <div className="min-h-screen w-full bg-gradient-to-br from-emerald-600 via-green-500 to-teal-500 flex items-center justify-center p-4 relative overflow-hidden">
+      {/* Background Logo Watermark */}
+      <div className="absolute inset-0 flex items-center justify-center opacity-5 pointer-events-none">
+        <img 
+          src="/tactay-billedo-logo.png" 
+          alt="" 
+          className="w-[800px] h-auto"
+        />
+      </div>
+
+      <div className="w-full max-w-md relative z-10">
+        {/* Modern Logo Header with Decorative Elements */}
+        <div className="text-center mb-6">
+          <div className="relative inline-block">
+            {/* Decorative Rings */}
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="w-32 h-32 rounded-full border-2 border-white/20 animate-pulse"></div>
+            </div>
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="w-40 h-40 rounded-full border border-white/10"></div>
+            </div>
+            {/* Floating Dots */}
+            <div className="absolute -top-1 -right-1 w-2 h-2 bg-white/40 rounded-full animate-bounce"></div>
+            <div className="absolute -bottom-1 -left-1 w-2 h-2 bg-emerald-200/60 rounded-full animate-bounce" style={{ animationDelay: '0.3s' }}></div>
+            
+            {/* Logo Container */}
+            <div className="relative bg-white rounded-2xl p-4 shadow-2xl border border-white/20 backdrop-blur-sm">
+              <div className="absolute inset-0 bg-gradient-to-br from-emerald-50 to-green-50 rounded-2xl opacity-50"></div>
+              <img 
+                src="/tactay-billedo-logo.png" 
+                alt="Tactay-Billedo Clinic" 
+                className="h-20 w-auto mx-auto relative z-10 drop-shadow-lg"
+              />
+            </div>
+          </div>
+          <h1 className="text-3xl font-bold text-white mt-4 mb-1 drop-shadow-lg">Tactay-Billedo Clinic</h1>
+          <p className="text-emerald-100 text-base font-medium">Dental & Medical Care</p>
         </div>
 
         {/* Sign Up Card */}
-        <Card className="shadow-2xl border-0 bg-white">
-          <CardHeader className="pb-4">
+        <Card className="shadow-2xl border-0 bg-white/95 backdrop-blur-sm">
+          <CardHeader className="pb-3">
             <CardTitle className="text-2xl font-bold text-gray-900">Create Account</CardTitle>
             <CardDescription className="text-gray-600">Register as a patient</CardDescription>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleSignUp} className="space-y-5">
+            <form onSubmit={handleSignUp} className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="fullName" className="text-gray-700 font-medium">
                   Full Name
@@ -80,7 +108,7 @@ export default function SignUpPage() {
                   id="fullName"
                   type="text"
                   placeholder="Juan Dela Cruz"
-                  className="h-11 border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                  className="h-10 border-gray-300 focus:border-emerald-500 focus:ring-emerald-500"
                   required
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
@@ -94,36 +122,38 @@ export default function SignUpPage() {
                   id="email"
                   type="email"
                   placeholder="juan@example.com"
-                  className="h-11 border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                  className="h-10 border-gray-300 focus:border-emerald-500 focus:ring-emerald-500"
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                 />
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="phone" className="text-gray-700 font-medium">
-                  Phone Number
-                </Label>
-                <Input
-                  id="phone"
-                  type="tel"
-                  placeholder="+63-917-123-4567"
-                  className="h-11 border-gray-300 focus:border-blue-500 focus:ring-blue-500"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="dateOfBirth" className="text-gray-700 font-medium">
-                  Date of Birth
-                </Label>
-                <Input
-                  id="dateOfBirth"
-                  type="date"
-                  className="h-11 border-gray-300 focus:border-blue-500 focus:ring-blue-500"
-                  value={dateOfBirth}
-                  onChange={(e) => setDateOfBirth(e.target.value)}
-                />
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-2">
+                  <Label htmlFor="phone" className="text-gray-700 font-medium">
+                    Phone
+                  </Label>
+                  <Input
+                    id="phone"
+                    type="tel"
+                    placeholder="+63-917-123-4567"
+                    className="h-10 border-gray-300 focus:border-emerald-500 focus:ring-emerald-500"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="dateOfBirth" className="text-gray-700 font-medium">
+                    Date of Birth
+                  </Label>
+                  <Input
+                    id="dateOfBirth"
+                    type="date"
+                    className="h-10 border-gray-300 focus:border-emerald-500 focus:ring-emerald-500"
+                    value={dateOfBirth}
+                    onChange={(e) => setDateOfBirth(e.target.value)}
+                  />
+                </div>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="address" className="text-gray-700 font-medium">
@@ -133,7 +163,7 @@ export default function SignUpPage() {
                   id="address"
                   type="text"
                   placeholder="123 Main St, Manila"
-                  className="h-11 border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                  className="h-10 border-gray-300 focus:border-emerald-500 focus:ring-emerald-500"
                   value={address}
                   onChange={(e) => setAddress(e.target.value)}
                 />
@@ -145,7 +175,8 @@ export default function SignUpPage() {
                 <Input
                   id="password"
                   type="password"
-                  className="h-11 border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                  placeholder="Create a password"
+                  className="h-10 border-gray-300 focus:border-emerald-500 focus:ring-emerald-500"
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
@@ -156,18 +187,18 @@ export default function SignUpPage() {
 
               <Button
                 type="submit"
-                className="w-full h-11 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors"
+                className="w-full h-11 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-lg transition-all shadow-lg hover:shadow-xl"
                 disabled={isLoading}
               >
-                {isLoading ? "Creating account..." : "Sign up"}
+                {isLoading ? "Creating account..." : "Create Account"}
               </Button>
 
-              <div className="pt-4 border-t border-gray-200 text-center text-sm">
+              <div className="pt-3 border-t border-gray-200 text-center text-sm">
                 <p className="text-gray-600">
                   Already have an account?{" "}
                   <Link
                     href="/auth/login"
-                    className="text-blue-600 hover:text-blue-700 font-semibold transition-colors"
+                    className="text-emerald-600 hover:text-emerald-700 font-semibold transition-colors"
                   >
                     Login here
                   </Link>
@@ -178,7 +209,7 @@ export default function SignUpPage() {
         </Card>
 
         {/* Footer */}
-        <p className="text-center text-white text-sm mt-6">© 2025 Tactay Billedo Dental Clinic. All rights reserved.</p>
+        <p className="text-center text-white/90 text-sm mt-6 drop-shadow">© 2025 Tactay-Billedo Clinic. All rights reserved.</p>
       </div>
     </div>
   )

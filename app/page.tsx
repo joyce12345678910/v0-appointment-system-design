@@ -2,179 +2,331 @@
 
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
-import { MapPin, Facebook, Phone, Mail, Clock } from "lucide-react"
+import { MapPin, Facebook, Phone, Mail, Calendar, Shield, Users, Star, ChevronRight, Clock } from "lucide-react"
 
 export default function HomePage() {
-  const doctors = [
-    {
-      name: "Dr. LYKA KAYABCABO",
-      specialty: "MATUROG",
-      image: "/doctor-female-2.png",
-    },
-    {
-      name: "Dr. ADRIAN UBARRE",
-      specialty: "Cardiologist",
-      image: "/male-cardiologist-doctor-portrait.jpg",
-    },
-  ]
-
   return (
     <div className="min-h-screen bg-white">
       {/* Navigation Bar */}
-      <nav className="sticky top-0 bg-white border-b border-gray-200 z-50">
-        <div className="container mx-auto max-w-7xl px-4 py-4 flex items-center justify-between">
-          <div className="text-2xl font-bold text-blue-600">Tactay-Billedo</div>
+      <nav className="fixed top-0 left-0 right-0 bg-white/80 backdrop-blur-lg border-b border-gray-100 z-50">
+        <div className="container mx-auto max-w-7xl px-4 py-3 flex items-center justify-between">
+          <Link href="/" className="flex items-center gap-3">
+            <img 
+              src="/tactay-billedo-logo.png" 
+              alt="Tactay-Billedo Logo" 
+              className="h-12 w-auto"
+            />
+          </Link>
           <div className="hidden md:flex gap-8 items-center">
-            <a href="#doctors" className="text-gray-700 hover:text-blue-600 transition">
-              Doctors
+            <a href="#services" className="text-gray-600 hover:text-emerald-600 transition font-medium">
+              Services
             </a>
-            <a href="#location" className="text-gray-700 hover:text-blue-600 transition">
+            <a href="#about" className="text-gray-600 hover:text-emerald-600 transition font-medium">
+              About
+            </a>
+            <a href="#location" className="text-gray-600 hover:text-emerald-600 transition font-medium">
               Location
             </a>
-            <a href="#contact" className="text-gray-700 hover:text-blue-600 transition">
+            <a href="#contact" className="text-gray-600 hover:text-emerald-600 transition font-medium">
               Contact
             </a>
           </div>
           <div className="flex gap-3">
-            <Button asChild variant="outline" size="sm">
-              <Link href="/auth/login">Login</Link>
+            <Button asChild variant="ghost" size="sm" className="text-gray-700 hover:text-emerald-600">
+              <Link href="/auth/login">Sign In</Link>
             </Button>
-            <Button asChild size="sm" className="bg-blue-600 hover:bg-blue-700">
-              <Link href="/auth/sign-up">Register</Link>
+            <Button asChild size="sm" className="bg-emerald-500 hover:bg-emerald-600 text-white rounded-full px-6">
+              <Link href="/auth/sign-up">Book Now</Link>
             </Button>
           </div>
         </div>
       </nav>
 
       {/* Hero Section */}
-      <div className="relative bg-gradient-to-br from-blue-600 via-blue-700 to-blue-900 text-white py-24 px-4 overflow-hidden">
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-20 left-10 w-72 h-72 bg-blue-400 rounded-full blur-3xl"></div>
-          <div className="absolute bottom-10 right-10 w-96 h-96 bg-blue-500 rounded-full blur-3xl"></div>
+      <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-16">
+        {/* Background Logo - Large and Subtle */}
+        <div className="absolute inset-0 flex items-center justify-center opacity-[0.04] pointer-events-none">
+          <img 
+            src="/tactay-billedo-logo.png" 
+            alt="" 
+            className="w-[800px] h-auto"
+          />
         </div>
+        
+        {/* Gradient Overlay */}
+        <div className="absolute inset-0 bg-gradient-to-br from-emerald-50 via-white to-green-50"></div>
+        
+        {/* Decorative Elements */}
+        <div className="absolute top-20 left-10 w-72 h-72 bg-emerald-200 rounded-full blur-3xl opacity-30"></div>
+        <div className="absolute bottom-20 right-10 w-96 h-96 bg-green-200 rounded-full blur-3xl opacity-30"></div>
 
-        <div className="container mx-auto max-w-7xl relative z-10">
-          <div className="grid md:grid-cols-2 gap-12 items-center">
+        <div className="container mx-auto max-w-7xl px-4 relative z-10">
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div className="space-y-8">
-              <div className="space-y-4">
-                <h1 className="text-5xl md:text-7xl font-bold text-balance leading-tight">Your Smile, Our Priority</h1>
-                <p className="text-xl text-blue-100 text-pretty leading-relaxed">
-                  Experience seamless healthcare with expert doctors, secure appointments, and comprehensive medical
-                  records all in one trusted platform.
-                </p>
+              <div className="inline-flex items-center gap-2 bg-emerald-100 text-emerald-700 px-4 py-2 rounded-full text-sm font-medium">
+                <Star className="h-4 w-4 fill-current" />
+                Trusted Dental & Medical Care
               </div>
+              
+              <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-gray-900 leading-tight text-balance">
+                Your Smile,{" "}
+                <span className="text-emerald-500">Our Priority</span>
+              </h1>
+              
+              <p className="text-xl text-gray-600 leading-relaxed max-w-lg text-pretty">
+                Experience world-class dental and medical care with our team of expert professionals. 
+                Book your appointment today and take the first step towards a healthier you.
+              </p>
 
-              <div className="flex flex-col sm:flex-row gap-4 pt-4">
+              <div className="flex flex-col sm:flex-row gap-4">
                 <Button
                   asChild
                   size="lg"
-                  className="bg-white text-blue-600 hover:bg-gray-100 text-lg font-semibold px-8 py-7 rounded-lg shadow-lg"
+                  className="bg-emerald-500 hover:bg-emerald-600 text-white text-lg font-semibold px-8 py-6 rounded-full shadow-lg shadow-emerald-500/30 hover:shadow-xl hover:shadow-emerald-500/40 transition-all"
                 >
-                  <Link href="/auth/sign-up">Book Appointment</Link>
+                  <Link href="/auth/sign-up" className="flex items-center gap-2">
+                    Book Appointment
+                    <ChevronRight className="h-5 w-5" />
+                  </Link>
                 </Button>
                 <Button
                   asChild
+                  variant="outline"
                   size="lg"
-                  className="border-2 border-white text-white hover:bg-white hover:text-blue-600 text-lg font-semibold bg-transparent rounded-lg transition"
+                  className="border-2 border-gray-300 text-gray-700 hover:border-emerald-500 hover:text-emerald-600 text-lg font-semibold px-8 py-6 rounded-full transition-all bg-white"
                 >
-                  <Link href="/auth/login">Sign In</Link>
+                  <Link href="#contact">Contact Us</Link>
                 </Button>
               </div>
 
-              <div className="flex flex-wrap gap-6 text-sm text-blue-100 pt-4">
+              <div className="flex items-center gap-8 pt-4">
                 <div className="flex items-center gap-2">
-                  <Clock className="h-5 w-5" />
-                  <span>24/7 Support</span>
+                  <div className="flex -space-x-2">
+                    {[1, 2, 3, 4].map((i) => (
+                      <div key={i} className="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-400 to-green-500 border-2 border-white flex items-center justify-center text-white text-xs font-bold">
+                        {String.fromCharCode(64 + i)}
+                      </div>
+                    ))}
+                  </div>
+                  <div className="text-sm">
+                    <p className="font-semibold text-gray-900">1000+ Patients</p>
+                    <p className="text-gray-500">Trust us</p>
+                  </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <Phone className="h-5 w-5" />
-                  <span>Quick Consultations</span>
+                <div className="h-12 w-px bg-gray-200"></div>
+                <div className="flex items-center gap-1">
+                  {[1, 2, 3, 4, 5].map((i) => (
+                    <Star key={i} className="h-5 w-5 fill-yellow-400 text-yellow-400" />
+                  ))}
+                  <span className="ml-2 font-semibold text-gray-900">4.9</span>
                 </div>
               </div>
             </div>
 
-            <div className="relative w-full h-64 sm:h-80 md:h-96">
-              <img
-                src="/smiling-professional-doctor-with-modern-background.jpg"
-                alt="Featured Doctor"
-                className="rounded-2xl shadow-2xl w-full h-full object-cover"
-              />
-              <div className="absolute -bottom-4 -left-4 md:-bottom-6 md:-left-6 bg-white rounded-xl shadow-xl p-3 md:p-4 max-w-xs">
-                <p className="text-xs md:text-sm text-gray-600 font-semibold">Trusted by thousands of patients</p>
-                <div className="flex gap-1 mt-2">
-                  <span className="text-yellow-400">★★★★★</span>
+            <div className="relative hidden lg:block">
+              {/* Modern Logo Container with Background Design */}
+              <div className="relative z-10">
+                {/* Decorative Background Circles */}
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="absolute w-[450px] h-[450px] rounded-full bg-gradient-to-br from-emerald-100 to-green-50 animate-pulse"></div>
+                  <div className="absolute w-[380px] h-[380px] rounded-full bg-gradient-to-tr from-green-100 to-teal-50 animate-pulse" style={{ animationDelay: '0.5s' }}></div>
+                  <div className="absolute w-[320px] h-[320px] rounded-full bg-gradient-to-bl from-emerald-50 to-white border-2 border-emerald-100"></div>
+                </div>
+                
+                {/* Decorative Dots Pattern */}
+                <div className="absolute top-0 right-0 w-24 h-24 opacity-20">
+                  <div className="grid grid-cols-4 gap-2">
+                    {[...Array(16)].map((_, i) => (
+                      <div key={i} className="w-2 h-2 rounded-full bg-emerald-500"></div>
+                    ))}
+                  </div>
+                </div>
+                <div className="absolute bottom-10 left-0 w-20 h-20 opacity-20">
+                  <div className="grid grid-cols-4 gap-2">
+                    {[...Array(16)].map((_, i) => (
+                      <div key={i} className="w-2 h-2 rounded-full bg-green-500"></div>
+                    ))}
+                  </div>
+                </div>
+                
+                {/* Glowing Ring Effect */}
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="w-[400px] h-[400px] rounded-full border-4 border-emerald-200/50 shadow-[0_0_60px_rgba(16,185,129,0.3)]"></div>
+                </div>
+                
+                {/* The Logo */}
+                <div className="relative p-8">
+                  <img
+                    src="/tactay-billedo-logo.png"
+                    alt="Tactay-Billedo Dental Clinic"
+                    className="w-full max-w-md mx-auto drop-shadow-2xl relative z-10 hover:scale-105 transition-transform duration-500"
+                  />
+                </div>
+                
+                {/* Floating Accent Elements */}
+                <div className="absolute top-8 right-8 w-6 h-6 bg-emerald-400 rounded-full animate-bounce opacity-60"></div>
+                <div className="absolute bottom-16 left-8 w-4 h-4 bg-green-400 rounded-full animate-bounce opacity-60" style={{ animationDelay: '0.3s' }}></div>
+                <div className="absolute top-1/2 right-4 w-3 h-3 bg-teal-400 rounded-full animate-bounce opacity-60" style={{ animationDelay: '0.6s' }}></div>
+              </div>
+              
+              {/* Floating Cards */}
+              <div className="absolute top-10 -left-4 bg-white rounded-2xl shadow-xl p-4 animate-float z-20">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center">
+                    <Calendar className="h-6 w-6 text-emerald-600" />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-gray-900">Easy Booking</p>
+                    <p className="text-sm text-gray-500">Online 24/7</p>
+                  </div>
+                </div>
+              </div>
+              <div className="absolute bottom-20 -right-4 bg-white rounded-2xl shadow-xl p-4 animate-float-delayed z-20">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+                    <Shield className="h-6 w-6 text-green-600" />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-gray-900">Safe & Secure</p>
+                    <p className="text-sm text-gray-500">Your data protected</p>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
+      </section>
 
-      {/* Features Section */}
-      <div className="py-20 px-4 bg-gray-50">
+      {/* Services Section */}
+      <section id="services" className="py-24 px-4 bg-white">
         <div className="container mx-auto max-w-7xl">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">Why Choose Tactay-Billedo?</h2>
+            <p className="text-emerald-600 font-semibold mb-2">OUR SERVICES</p>
+            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">What We Offer</h2>
             <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              We combine professional healthcare expertise with cutting-edge technology
+              Comprehensive dental and medical services designed for your complete well-being
             </p>
           </div>
 
           <div className="grid md:grid-cols-3 gap-8">
             {[
-              { title: "Expert Doctors", desc: "Qualified specialists with years of experience", icon: "👨‍⚕️" },
-              { title: "Secure Records", desc: "Your medical data protected with encryption", icon: "🔒" },
-              { title: "Easy Booking", desc: "Schedule appointments in minutes, anytime", icon: "📅" },
-            ].map((feature, i) => (
+              { 
+                title: "General Dentistry", 
+                desc: "Regular checkups, cleanings, fillings, and preventive care for optimal oral health", 
+                icon: <div className="text-3xl">🦷</div>,
+                color: "bg-emerald-50 hover:bg-emerald-100"
+              },
+              { 
+                title: "Cosmetic Dentistry", 
+                desc: "Teeth whitening, veneers, and smile makeovers to enhance your beautiful smile", 
+                icon: <div className="text-3xl">✨</div>,
+                color: "bg-green-50 hover:bg-green-100"
+              },
+              { 
+                title: "Oral Surgery", 
+                desc: "Expert surgical procedures including extractions and implant placements", 
+                icon: <div className="text-3xl">🏥</div>,
+                color: "bg-teal-50 hover:bg-teal-100"
+              },
+            ].map((service, i) => (
               <div
                 key={i}
-                className="bg-white p-8 rounded-xl shadow-sm hover:shadow-lg transition border border-gray-200"
+                className={`${service.color} p-8 rounded-3xl transition-all duration-300 hover:shadow-lg hover:-translate-y-1 cursor-pointer group`}
               >
-                <div className="h-12 w-12 bg-blue-100 rounded-lg mb-4 flex items-center justify-center text-2xl">
-                  {feature.icon}
+                <div className="w-16 h-16 bg-white rounded-2xl mb-6 flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
+                  {service.icon}
                 </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-2">{feature.title}</h3>
-                <p className="text-gray-600">{feature.desc}</p>
+                <h3 className="text-xl font-bold text-gray-900 mb-3">{service.title}</h3>
+                <p className="text-gray-600 leading-relaxed">{service.desc}</p>
               </div>
             ))}
           </div>
         </div>
-      </div>
+      </section>
 
-      {/* Doctors Section */}
-      <div className="py-20 px-4" id="doctors">
+      {/* About Section */}
+      <section id="about" className="py-24 px-4 bg-gradient-to-b from-gray-50 to-white">
+        <div className="container mx-auto max-w-7xl">
+          <div className="grid lg:grid-cols-2 gap-16 items-center">
+            <div className="relative">
+              <div className="relative z-10 rounded-3xl overflow-hidden shadow-2xl">
+                <img
+                  src="/smiling-professional-doctor-with-modern-background.jpg"
+                  alt="Our Clinic"
+                  className="w-full h-[500px] object-cover"
+                />
+              </div>
+              <div className="absolute -bottom-6 -right-6 w-48 h-48 bg-emerald-500 rounded-3xl -z-10"></div>
+              <div className="absolute -top-6 -left-6 w-32 h-32 bg-green-200 rounded-3xl -z-10"></div>
+            </div>
+            
+            <div className="space-y-6">
+              <p className="text-emerald-600 font-semibold">ABOUT US</p>
+              <h2 className="text-4xl md:text-5xl font-bold text-gray-900 leading-tight">
+                Providing Quality Healthcare Since 2015
+              </h2>
+              <p className="text-lg text-gray-600 leading-relaxed">
+                Tactay-Billedo Clinic has been serving the community with dedication and excellence. 
+                Our team of experienced professionals is committed to providing the highest standard 
+                of dental and medical care in a comfortable, modern environment.
+              </p>
+              
+              <div className="grid grid-cols-2 gap-6 pt-4">
+                <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <Users className="h-6 w-6 text-emerald-600" />
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-gray-900">Expert Team</h4>
+                    <p className="text-sm text-gray-600">Licensed professionals</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <Shield className="h-6 w-6 text-emerald-600" />
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-gray-900">Safe & Clean</h4>
+                    <p className="text-sm text-gray-600">Sterilized equipment</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <Clock className="h-6 w-6 text-emerald-600" />
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-gray-900">Flexible Hours</h4>
+                    <p className="text-sm text-gray-600">Convenient scheduling</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <Star className="h-6 w-6 text-emerald-600" />
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-gray-900">Top Rated</h4>
+                    <p className="text-sm text-gray-600">5-star reviews</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Location Section */}
+      <section id="location" className="py-24 px-4 bg-white">
         <div className="container mx-auto max-w-7xl">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">Meet Our Expert Team</h2>
+            <p className="text-emerald-600 font-semibold mb-2">FIND US</p>
+            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">Visit Our Clinic</h2>
             <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              Our experienced doctors are dedicated to providing you with exceptional healthcare
+              Conveniently located and ready to serve you
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-12 max-w-4xl mx-auto">
-            {doctors.map((doctor) => (
-              <div key={doctor.name} className="group">
-                <div className="overflow-hidden rounded-2xl mb-6 shadow-lg hover:shadow-2xl transition">
-                  <img
-                    src={doctor.image || "/placeholder.svg"}
-                    alt={doctor.name}
-                    className="w-full h-96 object-cover group-hover:scale-105 transition duration-300"
-                  />
-                </div>
-                <h3 className="text-2xl font-bold text-gray-900 mb-2">{doctor.name}</h3>
-                <p className="text-blue-600 font-semibold text-lg">{doctor.specialty}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* Location & Contact Section */}
-      <div className="py-20 px-4 bg-gray-50" id="location">
-        <div className="container mx-auto max-w-7xl">
-          <div className="grid md:grid-cols-2 gap-12 items-center">
-            {/* Map */}
-            <div className="rounded-2xl overflow-hidden shadow-lg h-96">
+          <div className="grid lg:grid-cols-2 gap-12 items-stretch">
+            <div className="rounded-3xl overflow-hidden shadow-lg h-[400px]">
               <iframe
                 src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3859.8640651643476!2d121.04540287346156!3d14.577864385925958!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3397b7f5e5e5e5e5%3A0x5e5e5e5e5e5e5e5e!2sTactay%20Billedo%20Dental%20Clinic!5e0!3m2!1sen!2sph!4v1234567890"
                 width="100%"
@@ -186,159 +338,161 @@ export default function HomePage() {
               ></iframe>
             </div>
 
-            {/* Contact Info */}
-            <div className="space-y-8">
-              <div>
-                <h2 className="text-4xl font-bold text-gray-900 mb-6">Visit Us Today</h2>
-                <p className="text-gray-600 text-lg mb-8">
-                  Located in the heart of the city, we welcome you to our modern medical facility.
-                </p>
-              </div>
-
+            <div className="bg-gradient-to-br from-emerald-500 to-green-600 rounded-3xl p-8 md:p-12 text-white flex flex-col justify-center" id="contact">
+              <h3 className="text-2xl font-bold mb-8">Contact Information</h3>
+              
               <div className="space-y-6">
-                {/* Address */}
-                <div className="flex gap-4">
-                  <div className="h-12 w-12 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <MapPin className="h-6 w-6 text-blue-600" />
+                <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <MapPin className="h-6 w-6" />
                   </div>
                   <div>
-                    <h3 className="font-bold text-gray-900 mb-1">Address</h3>
-                    <p className="text-gray-600">
+                    <h4 className="font-semibold mb-1">Address</h4>
+                    <p className="text-emerald-100">
                       2nd Floor Shell Santo Domingo Building, National Highway, Santo Domingo, Philippines, 2729
                     </p>
                     <a
                       href="https://share.google.com/JvtaNORpcUr4mRMWO"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-blue-600 hover:text-blue-700 font-semibold mt-2 inline-flex items-center gap-2"
+                      className="text-white underline hover:no-underline mt-2 inline-block text-sm"
                     >
-                      View on Maps
-                      <MapPin className="h-4 w-4" />
+                      Get Directions
                     </a>
                   </div>
                 </div>
 
-                {/* Phone */}
-                <div className="flex gap-4">
-                  <div className="h-12 w-12 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <Phone className="h-6 w-6 text-blue-600" />
+                <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <Phone className="h-6 w-6" />
                   </div>
                   <div>
-                    <h3 className="font-bold text-gray-900 mb-1">Phone</h3>
-                    <p className="text-gray-600">0917 568 0416</p>
+                    <h4 className="font-semibold mb-1">Phone</h4>
+                    <p className="text-emerald-100">0917 568 0416</p>
                   </div>
                 </div>
 
-                {/* Email */}
-                <div className="flex gap-4">
-                  <div className="h-12 w-12 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <Mail className="h-6 w-6 text-blue-600" />
+                <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <Mail className="h-6 w-6" />
                   </div>
                   <div>
-                    <h3 className="font-bold text-gray-900 mb-1">Email</h3>
-                    <p className="text-gray-600">mttactay.billedo@gmail.com</p>
+                    <h4 className="font-semibold mb-1">Email</h4>
+                    <p className="text-emerald-100">mttactay.billedo@gmail.com</p>
                   </div>
                 </div>
-              </div>
 
-              {/* Social Media */}
-              <div className="pt-6 border-t border-gray-200">
-                <h3 className="font-bold text-gray-900 mb-4">Follow Us</h3>
-                <a
-                  href="https://www.facebook.com/TactayBilledoDentalClinic/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-3 rounded-lg transition shadow-md hover:shadow-lg"
-                >
-                  <Facebook className="h-5 w-5" />
-                  Follow on Facebook
-                </a>
+                <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <Facebook className="h-6 w-6" />
+                  </div>
+                  <div>
+                    <h4 className="font-semibold mb-1">Social Media</h4>
+                    <a
+                      href="https://www.facebook.com/TactayBilledoDentalClinic/"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-emerald-100 hover:text-white transition"
+                    >
+                      Follow us on Facebook
+                    </a>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
+      </section>
 
       {/* CTA Section */}
-      <div className="bg-gradient-to-r from-blue-600 to-blue-800 text-white py-16 px-4">
-        <div className="container mx-auto max-w-4xl text-center space-y-8">
-          <h2 className="text-4xl font-bold">Ready to Book Your Appointment?</h2>
-          <p className="text-xl text-blue-100">Join thousands of patients who trust us with their healthcare</p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
+      <section className="py-24 px-4 bg-gradient-to-br from-emerald-500 via-green-500 to-teal-500 relative overflow-hidden">
+        <div className="absolute inset-0 opacity-10 pointer-events-none">
+          <img 
+            src="/tactay-billedo-logo.png" 
+            alt="" 
+            className="absolute right-0 top-1/2 -translate-y-1/2 w-[600px] h-auto"
+          />
+        </div>
+        
+        <div className="container mx-auto max-w-4xl text-center relative z-10">
+          <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
+            Ready for Your Best Smile?
+          </h2>
+          <p className="text-xl text-emerald-100 mb-10 max-w-2xl mx-auto">
+            Join thousands of happy patients who trust Tactay-Billedo Clinic for their dental and medical needs
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button
               asChild
               size="lg"
-              className="bg-white text-blue-600 hover:bg-gray-100 text-lg font-semibold px-8 py-6 rounded-lg"
+              className="bg-white text-emerald-600 hover:bg-gray-100 text-lg font-semibold px-10 py-6 rounded-full shadow-lg hover:shadow-xl transition-all"
             >
-              <Link href="/auth/sign-up">Get Started Now</Link>
+              <Link href="/auth/sign-up" className="flex items-center gap-2">
+                Book Appointment
+                <ChevronRight className="h-5 w-5" />
+              </Link>
             </Button>
             <Button
               asChild
               variant="outline"
               size="lg"
-              className="border-2 border-white text-white hover:bg-white hover:text-blue-600 text-lg font-semibold rounded-lg bg-transparent"
+              className="border-2 border-white text-white hover:bg-white hover:text-emerald-600 text-lg font-semibold px-10 py-6 rounded-full bg-transparent transition-all"
             >
               <Link href="/auth/login">Sign In</Link>
             </Button>
           </div>
         </div>
-      </div>
+      </section>
 
       {/* Footer */}
-      <footer className="bg-gray-900 text-gray-400 py-12 px-4">
+      <footer className="bg-gray-900 text-gray-400 py-16 px-4">
         <div className="container mx-auto max-w-7xl">
-          <div className="grid md:grid-cols-4 gap-8 mb-8">
-            <div>
-              <h3 className="text-white font-bold mb-4">Tactay-Billedo</h3>
-              <p className="text-sm">Providing excellent healthcare services since 2015</p>
+          <div className="grid md:grid-cols-4 gap-12 mb-12">
+            <div className="md:col-span-2">
+              <div className="bg-white rounded-xl p-3 inline-block mb-4">
+                <img 
+                  src="/tactay-billedo-logo.png" 
+                  alt="Tactay-Billedo" 
+                  className="h-14 w-auto"
+                />
+              </div>
+              <p className="text-gray-500 max-w-sm">
+                Providing excellent dental and medical healthcare services since 2015. 
+                Your health is our top priority.
+              </p>
             </div>
             <div>
               <h3 className="text-white font-bold mb-4">Quick Links</h3>
-              <ul className="space-y-2 text-sm">
+              <ul className="space-y-3 text-sm">
                 <li>
-                  <a href="#doctors" className="hover:text-white transition">
-                    Our Doctors
+                  <a href="#services" className="hover:text-emerald-400 transition">
+                    Services
                   </a>
                 </li>
                 <li>
-                  <a href="#location" className="hover:text-white transition">
+                  <a href="#about" className="hover:text-emerald-400 transition">
+                    About Us
+                  </a>
+                </li>
+                <li>
+                  <a href="#location" className="hover:text-emerald-400 transition">
                     Location
                   </a>
                 </li>
                 <li>
-                  <a href="#contact" className="hover:text-white transition">
+                  <a href="#contact" className="hover:text-emerald-400 transition">
                     Contact
                   </a>
                 </li>
               </ul>
             </div>
             <div>
-              <h3 className="text-white font-bold mb-4">Services</h3>
-              <ul className="space-y-2 text-sm">
-                <li>
-                  <a href="#" className="hover:text-white transition">
-                    Appointments
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="hover:text-white transition">
-                    Medical Records
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="hover:text-white transition">
-                    Consultations
-                  </a>
-                </li>
-              </ul>
-            </div>
-            <div>
-              <h3 className="text-white font-bold mb-4">Follow</h3>
+              <h3 className="text-white font-bold mb-4">Connect</h3>
               <a
                 href="https://www.facebook.com/TactayBilledoDentalClinic/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 hover:text-white transition"
+                className="inline-flex items-center gap-2 text-gray-400 hover:text-emerald-400 transition"
               >
                 <Facebook className="h-5 w-5" />
                 Facebook
@@ -346,11 +500,24 @@ export default function HomePage() {
             </div>
           </div>
           <div className="border-t border-gray-800 pt-8 text-center text-sm">
-            <p>&copy; 2025 Tactay-Billedo Medical Center. All rights reserved.</p>
-            <p>ADRIAN UBARRE</p>
+            <p>&copy; 2025 Tactay-Billedo Clinic. All rights reserved.</p>
           </div>
         </div>
       </footer>
+
+      <style jsx>{`
+        @keyframes float {
+          0%, 100% { transform: translateY(0px); }
+          50% { transform: translateY(-10px); }
+        }
+        .animate-float {
+          animation: float 3s ease-in-out infinite;
+        }
+        .animate-float-delayed {
+          animation: float 3s ease-in-out infinite;
+          animation-delay: 1.5s;
+        }
+      `}</style>
     </div>
   )
 }
