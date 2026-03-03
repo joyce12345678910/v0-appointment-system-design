@@ -145,39 +145,69 @@ export default function HomePage() {
               </div>
 
               {/* Mobile Logo and Feature Cards */}
-              <div className="lg:hidden pt-6">
-                {/* Mobile Logo with Decorative Background */}
-                <div className="relative flex justify-center mb-6">
+              <div className="lg:hidden pt-4 pb-8">
+                {/* Mobile Logo with Attractive Background Design */}
+                <div className="relative flex justify-center items-center mb-4 mx-auto" style={{ minHeight: '220px', maxWidth: '280px' }}>
+                  {/* Outer Glow Effect */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-emerald-200/40 via-green-100/30 to-teal-200/40 rounded-3xl blur-xl"></div>
+                  
+                  {/* Main Card Background */}
+                  <div className="absolute inset-2 bg-gradient-to-br from-white via-emerald-50/80 to-green-50 rounded-2xl shadow-xl border border-emerald-100/50"></div>
+                  
                   {/* Decorative Circles */}
-                  <div className="absolute w-64 h-64 rounded-full bg-gradient-to-br from-emerald-100 to-green-50 opacity-60"></div>
-                  <div className="absolute w-52 h-52 rounded-full bg-gradient-to-tr from-green-100 to-teal-50 opacity-60"></div>
-                  <div className="absolute w-44 h-44 rounded-full border-2 border-emerald-200/50"></div>
+                  <div className="absolute w-52 h-52 rounded-full bg-gradient-to-br from-emerald-100/60 to-green-50/40 animate-pulse"></div>
+                  <div className="absolute w-44 h-44 rounded-full bg-gradient-to-tr from-green-100/50 to-teal-50/30"></div>
+                  <div className="absolute w-36 h-36 rounded-full border-2 border-emerald-300/30 shadow-inner"></div>
+                  
+                  {/* Glowing Ring */}
+                  <div className="absolute w-48 h-48 rounded-full border-4 border-emerald-200/40 shadow-[0_0_30px_rgba(16,185,129,0.2)]"></div>
+                  
+                  {/* Dot Patterns */}
+                  <div className="absolute top-3 right-3 opacity-30">
+                    <div className="grid grid-cols-3 gap-1">
+                      {[...Array(9)].map((_, i) => (
+                        <div key={i} className="w-1.5 h-1.5 rounded-full bg-emerald-400"></div>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="absolute bottom-3 left-3 opacity-30">
+                    <div className="grid grid-cols-3 gap-1">
+                      {[...Array(9)].map((_, i) => (
+                        <div key={i} className="w-1.5 h-1.5 rounded-full bg-green-400"></div>
+                      ))}
+                    </div>
+                  </div>
+                  
+                  {/* Floating Accent Dots */}
+                  <div className="absolute top-4 left-6 w-2 h-2 bg-emerald-400 rounded-full animate-bounce opacity-60"></div>
+                  <div className="absolute bottom-6 right-4 w-1.5 h-1.5 bg-green-400 rounded-full animate-bounce opacity-60" style={{ animationDelay: '0.3s' }}></div>
+                  <div className="absolute top-1/3 right-2 w-1 h-1 bg-teal-400 rounded-full animate-bounce opacity-60" style={{ animationDelay: '0.6s' }}></div>
                   
                   {/* The Logo */}
                   <img
                     src="/tactay-billedo-logo.png"
                     alt="Tactay-Billedo Dental Clinic"
-                    className="relative z-10 w-56 h-auto drop-shadow-xl"
+                    className="relative z-10 w-40 h-auto drop-shadow-2xl"
                   />
                 </div>
                 
                 {/* Feature Cards Row */}
-                <div className="flex flex-wrap justify-center gap-3">
-                  <div className="bg-white rounded-xl shadow-lg p-3 flex items-center gap-2">
-                    <div className="w-10 h-10 bg-emerald-100 rounded-full flex items-center justify-center">
-                      <Calendar className="h-5 w-5 text-emerald-600" />
+                <div className="grid grid-cols-2 gap-3 px-2">
+                  <div className="bg-white rounded-xl shadow-lg p-3 flex items-center gap-2 border border-gray-100">
+                    <div className="w-9 h-9 bg-emerald-100 rounded-full flex items-center justify-center flex-shrink-0">
+                      <Calendar className="h-4 w-4 text-emerald-600" />
                     </div>
                     <div>
-                      <p className="font-semibold text-gray-900 text-sm">Easy Booking</p>
+                      <p className="font-semibold text-gray-900 text-xs">Easy Booking</p>
                       <p className="text-xs text-gray-500">Online 24/7</p>
                     </div>
                   </div>
-                  <div className="bg-white rounded-xl shadow-lg p-3 flex items-center gap-2">
-                    <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
-                      <Shield className="h-5 w-5 text-green-600" />
+                  <div className="bg-white rounded-xl shadow-lg p-3 flex items-center gap-2 border border-gray-100">
+                    <div className="w-9 h-9 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
+                      <Shield className="h-4 w-4 text-green-600" />
                     </div>
                     <div>
-                      <p className="font-semibold text-gray-900 text-sm">Safe & Secure</p>
+                      <p className="font-semibold text-gray-900 text-xs">Safe & Secure</p>
                       <p className="text-xs text-gray-500">Data protected</p>
                     </div>
                   </div>
