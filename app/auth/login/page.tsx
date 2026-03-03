@@ -1,7 +1,6 @@
 "use client"
 
 import type React from "react"
-
 import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -47,17 +46,32 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen w-full bg-gradient-to-br from-blue-600 via-blue-500 to-cyan-500 flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
-        {/* Header */}
+    <div className="min-h-screen w-full bg-gradient-to-br from-emerald-600 via-green-500 to-teal-500 flex items-center justify-center p-4 relative overflow-hidden">
+      {/* Background Logo Watermark */}
+      <div className="absolute inset-0 flex items-center justify-center opacity-5 pointer-events-none">
+        <img 
+          src="/tactay-billedo-logo.png" 
+          alt="" 
+          className="w-[800px] h-auto"
+        />
+      </div>
+
+      <div className="w-full max-w-md relative z-10">
+        {/* Modern Logo Header */}
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-white mb-2">Tactay Billedo</h1>
-          <p className="text-blue-100 text-lg">Dental Clinic</p>
-          <p className="text-blue-100 text-sm mt-1">Appointment System</p>
+          <div className="inline-block bg-white/95 backdrop-blur-sm rounded-3xl p-6 shadow-2xl mb-4 border border-white/20">
+            <img 
+              src="/tactay-billedo-logo.png" 
+              alt="Tactay-Billedo Clinic" 
+              className="h-20 w-auto mx-auto"
+            />
+          </div>
+          <h1 className="text-3xl font-bold text-white mb-1 drop-shadow-lg">Tactay-Billedo Clinic</h1>
+          <p className="text-emerald-100 text-base font-medium">Dental & Medical Care</p>
         </div>
 
         {/* Login Card */}
-        <Card className="shadow-2xl border-0 bg-white">
+        <Card className="shadow-2xl border-0 bg-white/95 backdrop-blur-sm">
           <CardHeader className="pb-4">
             <CardTitle className="text-2xl font-bold text-gray-900">Welcome Back</CardTitle>
             <CardDescription className="text-gray-600">Sign in to your account</CardDescription>
@@ -71,8 +85,8 @@ export default function LoginPage() {
                 <Input
                   id="email"
                   type="email"
-                  placeholder="doctor@tactay.com"
-                  className="h-11 border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                  placeholder="your@email.com"
+                  className="h-11 border-gray-300 focus:border-emerald-500 focus:ring-emerald-500"
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
@@ -86,8 +100,8 @@ export default function LoginPage() {
                 <Input
                   id="password"
                   type="password"
-                  placeholder="••••••••"
-                  className="h-11 border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                  placeholder="Enter your password"
+                  className="h-11 border-gray-300 focus:border-emerald-500 focus:ring-emerald-500"
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
@@ -98,7 +112,7 @@ export default function LoginPage() {
 
               <Button
                 type="submit"
-                className="w-full h-11 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors"
+                className="w-full h-11 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-lg transition-all shadow-lg hover:shadow-xl"
                 disabled={isLoading}
               >
                 {isLoading ? "Signing in..." : "Sign In"}
@@ -115,7 +129,7 @@ export default function LoginPage() {
 
               <Link
                 href="/auth/forgot-password"
-                className="block text-center text-sm text-blue-600 hover:text-blue-700 font-medium transition-colors"
+                className="block text-center text-sm text-emerald-600 hover:text-emerald-700 font-medium transition-colors"
               >
                 Forgot your password?
               </Link>
@@ -125,7 +139,7 @@ export default function LoginPage() {
                   Don&apos;t have an account?{" "}
                   <Link
                     href="/auth/sign-up"
-                    className="text-blue-600 hover:text-blue-700 font-semibold transition-colors"
+                    className="text-emerald-600 hover:text-emerald-700 font-semibold transition-colors"
                   >
                     Sign up here
                   </Link>
@@ -136,7 +150,7 @@ export default function LoginPage() {
         </Card>
 
         {/* Footer */}
-        <p className="text-center text-white text-sm mt-6">© 2025 Tactay Billedo Dental Clinic. All rights reserved.</p>
+        <p className="text-center text-white/90 text-sm mt-6 drop-shadow">© 2025 Tactay-Billedo Clinic. All rights reserved.</p>
       </div>
     </div>
   )
