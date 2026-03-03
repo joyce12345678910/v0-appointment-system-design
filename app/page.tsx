@@ -100,15 +100,10 @@ export default function HomePage() {
                 Trusted Dental & Medical Care
               </div>
               
-              <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-gray-900 leading-tight text-balance">
-                Your Smile,{" "}
-                <span className="text-emerald-500">Our Priority</span>
+              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 leading-tight text-balance">
+                <span className="text-emerald-600">TACTAY-BILLEDO</span>{" "}
+                <span className="block sm:inline">DENTAL CLINIC</span>
               </h1>
-              
-              <p className="text-lg sm:text-xl text-gray-600 leading-relaxed max-w-lg text-pretty">
-                Experience world-class dental and medical care with our team of expert professionals. 
-                Book your appointment today and take the first step towards a healthier you.
-              </p>
 
               <div className="flex flex-col sm:flex-row gap-4">
                 <Button
