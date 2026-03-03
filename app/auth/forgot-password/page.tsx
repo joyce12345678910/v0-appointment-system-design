@@ -50,16 +50,31 @@ export default function ForgotPasswordPage() {
       </div>
 
       <div className="w-full max-w-md relative z-10">
-        {/* Modern Logo Header */}
+        {/* Modern Logo Header with Decorative Elements */}
         <div className="text-center mb-8">
-          <div className="inline-block bg-white/95 backdrop-blur-sm rounded-3xl p-6 shadow-2xl mb-4 border border-white/20">
-            <img 
-              src="/tactay-billedo-logo.png" 
-              alt="Tactay-Billedo Clinic" 
-              className="h-20 w-auto mx-auto"
-            />
+          <div className="relative inline-block">
+            {/* Decorative Rings */}
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="w-40 h-40 rounded-full border-2 border-white/20 animate-pulse"></div>
+            </div>
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="w-48 h-48 rounded-full border border-white/10"></div>
+            </div>
+            {/* Floating Dots */}
+            <div className="absolute -top-2 -right-2 w-3 h-3 bg-white/40 rounded-full animate-bounce"></div>
+            <div className="absolute -bottom-1 -left-1 w-2 h-2 bg-emerald-200/60 rounded-full animate-bounce" style={{ animationDelay: '0.3s' }}></div>
+            
+            {/* Logo Container */}
+            <div className="relative bg-white rounded-3xl p-5 shadow-2xl border border-white/20 backdrop-blur-sm">
+              <div className="absolute inset-0 bg-gradient-to-br from-emerald-50 to-green-50 rounded-3xl opacity-50"></div>
+              <img 
+                src="/tactay-billedo-logo.png" 
+                alt="Tactay-Billedo Clinic" 
+                className="h-24 w-auto mx-auto relative z-10 drop-shadow-lg"
+              />
+            </div>
           </div>
-          <h1 className="text-3xl font-bold text-white mb-1 drop-shadow-lg">Tactay-Billedo Clinic</h1>
+          <h1 className="text-3xl font-bold text-white mt-5 mb-1 drop-shadow-lg">Tactay-Billedo Clinic</h1>
           <p className="text-emerald-100 text-base font-medium">Dental & Medical Care</p>
         </div>
 

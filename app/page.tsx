@@ -124,15 +124,53 @@ export default function HomePage() {
             </div>
 
             <div className="relative hidden lg:block">
+              {/* Modern Logo Container with Background Design */}
               <div className="relative z-10">
-                <img
-                  src="/tactay-billedo-logo.png"
-                  alt="Tactay-Billedo Dental Clinic"
-                  className="w-full max-w-lg mx-auto drop-shadow-2xl"
-                />
+                {/* Decorative Background Circles */}
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="absolute w-[450px] h-[450px] rounded-full bg-gradient-to-br from-emerald-100 to-green-50 animate-pulse"></div>
+                  <div className="absolute w-[380px] h-[380px] rounded-full bg-gradient-to-tr from-green-100 to-teal-50 animate-pulse" style={{ animationDelay: '0.5s' }}></div>
+                  <div className="absolute w-[320px] h-[320px] rounded-full bg-gradient-to-bl from-emerald-50 to-white border-2 border-emerald-100"></div>
+                </div>
+                
+                {/* Decorative Dots Pattern */}
+                <div className="absolute top-0 right-0 w-24 h-24 opacity-20">
+                  <div className="grid grid-cols-4 gap-2">
+                    {[...Array(16)].map((_, i) => (
+                      <div key={i} className="w-2 h-2 rounded-full bg-emerald-500"></div>
+                    ))}
+                  </div>
+                </div>
+                <div className="absolute bottom-10 left-0 w-20 h-20 opacity-20">
+                  <div className="grid grid-cols-4 gap-2">
+                    {[...Array(16)].map((_, i) => (
+                      <div key={i} className="w-2 h-2 rounded-full bg-green-500"></div>
+                    ))}
+                  </div>
+                </div>
+                
+                {/* Glowing Ring Effect */}
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="w-[400px] h-[400px] rounded-full border-4 border-emerald-200/50 shadow-[0_0_60px_rgba(16,185,129,0.3)]"></div>
+                </div>
+                
+                {/* The Logo */}
+                <div className="relative p-8">
+                  <img
+                    src="/tactay-billedo-logo.png"
+                    alt="Tactay-Billedo Dental Clinic"
+                    className="w-full max-w-md mx-auto drop-shadow-2xl relative z-10 hover:scale-105 transition-transform duration-500"
+                  />
+                </div>
+                
+                {/* Floating Accent Elements */}
+                <div className="absolute top-8 right-8 w-6 h-6 bg-emerald-400 rounded-full animate-bounce opacity-60"></div>
+                <div className="absolute bottom-16 left-8 w-4 h-4 bg-green-400 rounded-full animate-bounce opacity-60" style={{ animationDelay: '0.3s' }}></div>
+                <div className="absolute top-1/2 right-4 w-3 h-3 bg-teal-400 rounded-full animate-bounce opacity-60" style={{ animationDelay: '0.6s' }}></div>
               </div>
+              
               {/* Floating Cards */}
-              <div className="absolute top-10 -left-4 bg-white rounded-2xl shadow-xl p-4 animate-float">
+              <div className="absolute top-10 -left-4 bg-white rounded-2xl shadow-xl p-4 animate-float z-20">
                 <div className="flex items-center gap-3">
                   <div className="w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center">
                     <Calendar className="h-6 w-6 text-emerald-600" />
@@ -143,7 +181,7 @@ export default function HomePage() {
                   </div>
                 </div>
               </div>
-              <div className="absolute bottom-20 -right-4 bg-white rounded-2xl shadow-xl p-4 animate-float-delayed">
+              <div className="absolute bottom-20 -right-4 bg-white rounded-2xl shadow-xl p-4 animate-float-delayed z-20">
                 <div className="flex items-center gap-3">
                   <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
                     <Shield className="h-6 w-6 text-green-600" />
