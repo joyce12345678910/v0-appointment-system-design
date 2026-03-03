@@ -22,8 +22,11 @@ export default function ForgotPasswordPage() {
     setError(null)
 
     try {
+      const baseUrl = process.env.NEXT_PUBLIC_DEV_SUPABASE_REDIRECT_URL || window.location.origin
+      const redirectUrl = baseUrl.replace(/\/patient$/, '') + '/auth/reset-password'
+      
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/auth/reset-password`,
+        redirectTo: redirectUrl,
       })
 
       if (error) throw error
@@ -40,8 +43,8 @@ export default function ForgotPasswordPage() {
       <div className="w-full max-w-md">
         {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-white mb-2">Tactay Billedo</h1>
-          <p className="text-blue-100 text-lg">Dental Clinic</p>
+          <h1 className="text-4xl font-bold text-white mb-2">Tactay-Billedo Clinic</h1>
+          <p className="text-blue-100 text-lg">Dental & Medical Care</p>
           <p className="text-blue-100 text-sm mt-1">Appointment System</p>
         </div>
 
@@ -109,7 +112,7 @@ export default function ForgotPasswordPage() {
         </Card>
 
         {/* Footer */}
-        <p className="text-center text-white text-sm mt-6">© 2025 Tactay Billedo Dental Clinic. All rights reserved.</p>
+        <p className="text-center text-white text-sm mt-6">© 2025 Tactay-Billedo Clinic. All rights reserved.</p>
       </div>
     </div>
   )
