@@ -1,10 +1,13 @@
 "use client"
 
+import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
-import { MapPin, Facebook, Phone, Mail, Calendar, Shield, Users, Star, ChevronRight, Clock } from "lucide-react"
+import { MapPin, Facebook, Phone, Mail, Calendar, Shield, Users, Star, ChevronRight, Clock, Menu, X } from "lucide-react"
 
 export default function HomePage() {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+
   return (
     <div className="min-h-screen bg-white">
       {/* Navigation Bar */}
@@ -14,7 +17,7 @@ export default function HomePage() {
             <img 
               src="/tactay-billedo-logo.png" 
               alt="Tactay-Billedo Logo" 
-              className="h-12 w-auto"
+              className="h-10 sm:h-12 w-auto"
             />
           </Link>
           <div className="hidden md:flex gap-8 items-center">
@@ -31,15 +34,44 @@ export default function HomePage() {
               Contact
             </a>
           </div>
-          <div className="flex gap-3">
-            <Button asChild variant="ghost" size="sm" className="text-gray-700 hover:text-emerald-600">
+          <div className="flex gap-2 sm:gap-3 items-center">
+            <Button asChild variant="ghost" size="sm" className="text-gray-700 hover:text-emerald-600 hidden sm:inline-flex">
               <Link href="/auth/login">Sign In</Link>
             </Button>
-            <Button asChild size="sm" className="bg-emerald-500 hover:bg-emerald-600 text-white rounded-full px-6">
+            <Button asChild size="sm" className="bg-emerald-500 hover:bg-emerald-600 text-white rounded-full px-4 sm:px-6 text-xs sm:text-sm">
               <Link href="/auth/sign-up">Book Now</Link>
             </Button>
+            <button 
+              className="md:hidden p-2 text-gray-600 hover:text-emerald-600"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            >
+              {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+            </button>
           </div>
         </div>
+        
+        {/* Mobile Menu */}
+        {mobileMenuOpen && (
+          <div className="md:hidden bg-white border-t border-gray-100 py-4 px-4">
+            <div className="flex flex-col gap-3">
+              <a href="#services" className="text-gray-600 hover:text-emerald-600 transition font-medium py-2" onClick={() => setMobileMenuOpen(false)}>
+                Services
+              </a>
+              <a href="#about" className="text-gray-600 hover:text-emerald-600 transition font-medium py-2" onClick={() => setMobileMenuOpen(false)}>
+                About
+              </a>
+              <a href="#location" className="text-gray-600 hover:text-emerald-600 transition font-medium py-2" onClick={() => setMobileMenuOpen(false)}>
+                Location
+              </a>
+              <a href="#contact" className="text-gray-600 hover:text-emerald-600 transition font-medium py-2" onClick={() => setMobileMenuOpen(false)}>
+                Contact
+              </a>
+              <Link href="/auth/login" className="text-gray-600 hover:text-emerald-600 transition font-medium py-2 sm:hidden" onClick={() => setMobileMenuOpen(false)}>
+                Sign In
+              </Link>
+            </div>
+          </div>
+        )}
       </nav>
 
       {/* Hero Section */}
@@ -62,21 +94,11 @@ export default function HomePage() {
 
         <div className="container mx-auto max-w-7xl px-4 relative z-10">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <div className="space-y-8">
-              <div className="inline-flex items-center gap-2 bg-emerald-100 text-emerald-700 px-4 py-2 rounded-full text-sm font-medium">
-                <Star className="h-4 w-4 fill-current" />
-                Trusted Dental & Medical Care
-              </div>
-              
-              <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-gray-900 leading-tight text-balance">
-                Your Smile,{" "}
-                <span className="text-emerald-500">Our Priority</span>
+            <div className="space-y-6">
+              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 leading-tight text-balance">
+                <span className="text-emerald-600">TACTAY-BILLEDO</span>{" "}
+                <span className="block sm:inline">DENTAL CLINIC</span>
               </h1>
-              
-              <p className="text-xl text-gray-600 leading-relaxed max-w-lg text-pretty">
-                Experience world-class dental and medical care with our team of expert professionals. 
-                Book your appointment today and take the first step towards a healthier you.
-              </p>
 
               <div className="flex flex-col sm:flex-row gap-4">
                 <Button
@@ -99,11 +121,11 @@ export default function HomePage() {
                 </Button>
               </div>
 
-              <div className="flex items-center gap-8 pt-4">
+              <div className="flex flex-wrap items-center gap-4 sm:gap-8 pt-4">
                 <div className="flex items-center gap-2">
                   <div className="flex -space-x-2">
                     {[1, 2, 3, 4].map((i) => (
-                      <div key={i} className="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-400 to-green-500 border-2 border-white flex items-center justify-center text-white text-xs font-bold">
+                      <div key={i} className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-br from-emerald-400 to-green-500 border-2 border-white flex items-center justify-center text-white text-xs font-bold">
                         {String.fromCharCode(64 + i)}
                       </div>
                     ))}
@@ -113,12 +135,82 @@ export default function HomePage() {
                     <p className="text-gray-500">Trust us</p>
                   </div>
                 </div>
-                <div className="h-12 w-px bg-gray-200"></div>
+                <div className="h-12 w-px bg-gray-200 hidden sm:block"></div>
                 <div className="flex items-center gap-1">
                   {[1, 2, 3, 4, 5].map((i) => (
-                    <Star key={i} className="h-5 w-5 fill-yellow-400 text-yellow-400" />
+                    <Star key={i} className="h-4 w-4 sm:h-5 sm:w-5 fill-yellow-400 text-yellow-400" />
                   ))}
                   <span className="ml-2 font-semibold text-gray-900">4.9</span>
+                </div>
+              </div>
+
+              {/* Mobile Logo and Feature Cards */}
+              <div className="lg:hidden pt-4 pb-8">
+                {/* Mobile Logo with Attractive Background Design */}
+                <div className="relative flex justify-center items-center mb-4 mx-auto" style={{ minHeight: '220px', maxWidth: '280px' }}>
+                  {/* Outer Glow Effect */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-emerald-200/40 via-green-100/30 to-teal-200/40 rounded-3xl blur-xl"></div>
+                  
+                  {/* Main Card Background */}
+                  <div className="absolute inset-2 bg-gradient-to-br from-white via-emerald-50/80 to-green-50 rounded-2xl shadow-xl border border-emerald-100/50"></div>
+                  
+                  {/* Decorative Circles */}
+                  <div className="absolute w-52 h-52 rounded-full bg-gradient-to-br from-emerald-100/60 to-green-50/40 animate-pulse"></div>
+                  <div className="absolute w-44 h-44 rounded-full bg-gradient-to-tr from-green-100/50 to-teal-50/30"></div>
+                  <div className="absolute w-36 h-36 rounded-full border-2 border-emerald-300/30 shadow-inner"></div>
+                  
+                  {/* Glowing Ring */}
+                  <div className="absolute w-48 h-48 rounded-full border-4 border-emerald-200/40 shadow-[0_0_30px_rgba(16,185,129,0.2)]"></div>
+                  
+                  {/* Dot Patterns */}
+                  <div className="absolute top-3 right-3 opacity-30">
+                    <div className="grid grid-cols-3 gap-1">
+                      {[...Array(9)].map((_, i) => (
+                        <div key={i} className="w-1.5 h-1.5 rounded-full bg-emerald-400"></div>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="absolute bottom-3 left-3 opacity-30">
+                    <div className="grid grid-cols-3 gap-1">
+                      {[...Array(9)].map((_, i) => (
+                        <div key={i} className="w-1.5 h-1.5 rounded-full bg-green-400"></div>
+                      ))}
+                    </div>
+                  </div>
+                  
+                  {/* Floating Accent Dots */}
+                  <div className="absolute top-4 left-6 w-2 h-2 bg-emerald-400 rounded-full animate-bounce opacity-60"></div>
+                  <div className="absolute bottom-6 right-4 w-1.5 h-1.5 bg-green-400 rounded-full animate-bounce opacity-60" style={{ animationDelay: '0.3s' }}></div>
+                  <div className="absolute top-1/3 right-2 w-1 h-1 bg-teal-400 rounded-full animate-bounce opacity-60" style={{ animationDelay: '0.6s' }}></div>
+                  
+                  {/* The Logo */}
+                  <img
+                    src="/tactay-billedo-logo.png"
+                    alt="Tactay-Billedo Dental Clinic"
+                    className="relative z-10 w-40 h-auto drop-shadow-2xl"
+                  />
+                </div>
+                
+                {/* Feature Cards Row */}
+                <div className="grid grid-cols-2 gap-3 px-2">
+                  <div className="bg-white rounded-xl shadow-lg p-3 flex items-center gap-2 border border-gray-100">
+                    <div className="w-9 h-9 bg-emerald-100 rounded-full flex items-center justify-center flex-shrink-0">
+                      <Calendar className="h-4 w-4 text-emerald-600" />
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-900 text-xs">Easy Booking</p>
+                      <p className="text-xs text-gray-500">Online 24/7</p>
+                    </div>
+                  </div>
+                  <div className="bg-white rounded-xl shadow-lg p-3 flex items-center gap-2 border border-gray-100">
+                    <div className="w-9 h-9 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
+                      <Shield className="h-4 w-4 text-green-600" />
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-900 text-xs">Safe & Secure</p>
+                      <p className="text-xs text-gray-500">Data protected</p>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -249,11 +341,36 @@ export default function HomePage() {
         <div className="container mx-auto max-w-7xl">
           <div className="grid lg:grid-cols-2 gap-16 items-center">
             <div className="relative">
-              <div className="relative z-10 rounded-3xl overflow-hidden shadow-2xl">
+              {/* Modern Logo Display with Decorative Background */}
+              <div className="relative z-10 rounded-3xl overflow-hidden bg-gradient-to-br from-emerald-50 via-white to-green-50 p-8 shadow-2xl">
+                {/* Decorative Circles Background */}
+                <div className="absolute inset-0 flex items-center justify-center overflow-hidden">
+                  <div className="absolute w-80 h-80 rounded-full bg-gradient-to-br from-emerald-100 to-green-50 opacity-50"></div>
+                  <div className="absolute w-64 h-64 rounded-full bg-gradient-to-tr from-green-100 to-teal-50 opacity-50"></div>
+                  <div className="absolute w-48 h-48 rounded-full border-4 border-emerald-200/30"></div>
+                </div>
+                
+                {/* Dot Pattern */}
+                <div className="absolute top-4 right-4 w-16 h-16 opacity-20">
+                  <div className="grid grid-cols-4 gap-1">
+                    {[...Array(16)].map((_, i) => (
+                      <div key={i} className="w-1.5 h-1.5 rounded-full bg-emerald-500"></div>
+                    ))}
+                  </div>
+                </div>
+                <div className="absolute bottom-4 left-4 w-12 h-12 opacity-20">
+                  <div className="grid grid-cols-3 gap-1">
+                    {[...Array(9)].map((_, i) => (
+                      <div key={i} className="w-1.5 h-1.5 rounded-full bg-green-500"></div>
+                    ))}
+                  </div>
+                </div>
+                
+                {/* The Logo */}
                 <img
-                  src="/smiling-professional-doctor-with-modern-background.jpg"
-                  alt="Our Clinic"
-                  className="w-full h-[500px] object-cover"
+                  src="/tactay-billedo-logo.png"
+                  alt="Tactay-Billedo Dental Clinic"
+                  className="relative z-10 w-full max-w-sm mx-auto h-auto drop-shadow-xl"
                 />
               </div>
               <div className="absolute -bottom-6 -right-6 w-48 h-48 bg-emerald-500 rounded-3xl -z-10"></div>
