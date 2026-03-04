@@ -1,30 +1,30 @@
-import { createClient } from '@/lib/supabase/server'
-import { NextResponse, type NextRequest } from 'next/server'
+import { createClient } from "@/lib/supabase/server"
+import { NextResponse } from "next/server"
+import type { NextRequest } from "next/server"
 
 export async function GET(request: NextRequest) {
-  const { searchParams } = new URL(request.url)
-  const token_hash = searchParams.get('token_hash')
-  const type = searchParams.get('type')
-  const next = searchParams.get('next') ?? '/auth/login'
+  const requestUrl = new URL(request.url)
+  const token_hash = requestUrl.searchParams.get("token_hash")
+  const type = requestUrl.searchParams.get("type")
 
   if (token_hash && type) {
     const supabase = await createClient()
 
     const { error } = await supabase.auth.verifyOtp({
-      type: type as any,
+      type: type as "recovery" | "signup" | "email",
       token_hash,
     })
 
     if (!error) {
-      // If it's a recovery (password reset), redirect to reset password page
-      if (type === 'recovery') {
-        return NextResponse.redirect(new URL('/auth/reset-password', request.url))
+      // Redirect to reset password page after successful verification
+      if (type === "recovery") {
+        return NextResponse.redirect(new URL("/auth/reset-password", requestUrl.origin))
       }
       // For email confirmation, redirect to login
-      return NextResponse.redirect(new URL('/auth/login', request.url))
+      return NextResponse.redirect(new URL("/auth/login", requestUrl.origin))
     }
   }
 
   // If there's an error, redirect to error page
-  return NextResponse.redirect(new URL('/auth/error?message=Invalid+or+expired+link', request.url))
+  return NextResponse.redirect(new URL("/auth/error?message=Invalid+or+expired+link", requestUrl.origin))
 }
