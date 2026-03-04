@@ -10,6 +10,14 @@ export async function middleware(request: NextRequest) {
   if (pathname === "/" && code) {
     const redirectUrl = new URL("/auth/callback", request.url)
     redirectUrl.searchParams.set("code", code)
+    // Pass type parameter if present (for recovery flow)
+    const type = request.nextUrl.searchParams.get("type")
+    if (type) {
+      redirectUrl.searchParams.set("type", type)
+    } else {
+      // Default to recovery since password reset sends code to root
+      redirectUrl.searchParams.set("type", "recovery")
+    }
     return NextResponse.redirect(redirectUrl)
   }
   

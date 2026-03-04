@@ -7,10 +7,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import Link from "next/link"
-import { useState, useEffect } from "react"
+import { useState, useEffect, Suspense } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 
-export default function ForgotPasswordPage() {
+function ForgotPasswordForm() {
   const [email, setEmail] = useState("")
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
@@ -31,16 +31,10 @@ export default function ForgotPasswordPage() {
     setError(null)
 
     try {
-      // Use the production URL for the redirect - pointing to reset-password page
-      // Supabase will append the token as a hash fragment
-      const siteUrl = typeof window !== 'undefined' 
-        ? `${window.location.protocol}//${window.location.host}`
-        : ''
-      const redirectUrl = `${siteUrl}/auth/reset-password`
-      
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: redirectUrl,
-      })
+      // Supabase PKCE flow will redirect to Site URL with code parameter
+      // The middleware will intercept and redirect to /auth/callback
+      // which then redirects to /auth/reset-password
+      const { error } = await supabase.auth.resetPasswordForEmail(email)
 
       if (error) throw error
       
@@ -146,5 +140,21 @@ export default function ForgotPasswordPage() {
         <p className="text-center text-white/90 text-sm mt-6 drop-shadow">© 2025 TACTAY-BILLEDO CLINIC. All rights reserved.</p>
       </div>
     </div>
+  )
+}
+
+export default function ForgotPasswordPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen w-full bg-gradient-to-br from-emerald-600 via-green-500 to-teal-500 flex items-center justify-center p-4">
+        <Card className="w-full max-w-sm shadow-2xl border-0 bg-white/95 backdrop-blur-sm">
+          <CardContent className="pt-6">
+            <p className="text-center text-sm text-muted-foreground">Loading...</p>
+          </CardContent>
+        </Card>
+      </div>
+    }>
+      <ForgotPasswordForm />
+    </Suspense>
   )
 }

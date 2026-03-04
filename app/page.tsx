@@ -1,12 +1,37 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { MapPin, Facebook, Phone, Mail, Calendar, Shield, Users, Star, ChevronRight, Clock, Menu, X } from "lucide-react"
 
 export default function HomePage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const router = useRouter()
+
+  // Handle auth redirects - backup for middleware
+  useEffect(() => {
+    const url = new URL(window.location.href)
+    const code = url.searchParams.get("code")
+    const error = url.searchParams.get("error")
+    
+    // Also check hash fragment for errors
+    const hashParams = new URLSearchParams(url.hash.substring(1))
+    const hashError = hashParams.get("error")
+    
+    if (code) {
+      // Redirect to callback with the code
+      router.replace(`/auth/callback?code=${code}`)
+      return
+    }
+    
+    if (error || hashError) {
+      // Redirect to forgot-password with expired flag
+      router.replace("/auth/forgot-password?expired=true")
+      return
+    }
+  }, [router])
 
   return (
     <div className="min-h-screen bg-white">
