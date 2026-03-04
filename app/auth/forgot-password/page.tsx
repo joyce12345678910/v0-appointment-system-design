@@ -64,13 +64,12 @@ export default function ForgotPasswordPage() {
             <div className="absolute -top-2 -right-2 w-3 h-3 bg-white/40 rounded-full animate-bounce"></div>
             <div className="absolute -bottom-1 -left-1 w-2 h-2 bg-emerald-200/60 rounded-full animate-bounce" style={{ animationDelay: '0.3s' }}></div>
             
-            {/* Logo Container */}
-            <div className="relative bg-white rounded-3xl p-5 shadow-2xl border border-white/20 backdrop-blur-sm">
-              <div className="absolute inset-0 bg-gradient-to-br from-emerald-50 to-green-50 rounded-3xl opacity-50"></div>
+            {/* Logo - Transparent Background */}
+            <div className="relative p-2">
               <img 
                 src="/tactay-billedo-logo.png" 
                 alt="Tactay-Billedo Clinic" 
-                className="h-24 w-auto mx-auto relative z-10 drop-shadow-lg"
+                className="h-28 w-auto mx-auto relative z-10 drop-shadow-2xl"
               />
             </div>
           </div>

@@ -566,13 +566,11 @@ export default function HomePage() {
         <div className="container mx-auto max-w-7xl">
           <div className="grid md:grid-cols-4 gap-12 mb-12">
             <div className="md:col-span-2">
-              <div className="bg-white rounded-xl p-3 inline-block mb-4">
-                <img 
-                  src="/tactay-billedo-logo.png" 
-                  alt="Tactay-Billedo" 
-                  className="h-14 w-auto"
-                />
-              </div>
+              <img 
+                src="/tactay-billedo-logo.png" 
+                alt="Tactay-Billedo" 
+                className="h-16 w-auto mb-4 drop-shadow-lg"
+              />
               <p className="text-gray-500 max-w-sm">
                 Providing excellent dental and medical healthcare services since 2015. 
                 Your health is our top priority.
