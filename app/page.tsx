@@ -11,15 +11,22 @@ export default function HomePage() {
   const router = useRouter()
 
   useEffect(() => {
-    // Check for auth errors in URL and redirect to appropriate page
     const urlParams = new URLSearchParams(window.location.search)
     const hashParams = new URLSearchParams(window.location.hash.substring(1))
     
+    // Check for auth code (password reset or email confirmation)
+    const code = urlParams.get("code")
+    if (code) {
+      // Redirect to reset-password page with the code
+      router.replace(`/auth/reset-password?code=${code}`)
+      return
+    }
+    
+    // Check for auth errors
     const error = urlParams.get("error") || hashParams.get("error")
     const errorCode = urlParams.get("error_code") || hashParams.get("error_code")
     
     if (error || errorCode) {
-      // Clear the URL and redirect to forgot-password with error
       router.replace("/auth/forgot-password?expired=true")
     }
   }, [router])

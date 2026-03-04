@@ -22,50 +22,45 @@ function ResetPasswordForm() {
   const supabase = createClient()
 
   useEffect(() => {
-    // Check for error in URL params
-    const errorParam = searchParams.get("error")
-    const errorDescription = searchParams.get("error_description")
-    
-    if (errorParam) {
-      setError(errorDescription || "Invalid or expired reset link. Please request a new one.")
-      setIsReady(true)
-      return
-    }
-
-    // Supabase automatically handles the token exchange when the page loads
-    // The onAuthStateChange listener will catch the PASSWORD_RECOVERY event
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (event === "PASSWORD_RECOVERY") {
+    const handleAuth = async () => {
+      // Check for error in URL params
+      const errorParam = searchParams.get("error")
+      const errorDescription = searchParams.get("error_description")
+      
+      if (errorParam) {
+        setError(errorDescription || "Invalid or expired reset link. Please request a new one.")
         setIsReady(true)
-      } else if (event === "SIGNED_IN" && session) {
-        setIsReady(true)
+        return
       }
-    })
 
-    // Also check if there's already a session (user might have refreshed)
-    const checkSession = async () => {
+      // Check for code parameter (PKCE flow from Supabase)
+      const code = searchParams.get("code")
+      if (code) {
+        const { error } = await supabase.auth.exchangeCodeForSession(code)
+        if (error) {
+          setError("Invalid or expired reset link. Please request a new one.")
+          setIsReady(true)
+          return
+        }
+        setIsReady(true)
+        // Clear the code from URL
+        window.history.replaceState(null, "", "/auth/reset-password")
+        return
+      }
+
+      // Check if there's already a session
       const { data: { session } } = await supabase.auth.getSession()
       if (session) {
         setIsReady(true)
-      } else {
-        // Wait a bit for Supabase to process the URL hash
-        setTimeout(async () => {
-          const { data: { session: retrySession } } = await supabase.auth.getSession()
-          if (retrySession) {
-            setIsReady(true)
-          } else {
-            setError("Invalid or expired reset link. Please request a new one.")
-            setIsReady(true)
-          }
-        }, 2000)
+        return
       }
+
+      // No code and no session - show error
+      setError("Invalid or expired reset link. Please request a new one.")
+      setIsReady(true)
     }
     
-    checkSession()
-
-    return () => {
-      subscription.unsubscribe()
-    }
+    handleAuth()
   }, [supabase.auth, searchParams])
 
   const handleSubmit = async (e: React.FormEvent) => {
