@@ -17,19 +17,54 @@ export default function ResetPasswordPage() {
   const [success, setSuccess] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [isValidSession, setIsValidSession] = useState(false)
+  const [isChecking, setIsChecking] = useState(true)
   const router = useRouter()
   const supabase = createClient()
 
   useEffect(() => {
-    const checkSession = async () => {
-      const { data } = await supabase.auth.getSession()
-      if (data.session) {
-        setIsValidSession(true)
-      } else {
-        setError("Invalid or expired reset link. Please request a new one.")
+    const handlePasswordReset = async () => {
+      try {
+        // Check if there's a hash fragment with access_token (from email link)
+        const hashParams = new URLSearchParams(window.location.hash.substring(1))
+        const accessToken = hashParams.get("access_token")
+        const refreshToken = hashParams.get("refresh_token")
+        const type = hashParams.get("type")
+
+        if (accessToken && refreshToken && type === "recovery") {
+          // Set the session using the tokens from the URL
+          const { error } = await supabase.auth.setSession({
+            access_token: accessToken,
+            refresh_token: refreshToken,
+          })
+          
+          if (error) {
+            setError("Invalid or expired reset link. Please request a new one.")
+            setIsChecking(false)
+            return
+          }
+          
+          setIsValidSession(true)
+          setIsChecking(false)
+          // Clear the hash from the URL
+          window.history.replaceState(null, "", window.location.pathname)
+          return
+        }
+
+        // Check if there's already an active session
+        const { data } = await supabase.auth.getSession()
+        if (data.session) {
+          setIsValidSession(true)
+        } else {
+          setError("Invalid or expired reset link. Please request a new one.")
+        }
+      } catch (err) {
+        setError("An error occurred. Please try again.")
+      } finally {
+        setIsChecking(false)
       }
     }
-    checkSession()
+    
+    handlePasswordReset()
   }, [supabase.auth])
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -65,12 +100,12 @@ export default function ResetPasswordPage() {
     }
   }
 
-  if (!isValidSession && !error) {
+  if (isChecking) {
     return (
       <div className="min-h-screen w-full bg-gradient-to-br from-emerald-600 via-green-500 to-teal-500 flex items-center justify-center p-4">
         <Card className="w-full max-w-sm shadow-2xl border-0 bg-white/95 backdrop-blur-sm">
           <CardContent className="pt-6">
-            <p className="text-center text-sm text-muted-foreground">Loading...</p>
+            <p className="text-center text-sm text-muted-foreground">Verifying reset link...</p>
           </CardContent>
         </Card>
       </div>

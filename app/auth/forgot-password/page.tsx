@@ -23,7 +23,8 @@ export default function ForgotPasswordPage() {
     setError(null)
 
     try {
-      // Use the production URL for the redirect
+      // Use the production URL for the redirect - pointing to reset-password page
+      // Supabase will append the token as a hash fragment
       const siteUrl = typeof window !== 'undefined' 
         ? `${window.location.protocol}//${window.location.host}`
         : ''
