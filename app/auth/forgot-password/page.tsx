@@ -8,12 +8,13 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import Link from "next/link"
 import { useState } from "react"
+import { useRouter } from "next/navigation"
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("")
   const [error, setError] = useState<string | null>(null)
-  const [success, setSuccess] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+  const router = useRouter()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -22,15 +23,20 @@ export default function ForgotPasswordPage() {
     setError(null)
 
     try {
-      const baseUrl = process.env.NEXT_PUBLIC_DEV_SUPABASE_REDIRECT_URL || window.location.origin
-      const redirectUrl = baseUrl.replace(/\/patient$/, '') + '/auth/reset-password'
+      // Use the production URL for the redirect
+      const siteUrl = typeof window !== 'undefined' 
+        ? `${window.location.protocol}//${window.location.host}`
+        : ''
+      const redirectUrl = `${siteUrl}/auth/reset-password`
       
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: redirectUrl,
       })
 
       if (error) throw error
-      setSuccess(true)
+      
+      // Redirect to success page
+      router.push('/auth/forgot-password-success')
     } catch (error: unknown) {
       setError(error instanceof Error ? error.message : "An error occurred")
     } finally {
@@ -68,12 +74,12 @@ export default function ForgotPasswordPage() {
             <div className="relative p-2">
               <img 
                 src="/tactay-billedo-logo.png" 
-                alt="Tactay-Billedo Clinic" 
+                alt="TACTAY-BILLEDO CLINIC" 
                 className="h-28 w-auto mx-auto relative z-10 drop-shadow-2xl"
               />
             </div>
           </div>
-          <h1 className="text-3xl font-bold text-white mt-5 mb-1 drop-shadow-lg">Tactay-Billedo Clinic</h1>
+          <h1 className="text-3xl font-bold text-white mt-5 mb-1 drop-shadow-lg">TACTAY-BILLEDO CLINIC</h1>
           <p className="text-emerald-100 text-base font-medium">Dental & Medical Care</p>
         </div>
 
@@ -86,62 +92,49 @@ export default function ForgotPasswordPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            {success ? (
-              <div className="flex flex-col gap-4">
-                <div className="rounded-lg bg-emerald-50 p-4 text-sm text-emerald-800 font-medium border border-emerald-100">
-                  Check your email for a password reset link. The link will expire in 1 hour.
-                </div>
-                <Link href="/auth/login">
-                  <Button className="w-full h-11 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-lg transition-all shadow-lg hover:shadow-xl">
-                    Back to Login
-                  </Button>
-                </Link>
+            <form onSubmit={handleSubmit} className="space-y-5">
+              <div className="space-y-2">
+                <Label htmlFor="email" className="text-gray-700 font-medium">
+                  Email Address
+                </Label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="your@email.com"
+                  className="h-11 border-gray-300 focus:border-emerald-500 focus:ring-emerald-500"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
               </div>
-            ) : (
-              <form onSubmit={handleSubmit} className="space-y-5">
-                <div className="space-y-2">
-                  <Label htmlFor="email" className="text-gray-700 font-medium">
-                    Email Address
-                  </Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="your@email.com"
-                    className="h-11 border-gray-300 focus:border-emerald-500 focus:ring-emerald-500"
-                    required
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                  />
-                </div>
 
-                {error && <p className="text-sm text-destructive font-medium bg-red-50 p-3 rounded-lg">{error}</p>}
+              {error && <p className="text-sm text-destructive font-medium bg-red-50 p-3 rounded-lg">{error}</p>}
 
-                <Button
-                  type="submit"
-                  className="w-full h-11 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-lg transition-all shadow-lg hover:shadow-xl"
-                  disabled={isLoading}
-                >
-                  {isLoading ? "Sending..." : "Send Reset Link"}
-                </Button>
+              <Button
+                type="submit"
+                className="w-full h-11 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-lg transition-all shadow-lg hover:shadow-xl"
+                disabled={isLoading}
+              >
+                {isLoading ? "Sending..." : "Send Reset Link"}
+              </Button>
 
-                <div className="pt-4 border-t border-gray-200 text-center text-sm">
-                  <p className="text-gray-600">
-                    Remember your password?{" "}
-                    <Link
-                      href="/auth/login"
-                      className="text-emerald-600 hover:text-emerald-700 font-semibold transition-colors"
-                    >
-                      Login here
-                    </Link>
-                  </p>
-                </div>
-              </form>
-            )}
+              <div className="pt-4 border-t border-gray-200 text-center text-sm">
+                <p className="text-gray-600">
+                  Remember your password?{" "}
+                  <Link
+                    href="/auth/login"
+                    className="text-emerald-600 hover:text-emerald-700 font-semibold transition-colors"
+                  >
+                    Login here
+                  </Link>
+                </p>
+              </div>
+            </form>
           </CardContent>
         </Card>
 
         {/* Footer */}
-        <p className="text-center text-white/90 text-sm mt-6 drop-shadow">© 2025 Tactay-Billedo Clinic. All rights reserved.</p>
+        <p className="text-center text-white/90 text-sm mt-6 drop-shadow">© 2025 TACTAY-BILLEDO CLINIC. All rights reserved.</p>
       </div>
     </div>
   )
