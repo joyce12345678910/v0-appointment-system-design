@@ -7,98 +7,66 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
-import { useEffect, useState } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
+import { useEffect, useState, Suspense } from "react"
 
-export default function ResetPasswordPage() {
+function ResetPasswordForm() {
   const [password, setPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
-  const [isValidSession, setIsValidSession] = useState(false)
-  const [isChecking, setIsChecking] = useState(true)
+  const [isReady, setIsReady] = useState(false)
   const router = useRouter()
+  const searchParams = useSearchParams()
   const supabase = createClient()
 
   useEffect(() => {
-    const handlePasswordReset = async () => {
-      try {
-        // First check if there's a hash fragment with access_token (from email link)
-        const hashParams = new URLSearchParams(window.location.hash.substring(1))
-        const accessToken = hashParams.get("access_token")
-        const refreshToken = hashParams.get("refresh_token")
-        const type = hashParams.get("type")
+    // Check for error in URL params
+    const errorParam = searchParams.get("error")
+    const errorDescription = searchParams.get("error_description")
+    
+    if (errorParam) {
+      setError(errorDescription || "Invalid or expired reset link. Please request a new one.")
+      setIsReady(true)
+      return
+    }
 
-        if (accessToken && refreshToken && type === "recovery") {
-          // Set the session using the tokens from the URL
-          const { error } = await supabase.auth.setSession({
-            access_token: accessToken,
-            refresh_token: refreshToken,
-          })
-          
-          if (error) {
+    // Supabase automatically handles the token exchange when the page loads
+    // The onAuthStateChange listener will catch the PASSWORD_RECOVERY event
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (event === "PASSWORD_RECOVERY") {
+        setIsReady(true)
+      } else if (event === "SIGNED_IN" && session) {
+        setIsReady(true)
+      }
+    })
+
+    // Also check if there's already a session (user might have refreshed)
+    const checkSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (session) {
+        setIsReady(true)
+      } else {
+        // Wait a bit for Supabase to process the URL hash
+        setTimeout(async () => {
+          const { data: { session: retrySession } } = await supabase.auth.getSession()
+          if (retrySession) {
+            setIsReady(true)
+          } else {
             setError("Invalid or expired reset link. Please request a new one.")
-            setIsChecking(false)
-            return
+            setIsReady(true)
           }
-          
-          setIsValidSession(true)
-          setIsChecking(false)
-          // Clear the hash from the URL
-          window.history.replaceState(null, "", window.location.pathname)
-          return
-        }
-
-        // Check URL query params for error
-        const urlParams = new URLSearchParams(window.location.search)
-        if (urlParams.get("error")) {
-          setError("Invalid or expired reset link. Please request a new one.")
-          setIsChecking(false)
-          return
-        }
-
-        // Check if there's already an active session (set by /auth/confirm route)
-        const { data } = await supabase.auth.getSession()
-        if (data.session) {
-          setIsValidSession(true)
-          setIsChecking(false)
-          return
-        }
-
-        // Listen for auth state changes (for when token is being processed)
-        const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-          if (event === 'PASSWORD_RECOVERY' || (event === 'SIGNED_IN' && session)) {
-            setIsValidSession(true)
-            setIsChecking(false)
-          }
-        })
-
-        // Give it a moment to process any auth events
-        setTimeout(() => {
-          if (!isValidSession) {
-            supabase.auth.getSession().then(({ data }) => {
-              if (data.session) {
-                setIsValidSession(true)
-              } else {
-                setError("Invalid or expired reset link. Please request a new one.")
-              }
-              setIsChecking(false)
-            })
-          }
-        }, 1500)
-
-        return () => {
-          subscription.unsubscribe()
-        }
-      } catch (err) {
-        setError("An error occurred. Please try again.")
-        setIsChecking(false)
+        }, 2000)
       }
     }
     
-    handlePasswordReset()
-  }, [supabase.auth, isValidSession])
+    checkSession()
+
+    return () => {
+      subscription.unsubscribe()
+    }
+  }, [supabase.auth, searchParams])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -123,6 +91,9 @@ export default function ResetPasswordPage() {
 
       if (error) throw error
       setSuccess(true)
+      
+      // Sign out and redirect to login
+      await supabase.auth.signOut()
       setTimeout(() => {
         router.push("/auth/login")
       }, 2000)
@@ -133,12 +104,15 @@ export default function ResetPasswordPage() {
     }
   }
 
-  if (isChecking) {
+  if (!isReady) {
     return (
       <div className="min-h-screen w-full bg-gradient-to-br from-emerald-600 via-green-500 to-teal-500 flex items-center justify-center p-4">
         <Card className="w-full max-w-sm shadow-2xl border-0 bg-white/95 backdrop-blur-sm">
           <CardContent className="pt-6">
-            <p className="text-center text-sm text-muted-foreground">Verifying reset link...</p>
+            <div className="flex flex-col items-center gap-3">
+              <div className="h-8 w-8 animate-spin rounded-full border-4 border-emerald-500 border-t-transparent"></div>
+              <p className="text-center text-sm text-muted-foreground">Verifying reset link...</p>
+            </div>
           </CardContent>
         </Card>
       </div>
@@ -147,44 +121,29 @@ export default function ResetPasswordPage() {
 
   return (
     <div className="min-h-screen w-full bg-gradient-to-br from-emerald-600 via-green-500 to-teal-500 flex items-center justify-center p-4 relative overflow-hidden">
-      {/* Background Logo Watermark */}
       <div className="absolute inset-0 flex items-center justify-center opacity-5 pointer-events-none">
-        <img 
-          src="/tactay-billedo-logo.png" 
-          alt="" 
-          className="w-[800px] h-auto"
-        />
+        <img src="/tactay-billedo-logo.png" alt="" className="w-[800px] h-auto" />
       </div>
 
       <div className="w-full max-w-md relative z-10">
-        {/* Modern Logo Header with Decorative Elements */}
         <div className="text-center mb-8">
           <div className="relative inline-block">
-            {/* Decorative Rings */}
             <div className="absolute inset-0 flex items-center justify-center">
               <div className="w-40 h-40 rounded-full border-2 border-white/20 animate-pulse"></div>
             </div>
             <div className="absolute inset-0 flex items-center justify-center">
               <div className="w-48 h-48 rounded-full border border-white/10"></div>
             </div>
-            {/* Floating Dots */}
             <div className="absolute -top-2 -right-2 w-3 h-3 bg-white/40 rounded-full animate-bounce"></div>
             <div className="absolute -bottom-1 -left-1 w-2 h-2 bg-emerald-200/60 rounded-full animate-bounce" style={{ animationDelay: '0.3s' }}></div>
-            
-            {/* Logo - Transparent Background */}
             <div className="relative p-2">
-              <img 
-                src="/tactay-billedo-logo.png" 
-                alt="Tactay-Billedo Clinic" 
-                className="h-28 w-auto mx-auto relative z-10 drop-shadow-2xl"
-              />
+              <img src="/tactay-billedo-logo.png" alt="TACTAY-BILLEDO CLINIC" className="h-28 w-auto mx-auto relative z-10 drop-shadow-2xl" />
             </div>
           </div>
-          <h1 className="text-3xl font-bold text-white mt-5 mb-1 drop-shadow-lg">Tactay-Billedo Clinic</h1>
+          <h1 className="text-3xl font-bold text-white mt-5 mb-1 drop-shadow-lg">TACTAY-BILLEDO CLINIC</h1>
           <p className="text-emerald-100 text-base font-medium">Dental & Medical Care</p>
         </div>
 
-        {/* Reset Password Card */}
         <Card className="shadow-2xl border-0 bg-white/95 backdrop-blur-sm">
           <CardHeader className="pb-4">
             <CardTitle className="text-2xl font-bold text-gray-900">Create New Password</CardTitle>
@@ -197,12 +156,21 @@ export default function ResetPasswordPage() {
                   Password reset successful! Redirecting to login...
                 </div>
               </div>
+            ) : error && !password ? (
+              <div className="flex flex-col gap-4">
+                <div className="rounded-lg bg-red-50 p-4 text-sm text-red-800 font-medium border border-red-100">
+                  {error}
+                </div>
+                <Link href="/auth/forgot-password">
+                  <Button className="w-full h-11 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-lg">
+                    Request New Reset Link
+                  </Button>
+                </Link>
+              </div>
             ) : (
               <form onSubmit={handleSubmit} className="space-y-5">
                 <div className="space-y-2">
-                  <Label htmlFor="password" className="text-gray-700 font-medium">
-                    New Password
-                  </Label>
+                  <Label htmlFor="password" className="text-gray-700 font-medium">New Password</Label>
                   <Input
                     id="password"
                     type="password"
@@ -214,9 +182,7 @@ export default function ResetPasswordPage() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="confirmPassword" className="text-gray-700 font-medium">
-                    Confirm Password
-                  </Label>
+                  <Label htmlFor="confirmPassword" className="text-gray-700 font-medium">Confirm Password</Label>
                   <Input
                     id="confirmPassword"
                     type="password"
@@ -239,10 +205,7 @@ export default function ResetPasswordPage() {
                 </Button>
 
                 <div className="pt-4 border-t border-gray-200 text-center text-sm">
-                  <Link 
-                    href="/auth/login" 
-                    className="text-emerald-600 hover:text-emerald-700 font-semibold transition-colors"
-                  >
+                  <Link href="/auth/login" className="text-emerald-600 hover:text-emerald-700 font-semibold transition-colors">
                     Back to Login
                   </Link>
                 </div>
@@ -251,9 +214,24 @@ export default function ResetPasswordPage() {
           </CardContent>
         </Card>
 
-        {/* Footer */}
-        <p className="text-center text-white/90 text-sm mt-6 drop-shadow">© 2025 Tactay-Billedo Clinic. All rights reserved.</p>
+        <p className="text-center text-white/90 text-sm mt-6 drop-shadow">© 2025 TACTAY-BILLEDO CLINIC. All rights reserved.</p>
       </div>
     </div>
+  )
+}
+
+export default function ResetPasswordPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen w-full bg-gradient-to-br from-emerald-600 via-green-500 to-teal-500 flex items-center justify-center p-4">
+        <Card className="w-full max-w-sm shadow-2xl border-0 bg-white/95 backdrop-blur-sm">
+          <CardContent className="pt-6">
+            <p className="text-center text-sm text-muted-foreground">Loading...</p>
+          </CardContent>
+        </Card>
+      </div>
+    }>
+      <ResetPasswordForm />
+    </Suspense>
   )
 }
