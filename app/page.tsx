@@ -35,11 +35,8 @@ export default function HomePage() {
             </a>
           </div>
           <div className="flex gap-2 sm:gap-3 items-center">
-            <Button asChild variant="ghost" size="sm" className="text-gray-700 hover:text-emerald-600 hidden sm:inline-flex">
-              <Link href="/auth/login">Sign In</Link>
-            </Button>
-            <Button asChild size="sm" className="bg-emerald-500 hover:bg-emerald-600 text-white rounded-full px-4 sm:px-6 text-xs sm:text-sm">
-              <Link href="/auth/sign-up">Book Now</Link>
+            <Button asChild size="sm" className="bg-emerald-500 hover:bg-emerald-600 text-white rounded-full px-5 sm:px-6 text-xs sm:text-sm">
+              <Link href="/auth/login">Log In</Link>
             </Button>
             <button 
               className="md:hidden p-2 text-gray-600 hover:text-emerald-600"
@@ -66,9 +63,6 @@ export default function HomePage() {
               <a href="#contact" className="text-gray-600 hover:text-emerald-600 transition font-medium py-2" onClick={() => setMobileMenuOpen(false)}>
                 Contact
               </a>
-              <Link href="/auth/login" className="text-gray-600 hover:text-emerald-600 transition font-medium py-2 sm:hidden" onClick={() => setMobileMenuOpen(false)}>
-                Sign In
-              </Link>
             </div>
           </div>
         )}
