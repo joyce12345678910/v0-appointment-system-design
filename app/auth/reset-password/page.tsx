@@ -24,7 +24,7 @@ export default function ResetPasswordPage() {
   useEffect(() => {
     const handlePasswordReset = async () => {
       try {
-        // Check if there's a hash fragment with access_token (from email link)
+        // First check if there's a hash fragment with access_token (from email link)
         const hashParams = new URLSearchParams(window.location.hash.substring(1))
         const accessToken = hashParams.get("access_token")
         const refreshToken = hashParams.get("refresh_token")
@@ -50,22 +50,55 @@ export default function ResetPasswordPage() {
           return
         }
 
-        // Check if there's already an active session
+        // Check URL query params for error
+        const urlParams = new URLSearchParams(window.location.search)
+        if (urlParams.get("error")) {
+          setError("Invalid or expired reset link. Please request a new one.")
+          setIsChecking(false)
+          return
+        }
+
+        // Check if there's already an active session (set by /auth/confirm route)
         const { data } = await supabase.auth.getSession()
         if (data.session) {
           setIsValidSession(true)
-        } else {
-          setError("Invalid or expired reset link. Please request a new one.")
+          setIsChecking(false)
+          return
+        }
+
+        // Listen for auth state changes (for when token is being processed)
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+          if (event === 'PASSWORD_RECOVERY' || (event === 'SIGNED_IN' && session)) {
+            setIsValidSession(true)
+            setIsChecking(false)
+          }
+        })
+
+        // Give it a moment to process any auth events
+        setTimeout(() => {
+          if (!isValidSession) {
+            supabase.auth.getSession().then(({ data }) => {
+              if (data.session) {
+                setIsValidSession(true)
+              } else {
+                setError("Invalid or expired reset link. Please request a new one.")
+              }
+              setIsChecking(false)
+            })
+          }
+        }, 1500)
+
+        return () => {
+          subscription.unsubscribe()
         }
       } catch (err) {
         setError("An error occurred. Please try again.")
-      } finally {
         setIsChecking(false)
       }
     }
     
     handlePasswordReset()
-  }, [supabase.auth])
+  }, [supabase.auth, isValidSession])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
