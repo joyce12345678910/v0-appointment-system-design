@@ -78,13 +78,12 @@ export default function SignUpPage() {
             <div className="absolute -top-1 -right-1 w-2 h-2 bg-white/40 rounded-full animate-bounce"></div>
             <div className="absolute -bottom-1 -left-1 w-2 h-2 bg-emerald-200/60 rounded-full animate-bounce" style={{ animationDelay: '0.3s' }}></div>
             
-            {/* Logo Container */}
-            <div className="relative bg-white rounded-2xl p-4 shadow-2xl border border-white/20 backdrop-blur-sm">
-              <div className="absolute inset-0 bg-gradient-to-br from-emerald-50 to-green-50 rounded-2xl opacity-50"></div>
+            {/* Logo - Transparent Background */}
+            <div className="relative p-2">
               <img 
                 src="/tactay-billedo-logo.png" 
                 alt="Tactay-Billedo Clinic" 
-                className="h-20 w-auto mx-auto relative z-10 drop-shadow-lg"
+                className="h-24 w-auto mx-auto relative z-10 drop-shadow-2xl"
               />
             </div>
           </div>
