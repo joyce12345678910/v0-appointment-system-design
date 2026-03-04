@@ -1,35 +1,12 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
 import { MapPin, Facebook, Phone, Mail, Calendar, Shield, Users, Star, ChevronRight, Clock, Menu, X } from "lucide-react"
 
 export default function HomePage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const router = useRouter()
-
-  useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search)
-    const hashParams = new URLSearchParams(window.location.hash.substring(1))
-    
-    // Check for auth code (password reset or email confirmation)
-    const code = urlParams.get("code")
-    if (code) {
-      // Redirect to reset-password page with the code
-      router.replace(`/auth/reset-password?code=${code}`)
-      return
-    }
-    
-    // Check for auth errors
-    const error = urlParams.get("error") || hashParams.get("error")
-    const errorCode = urlParams.get("error_code") || hashParams.get("error_code")
-    
-    if (error || errorCode) {
-      router.replace("/auth/forgot-password?expired=true")
-    }
-  }, [router])
 
   return (
     <div className="min-h-screen bg-white">
