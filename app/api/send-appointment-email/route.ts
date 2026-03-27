@@ -101,11 +101,13 @@ export async function POST(request: Request) {
       })
     }
 
-    // Send email using Resend
+    // Send email using Resend API
     try {
       const resendApiKey = process.env.RESEND_API_KEY
+      console.log("[v0] Using Resend API, key exists:", !!resendApiKey)
 
       if (!resendApiKey) {
+        console.log("[v0] RESEND_API_KEY not set")
         return NextResponse.json({ 
           success: true,
           warning: "Email not sent - RESEND_API_KEY not set"
@@ -119,6 +121,8 @@ export async function POST(request: Request) {
         html: emailBody,
       }
 
+      console.log("[v0] Sending email via Resend to:", patientEmail)
+
       const response = await fetch("https://api.resend.com/emails", {
         method: "POST",
         headers: {
@@ -128,17 +132,19 @@ export async function POST(request: Request) {
         body: JSON.stringify(emailPayload),
       })
 
+      const responseData = await response.json().catch(() => ({}))
+      console.log("[v0] Resend response:", response.status, responseData)
+
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}))
-        console.log("[v0] Resend error:", response.status, errorData)
+        console.log("[v0] Resend error:", response.status, responseData)
         return NextResponse.json({ 
           success: true,
           warning: "Email could not be sent",
-          details: errorData
+          details: responseData
         })
       }
 
-      const responseData = await response.json()
+      console.log("[v0] Email sent successfully via Resend, ID:", responseData.id)
       return NextResponse.json({ success: true, sentTo: patientEmail, messageId: responseData.id })
     } catch (err) {
       console.log("[v0] Email error:", err)
