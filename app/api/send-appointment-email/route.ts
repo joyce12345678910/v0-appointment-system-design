@@ -103,11 +103,11 @@ export async function POST(request: Request) {
 
     // Send email using MailerSend
     try {
-      const mailersendApiKey = "mlsn.18a7f1bd7c163479be3a17d84d612060226957814e317e0c60bddc0055763bc5"
+      const mailersendApiKey = "mlsn.536268304b54ab09533ec644b327a5164c92371381e81bdac0eeb95ecddbf56d"
 
       const emailPayload = {
         from: {
-          email: "MS_3gvA5J@trial-neqvygm8j5nl0p7w.mlsender.net",
+          email: "noreply@tactaybilledoclinic.site",
           name: "TACTAY-BILLEDO DENTAL CLINIC",
         },
         to: [
