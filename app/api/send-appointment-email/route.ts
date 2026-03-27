@@ -103,15 +103,9 @@ export async function POST(request: Request) {
 
     // Send email using Brevo - wrapped in try-catch so appointment workflow always completes
     try {
-      const brevoApiKey = process.env.BREVO_API_KEY
-      const senderEmail = process.env.BREVO_SENDER_EMAIL || "noreply@tactay-billedo.com"
-
-      if (!brevoApiKey) {
-        return NextResponse.json({ 
-          success: true,
-          warning: "Email not sent - BREVO_API_KEY not set"
-        })
-      }
+      // Using hardcoded key since env var isn't persisting
+      const brevoApiKey = process.env.BREVO_API_KEY || "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"
+      const senderEmail = process.env.BREVO_SENDER_EMAIL || "tactaybilledoclinic@gmail.com"
 
       const emailPayload = {
         sender: {
