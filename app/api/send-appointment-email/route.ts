@@ -102,12 +102,14 @@ export async function POST(request: Request) {
     }
 
     // Send email using MailerSend
+    // Note: On trial accounts, you can only send to verified domains or use test mode
+    // Using the test domain sender for development
     try {
       const mailersendApiKey = "mlsn.536268304b54ab09533ec644b327a5164c92371381e81bdac0eeb95ecddbf56d"
 
       const emailPayload = {
         from: {
-          email: "noreply@tactay-billedo.com",
+          email: "noreply@test-z0vklo6o6opl7qrx.mlsender.net",
           name: "TACTAY-BILLEDO DENTAL CLINIC",
         },
         to: [
