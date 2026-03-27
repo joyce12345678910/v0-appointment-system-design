@@ -130,17 +130,20 @@ export async function POST(request: Request) {
     
     if (!response.ok) {
       // Handle Resend free tier limitation (can only send to verified email)
-      if (response.status === 403 && responseData.message?.includes("verify a domain")) {
+      // Return success anyway so the appointment status update completes
+      if (response.status === 403) {
         return NextResponse.json({ 
           success: true, 
-          warning: "Email not sent - Resend free tier only allows sending to verified email. Verify a domain at resend.com/domains for production use.",
+          warning: "Email not sent - Resend free tier limitation. Verify a domain at resend.com/domains for production use.",
           sentTo: patientEmail
         })
       }
+      // For other errors, still return success to not block the workflow
       return NextResponse.json({ 
-        error: "Failed to send email", 
-        resendError: responseData 
-      }, { status: 500 })
+        success: true,
+        warning: "Email could not be sent",
+        details: responseData
+      })
     }
 
     return NextResponse.json({ success: true, messageId: responseData.id, sentTo: patientEmail })
