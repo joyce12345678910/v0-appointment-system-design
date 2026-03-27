@@ -127,27 +127,36 @@ export async function POST(request: Request) {
       htmlContent: emailBody,
     }
 
-    const response = await fetch("https://api.brevo.com/v3/smtp/email", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "api-key": brevoApiKey,
-      },
-      body: JSON.stringify(emailPayload),
-    })
+    try {
+      const response = await fetch("https://api.brevo.com/v3/smtp/email", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "api-key": brevoApiKey,
+        },
+        body: JSON.stringify(emailPayload),
+      })
 
-    const responseData = await response.json()
-    
-    if (!response.ok) {
-      // Return success anyway so the appointment status update completes
+      const responseData = await response.json()
+      
+      if (!response.ok) {
+        // Return success anyway so the appointment status update completes
+        return NextResponse.json({ 
+          success: true,
+          warning: "Email could not be sent - please update BREVO_API_KEY in v0 Settings > Vars",
+          details: responseData
+        })
+      }
+
+      return NextResponse.json({ success: true, messageId: responseData.messageId, sentTo: patientEmail })
+    } catch (emailError) {
+      // Email sending failed - return success anyway so appointment workflow completes
       return NextResponse.json({ 
         success: true,
-        warning: "Email could not be sent",
-        details: responseData
+        warning: "Email service unavailable",
+        details: emailError instanceof Error ? emailError.message : "Unknown error"
       })
     }
-
-    return NextResponse.json({ success: true, messageId: responseData.messageId, sentTo: patientEmail })
   } catch (error) {
     return NextResponse.json({ 
       error: "Internal server error", 
