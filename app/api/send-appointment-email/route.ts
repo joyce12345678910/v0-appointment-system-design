@@ -101,27 +101,37 @@ export async function POST(request: Request) {
       })
     }
 
-    // Send email using Resend
-    const resendApiKey = process.env.RESEND_API_KEY
+    // Send email using Brevo
+    const brevoApiKey = process.env.BREVO_API_KEY
+    const senderEmail = process.env.BREVO_SENDER_EMAIL || "noreply@tactay-billedo.com"
 
-    if (!resendApiKey) {
+    if (!brevoApiKey) {
       return NextResponse.json({ 
-        error: "Email configuration missing - RESEND_API_KEY not set"
-      }, { status: 500 })
+        success: true,
+        warning: "Email not sent - BREVO_API_KEY not set"
+      })
     }
 
     const emailPayload = {
-      from: "TACTAY-BILLEDO DENTAL CLINIC <onboarding@resend.dev>",
-      to: [patientEmail],
+      sender: {
+        name: "TACTAY-BILLEDO DENTAL CLINIC",
+        email: senderEmail,
+      },
+      to: [
+        {
+          email: patientEmail,
+          name: patientName,
+        },
+      ],
       subject,
-      html: emailBody,
+      htmlContent: emailBody,
     }
 
-    const response = await fetch("https://api.resend.com/emails", {
+    const response = await fetch("https://api.brevo.com/v3/smtp/email", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": `Bearer ${resendApiKey}`,
+        "api-key": brevoApiKey,
       },
       body: JSON.stringify(emailPayload),
     })
@@ -129,16 +139,7 @@ export async function POST(request: Request) {
     const responseData = await response.json()
     
     if (!response.ok) {
-      // Handle Resend free tier limitation (can only send to verified email)
       // Return success anyway so the appointment status update completes
-      if (response.status === 403) {
-        return NextResponse.json({ 
-          success: true, 
-          warning: "Email not sent - Resend free tier limitation. Verify a domain at resend.com/domains for production use.",
-          sentTo: patientEmail
-        })
-      }
-      // For other errors, still return success to not block the workflow
       return NextResponse.json({ 
         success: true,
         warning: "Email could not be sent",
@@ -146,7 +147,7 @@ export async function POST(request: Request) {
       })
     }
 
-    return NextResponse.json({ success: true, messageId: responseData.id, sentTo: patientEmail })
+    return NextResponse.json({ success: true, messageId: responseData.messageId, sentTo: patientEmail })
   } catch (error) {
     return NextResponse.json({ 
       error: "Internal server error", 
