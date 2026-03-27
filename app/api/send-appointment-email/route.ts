@@ -88,7 +88,17 @@ export async function POST(request: Request) {
     const senderEmail = process.env.BREVO_SENDER_EMAIL || "noreply@tactay-billedo.com"
     const senderName = process.env.BREVO_SENDER_NAME || "TACTAY-BILLEDO DENTAL CLINIC"
 
+    console.log("[v0] ========== EMAIL DEBUG ==========")
+    console.log("[v0] BREVO_API_KEY exists:", !!brevoApiKey)
+    console.log("[v0] BREVO_API_KEY length:", brevoApiKey?.length || 0)
+    console.log("[v0] Sender Email:", senderEmail)
+    console.log("[v0] Patient Email:", patientEmail)
+    console.log("[v0] Patient Name:", patientName)
+    console.log("[v0] Subject:", subject)
+    console.log("[v0] ===================================")
+
     if (brevoApiKey) {
+      console.log("[v0] Making request to Brevo API...")
       const response = await fetch("https://api.brevo.com/v3/smtp/email", {
         method: "POST",
         headers: {
@@ -111,7 +121,9 @@ export async function POST(request: Request) {
         }),
       })
 
+      console.log("[v0] Brevo API response status:", response.status)
       const responseData = await response.json()
+      console.log("[v0] Brevo API response data:", JSON.stringify(responseData))
       
       if (!response.ok) {
         console.error("[v0] Brevo API error:", responseData)
@@ -121,6 +133,7 @@ export async function POST(request: Request) {
         }, { status: 500 })
       }
 
+      console.log("[v0] Email sent successfully! Message ID:", responseData.messageId)
       return NextResponse.json({ success: true, messageId: responseData.messageId })
     } else {
       // Log email for development/testing when no API key is set
