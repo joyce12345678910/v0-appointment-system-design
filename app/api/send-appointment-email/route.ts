@@ -129,6 +129,14 @@ export async function POST(request: Request) {
     const responseData = await response.json()
     
     if (!response.ok) {
+      // Handle Resend free tier limitation (can only send to verified email)
+      if (response.status === 403 && responseData.message?.includes("verify a domain")) {
+        return NextResponse.json({ 
+          success: true, 
+          warning: "Email not sent - Resend free tier only allows sending to verified email. Verify a domain at resend.com/domains for production use.",
+          sentTo: patientEmail
+        })
+      }
       return NextResponse.json({ 
         error: "Failed to send email", 
         resendError: responseData 
