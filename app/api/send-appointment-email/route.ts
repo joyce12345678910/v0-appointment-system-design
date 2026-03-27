@@ -83,42 +83,54 @@ export async function POST(request: Request) {
       })
     }
 
-    // Send email using Resend or fallback to logging
-    const resendApiKey = process.env.RESEND_API_KEY
+    // Send email using Brevo (Sendinblue)
+    const brevoApiKey = process.env.BREVO_API_KEY
+    const senderEmail = process.env.BREVO_SENDER_EMAIL || "noreply@tactay-billedo.com"
+    const senderName = process.env.BREVO_SENDER_NAME || "TACTAY-BILLEDO DENTAL CLINIC"
 
-    if (resendApiKey) {
-      const response = await fetch("https://api.resend.com/emails", {
+    if (brevoApiKey) {
+      const response = await fetch("https://api.brevo.com/v3/smtp/email", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${resendApiKey}`,
+          "api-key": brevoApiKey,
         },
         body: JSON.stringify({
-          from: "TACTAY-BILLEDO CLINIC <onboarding@resend.dev>",
-          to: [patientEmail],
+          sender: {
+            name: senderName,
+            email: senderEmail,
+          },
+          to: [
+            {
+              email: patientEmail,
+              name: patientName,
+            },
+          ],
           subject,
-          html: emailBody,
+          htmlContent: emailBody,
         }),
       })
 
+      const responseData = await response.json()
+      
       if (!response.ok) {
-        const errorData = await response.json()
-        console.error("[v0] Resend API error:", errorData)
-        return NextResponse.json({ error: "Failed to send email", details: errorData }, { status: 500 })
+        console.error("[v0] Brevo API error:", responseData)
+        return NextResponse.json({ 
+          error: "Failed to send email", 
+          details: responseData 
+        }, { status: 500 })
       }
 
-      const data = await response.json()
-      return NextResponse.json({ success: true, messageId: data.id })
+      return NextResponse.json({ success: true, messageId: responseData.messageId })
     } else {
       // Log email for development/testing when no API key is set
-      console.log("[v0] Email would be sent (no RESEND_API_KEY set):")
+      console.log("[v0] Email would be sent (no BREVO_API_KEY set):")
       console.log("[v0] To:", patientEmail)
       console.log("[v0] Subject:", subject)
-      console.log("[v0] Body:", emailBody)
       
       return NextResponse.json({ 
         success: true, 
-        message: "Email logged (RESEND_API_KEY not configured)",
+        message: "Email logged (BREVO_API_KEY not configured). Add BREVO_API_KEY to send real emails.",
         emailDetails: { to: patientEmail, subject }
       })
     }
