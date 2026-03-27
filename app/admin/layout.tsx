@@ -6,9 +6,15 @@ import { AdminSidebar } from "@/components/admin-sidebar"
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient()
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  let user = null
+  try {
+    const { data, error } = await supabase.auth.getUser()
+    if (error) throw error
+    user = data.user
+  } catch (error) {
+    // Auth fetch failed - redirect to login
+    redirect("/auth/login")
+  }
 
   if (!user) {
     redirect("/auth/login")
