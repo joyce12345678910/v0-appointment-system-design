@@ -101,39 +101,36 @@ export async function POST(request: Request) {
       })
     }
 
-    // Send email using MailerSend
-    // Note: On trial accounts, you can only send to verified domains or use test mode
-    // Using the test domain sender for development
+    // Send email using Resend
     try {
-      const mailersendApiKey = "mlsn.536268304b54ab09533ec644b327a5164c92371381e81bdac0eeb95ecddbf56d"
+      const resendApiKey = process.env.RESEND_API_KEY
+
+      if (!resendApiKey) {
+        return NextResponse.json({ 
+          success: true,
+          warning: "Email not sent - RESEND_API_KEY not set"
+        })
+      }
 
       const emailPayload = {
-        from: {
-          email: "noreply@test-z0vklo6o6opl7qrx.mlsender.net",
-          name: "TACTAY-BILLEDO DENTAL CLINIC",
-        },
-        to: [
-          {
-            email: patientEmail,
-            name: patientName,
-          },
-        ],
+        from: "TACTAY-BILLEDO DENTAL CLINIC <noreply@tactay-billedo.com>",
+        to: [patientEmail],
         subject,
         html: emailBody,
       }
 
-      const response = await fetch("https://api.mailersend.com/v1/email", {
+      const response = await fetch("https://api.resend.com/emails", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${mailersendApiKey}`,
+          "Authorization": `Bearer ${resendApiKey}`,
         },
         body: JSON.stringify(emailPayload),
       })
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}))
-        console.log("[v0] MailerSend error:", response.status, errorData)
+        console.log("[v0] Resend error:", response.status, errorData)
         return NextResponse.json({ 
           success: true,
           warning: "Email could not be sent",
@@ -141,7 +138,8 @@ export async function POST(request: Request) {
         })
       }
 
-      return NextResponse.json({ success: true, sentTo: patientEmail })
+      const responseData = await response.json()
+      return NextResponse.json({ success: true, sentTo: patientEmail, messageId: responseData.id })
     } catch (err) {
       console.log("[v0] Email error:", err)
       return NextResponse.json({ 
