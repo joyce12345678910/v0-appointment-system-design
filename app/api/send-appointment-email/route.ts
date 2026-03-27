@@ -107,7 +107,7 @@ export async function POST(request: Request) {
 
       const emailPayload = {
         from: {
-          email: "noreply@tactaybilledoclinic.site",
+          email: "noreply@tactay-billedo.com",
           name: "TACTAY-BILLEDO DENTAL CLINIC",
         },
         to: [
