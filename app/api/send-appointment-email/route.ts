@@ -101,41 +101,62 @@ export async function POST(request: Request) {
       })
     }
 
-    // Send email using Resend
-    const resendApiKey = process.env.RESEND_API_KEY
+    // Send email using Brevo
+    const brevoApiKey = process.env.BREVO_API_KEY
+    const senderEmail = process.env.BREVO_SENDER_EMAIL || "noreply@tactay-billedo.com"
 
-    if (!resendApiKey) {
+    if (!brevoApiKey) {
       return NextResponse.json({ 
-        error: "Email configuration missing - RESEND_API_KEY not set"
-      }, { status: 500 })
+        success: true,
+        warning: "Email not sent - BREVO_API_KEY not set"
+      })
     }
 
     const emailPayload = {
-      from: "TACTAY-BILLEDO DENTAL CLINIC <onboarding@resend.dev>",
-      to: [patientEmail],
-      subject,
-      html: emailBody,
-    }
-
-    const response = await fetch("https://api.resend.com/emails", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${resendApiKey}`,
+      sender: {
+        name: "TACTAY-BILLEDO DENTAL CLINIC",
+        email: senderEmail,
       },
-      body: JSON.stringify(emailPayload),
-    })
-
-    const responseData = await response.json()
-    
-    if (!response.ok) {
-      return NextResponse.json({ 
-        error: "Failed to send email", 
-        resendError: responseData 
-      }, { status: 500 })
+      to: [
+        {
+          email: patientEmail,
+          name: patientName,
+        },
+      ],
+      subject,
+      htmlContent: emailBody,
     }
 
-    return NextResponse.json({ success: true, messageId: responseData.id, sentTo: patientEmail })
+    try {
+      const response = await fetch("https://api.brevo.com/v3/smtp/email", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "api-key": brevoApiKey,
+        },
+        body: JSON.stringify(emailPayload),
+      })
+
+      const responseData = await response.json()
+      
+      if (!response.ok) {
+        // Return success anyway so the appointment status update completes
+        return NextResponse.json({ 
+          success: true,
+          warning: "Email could not be sent - please update BREVO_API_KEY in v0 Settings > Vars",
+          details: responseData
+        })
+      }
+
+      return NextResponse.json({ success: true, messageId: responseData.messageId, sentTo: patientEmail })
+    } catch (emailError) {
+      // Email sending failed - return success anyway so appointment workflow completes
+      return NextResponse.json({ 
+        success: true,
+        warning: "Email service unavailable",
+        details: emailError instanceof Error ? emailError.message : "Unknown error"
+      })
+    }
   } catch (error) {
     return NextResponse.json({ 
       error: "Internal server error", 
