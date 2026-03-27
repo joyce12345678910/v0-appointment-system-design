@@ -35,26 +35,17 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Appointment not found", details: appointmentError?.message }, { status: 404 })
     }
 
-    console.log("[v0] Appointment data:", JSON.stringify(appointment, null, 2))
-    console.log("[v0] Patient data:", appointment.patient)
-    console.log("[v0] Patient ID:", appointment.patient_id)
-
     // Try to get email from profile first, then from auth user
     let patientEmail = appointment.patient?.email
     const patientName = appointment.patient?.full_name || "Patient"
     
-    console.log("[v0] Email from profile:", patientEmail)
-    
     // If no email in profile, try to get from auth.users table
     if (!patientEmail && appointment.patient_id) {
       const { data: authUser } = await supabase.auth.admin.getUserById(appointment.patient_id)
-      console.log("[v0] Auth user data:", authUser?.user?.email)
       if (authUser?.user?.email) {
         patientEmail = authUser.user.email
       }
     }
-    
-    console.log("[v0] Final patient email:", patientEmail)
     const doctorName = appointment.doctor?.full_name || "Doctor"
     const doctorSpecialization = appointment.doctor?.specialization || ""
     const appointmentDate = new Date(appointment.appointment_date).toLocaleDateString("en-US", {
@@ -110,60 +101,41 @@ export async function POST(request: Request) {
       })
     }
 
-    // Send email using Brevo
-    const brevoApiKey = process.env.BREVO_API_KEY
-    const senderEmail = process.env.BREVO_SENDER_EMAIL
+    // Send email using Resend
+    const resendApiKey = process.env.RESEND_API_KEY
 
-    console.log("[v0] Brevo API Key exists:", !!brevoApiKey)
-    console.log("[v0] Brevo Sender Email:", senderEmail)
-
-    if (!brevoApiKey || !senderEmail) {
+    if (!resendApiKey) {
       return NextResponse.json({ 
-        error: "Email configuration missing",
-        details: { hasApiKey: !!brevoApiKey, hasSenderEmail: !!senderEmail }
+        error: "Email configuration missing - RESEND_API_KEY not set"
       }, { status: 500 })
     }
 
     const emailPayload = {
-      sender: {
-        name: "TACTAY-BILLEDO DENTAL CLINIC",
-        email: senderEmail,
-      },
-      to: [
-        {
-          email: patientEmail,
-          name: patientName,
-        },
-      ],
+      from: "TACTAY-BILLEDO DENTAL CLINIC <onboarding@resend.dev>",
+      to: [patientEmail],
       subject,
-      htmlContent: emailBody,
+      html: emailBody,
     }
 
-    console.log("[v0] Sending email to:", patientEmail)
-    console.log("[v0] Email payload:", JSON.stringify(emailPayload, null, 2))
-
-    const response = await fetch("https://api.brevo.com/v3/smtp/email", {
+    const response = await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "api-key": brevoApiKey,
+        "Authorization": `Bearer ${resendApiKey}`,
       },
       body: JSON.stringify(emailPayload),
     })
 
     const responseData = await response.json()
     
-    console.log("[v0] Brevo response status:", response.status)
-    console.log("[v0] Brevo response data:", JSON.stringify(responseData))
-    
     if (!response.ok) {
       return NextResponse.json({ 
         error: "Failed to send email", 
-        brevoError: responseData 
+        resendError: responseData 
       }, { status: 500 })
     }
 
-    return NextResponse.json({ success: true, messageId: responseData.messageId, sentTo: patientEmail })
+    return NextResponse.json({ success: true, messageId: responseData.id, sentTo: patientEmail })
   } catch (error) {
     return NextResponse.json({ 
       error: "Internal server error", 
