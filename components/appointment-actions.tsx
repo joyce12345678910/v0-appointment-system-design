@@ -56,9 +56,20 @@ export function AppointmentActions({ appointmentId, currentStatus, appointmentDa
 
       if (error) throw error
 
+      // Send confirmation email to patient
+      try {
+        await fetch("/api/send-appointment-email", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ appointmentId, action: "approved" }),
+        })
+      } catch (emailError) {
+        console.error("[v0] Failed to send email:", emailError)
+      }
+
       toast({
         title: "Appointment Approved",
-        description: "The appointment has been successfully approved.",
+        description: "The appointment has been approved and confirmation email sent to the patient.",
       })
 
       setIsApproveOpen(false)
@@ -96,9 +107,20 @@ export function AppointmentActions({ appointmentId, currentStatus, appointmentDa
 
       if (error) throw error
 
+      // Send rejection email to patient
+      try {
+        await fetch("/api/send-appointment-email", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ appointmentId, action: "rejected" }),
+        })
+      } catch (emailError) {
+        console.error("[v0] Failed to send rejection email:", emailError)
+      }
+
       toast({
         title: "Appointment Rejected",
-        description: "The appointment has been cancelled.",
+        description: "The appointment has been cancelled and the patient has been notified.",
       })
 
       setIsRejectOpen(false)
@@ -177,9 +199,20 @@ export function AppointmentActions({ appointmentId, currentStatus, appointmentDa
 
       if (error) throw error
 
+      // Send completion email to patient
+      try {
+        await fetch("/api/send-appointment-email", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ appointmentId, action: "completed" }),
+        })
+      } catch (emailError) {
+        console.error("[v0] Failed to send completion email:", emailError)
+      }
+
       toast({
         title: "Appointment Completed",
-        description: "The appointment has been marked as completed.",
+        description: "The appointment has been marked as completed and the patient has been notified.",
       })
 
       setIsCompleteOpen(false)
