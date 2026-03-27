@@ -35,8 +35,17 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Appointment not found", details: appointmentError?.message }, { status: 404 })
     }
 
-    const patientEmail = appointment.patient?.email
+    // Try to get email from profile first, then from auth user
+    let patientEmail = appointment.patient?.email
     const patientName = appointment.patient?.full_name || "Patient"
+    
+    // If no email in profile, try to get from auth.users table
+    if (!patientEmail && appointment.patient_id) {
+      const { data: authUser } = await supabase.auth.admin.getUserById(appointment.patient_id)
+      if (authUser?.user?.email) {
+        patientEmail = authUser.user.email
+      }
+    }
     const doctorName = appointment.doctor?.full_name || "Doctor"
     const doctorSpecialization = appointment.doctor?.specialization || ""
     const appointmentDate = new Date(appointment.appointment_date).toLocaleDateString("en-US", {
