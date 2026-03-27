@@ -58,19 +58,13 @@ export function AppointmentActions({ appointmentId, currentStatus, appointmentDa
 
       // Send confirmation email to patient
       try {
-        const emailResponse = await fetch("/api/send-appointment-email", {
+        await fetch("/api/send-appointment-email", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ appointmentId, action: "approved" }),
         })
-        const emailResult = await emailResponse.json()
-        console.log("[v0] Email API response:", emailResult)
-        
-        if (!emailResponse.ok) {
-          console.error("[v0] Email sending failed:", emailResult)
-        }
       } catch (emailError) {
-        console.error("[v0] Failed to send email:", emailError)
+        // Email sending failed silently
       }
 
       toast({
@@ -121,7 +115,7 @@ export function AppointmentActions({ appointmentId, currentStatus, appointmentDa
           body: JSON.stringify({ appointmentId, action: "rejected" }),
         })
       } catch (emailError) {
-        console.error("[v0] Failed to send rejection email:", emailError)
+        // Email sending failed silently
       }
 
       toast({
@@ -157,8 +151,6 @@ export function AppointmentActions({ appointmentId, currentStatus, appointmentDa
       const { error } = await supabase.from("appointments").delete().eq("id", appointmentId)
 
       if (error) throw error
-
-      console.log("[v0] Appointment deleted successfully")
       
       toast({
         title: "Appointment Deleted",
@@ -213,7 +205,7 @@ export function AppointmentActions({ appointmentId, currentStatus, appointmentDa
           body: JSON.stringify({ appointmentId, action: "completed" }),
         })
       } catch (emailError) {
-        console.error("[v0] Failed to send completion email:", emailError)
+        // Email sending failed silently
       }
 
       toast({
