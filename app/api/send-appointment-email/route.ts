@@ -86,7 +86,18 @@ export async function POST(request: Request) {
     // Send email using Resend or fallback to logging
     const resendApiKey = process.env.RESEND_API_KEY
 
+    console.log("[v0] Attempting to send email:")
+    console.log("[v0] - To:", patientEmail)
+    console.log("[v0] - Subject:", subject)
+    console.log("[v0] - RESEND_API_KEY present:", !!resendApiKey)
+
     if (resendApiKey) {
+      // Use verified domain email if available, otherwise use onboarding@resend.dev
+      // Note: onboarding@resend.dev only works for sending to your own verified email
+      const fromEmail = process.env.RESEND_FROM_EMAIL || "TACTAY-BILLEDO CLINIC <onboarding@resend.dev>"
+      
+      console.log("[v0] Sending via Resend API from:", fromEmail)
+      
       const response = await fetch("https://api.resend.com/emails", {
         method: "POST",
         headers: {
@@ -94,31 +105,36 @@ export async function POST(request: Request) {
           Authorization: `Bearer ${resendApiKey}`,
         },
         body: JSON.stringify({
-          from: "TACTAY-BILLEDO CLINIC <onboarding@resend.dev>",
+          from: fromEmail,
           to: [patientEmail],
           subject,
           html: emailBody,
         }),
       })
 
+      const responseData = await response.json()
+      
       if (!response.ok) {
-        const errorData = await response.json()
-        console.error("[v0] Resend API error:", errorData)
-        return NextResponse.json({ error: "Failed to send email", details: errorData }, { status: 500 })
+        console.error("[v0] Resend API error:", responseData)
+        console.error("[v0] Response status:", response.status)
+        return NextResponse.json({ 
+          error: "Failed to send email", 
+          details: responseData,
+          hint: "If using free Resend plan, you can only send to your own verified email. Add a verified domain to send to any email."
+        }, { status: 500 })
       }
 
-      const data = await response.json()
-      return NextResponse.json({ success: true, messageId: data.id })
+      console.log("[v0] Email sent successfully! Message ID:", responseData.id)
+      return NextResponse.json({ success: true, messageId: responseData.id })
     } else {
       // Log email for development/testing when no API key is set
       console.log("[v0] Email would be sent (no RESEND_API_KEY set):")
       console.log("[v0] To:", patientEmail)
       console.log("[v0] Subject:", subject)
-      console.log("[v0] Body:", emailBody)
       
       return NextResponse.json({ 
         success: true, 
-        message: "Email logged (RESEND_API_KEY not configured)",
+        message: "Email logged (RESEND_API_KEY not configured). Add RESEND_API_KEY to send real emails.",
         emailDetails: { to: patientEmail, subject }
       })
     }

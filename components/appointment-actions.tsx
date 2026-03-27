@@ -58,11 +58,17 @@ export function AppointmentActions({ appointmentId, currentStatus, appointmentDa
 
       // Send confirmation email to patient
       try {
-        await fetch("/api/send-appointment-email", {
+        const emailResponse = await fetch("/api/send-appointment-email", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ appointmentId, action: "approved" }),
         })
+        const emailResult = await emailResponse.json()
+        console.log("[v0] Email API response:", emailResult)
+        
+        if (!emailResponse.ok) {
+          console.error("[v0] Email sending failed:", emailResult)
+        }
       } catch (emailError) {
         console.error("[v0] Failed to send email:", emailError)
       }
