@@ -101,16 +101,14 @@ export async function POST(request: Request) {
       })
     }
 
-    // Send email using Brevo - wrapped in try-catch so appointment workflow always completes
+    // Send email using MailerSend
     try {
-      // Using hardcoded key since env var isn't persisting
-      const brevoApiKey = process.env.BREVO_API_KEY || "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"
-      const senderEmail = process.env.BREVO_SENDER_EMAIL || "tactaybilledoclinic@gmail.com"
+      const mailersendApiKey = "mlsn.18a7f1bd7c163479be3a17d84d612060226957814e317e0c60bddc0055763bc5"
 
       const emailPayload = {
-        sender: {
+        from: {
+          email: "MS_3gvA5J@trial-neqvygm8j5nl0p7w.mlsender.net",
           name: "TACTAY-BILLEDO DENTAL CLINIC",
-          email: senderEmail,
         },
         to: [
           {
@@ -119,30 +117,31 @@ export async function POST(request: Request) {
           },
         ],
         subject,
-        htmlContent: emailBody,
+        html: emailBody,
       }
 
-      const response = await fetch("https://api.brevo.com/v3/smtp/email", {
+      const response = await fetch("https://api.mailersend.com/v1/email", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "api-key": brevoApiKey,
+          "Authorization": `Bearer ${mailersendApiKey}`,
         },
         body: JSON.stringify(emailPayload),
       })
 
       if (!response.ok) {
-        // Return success anyway so the appointment status update completes
+        const errorData = await response.json().catch(() => ({}))
+        console.log("[v0] MailerSend error:", response.status, errorData)
         return NextResponse.json({ 
           success: true,
-          warning: "Email could not be sent - please update BREVO_API_KEY in v0 Settings > Vars"
+          warning: "Email could not be sent",
+          details: errorData
         })
       }
 
-      const responseData = await response.json()
-      return NextResponse.json({ success: true, messageId: responseData.messageId, sentTo: patientEmail })
-    } catch {
-      // Email sending failed - return success anyway so appointment workflow completes
+      return NextResponse.json({ success: true, sentTo: patientEmail })
+    } catch (err) {
+      console.log("[v0] Email error:", err)
       return NextResponse.json({ 
         success: true,
         warning: "Email service temporarily unavailable"
