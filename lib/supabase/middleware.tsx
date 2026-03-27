@@ -14,6 +14,28 @@ export async function updateSession(request: NextRequest) {
     return supabaseResponse
   }
 
+  // Define public paths that don't require authentication
+  const publicPaths = [
+    "/",
+    "/auth/login",
+    "/auth/sign-up",
+    "/auth/sign-up-success",
+    "/auth/forgot-password",
+    "/auth/forgot-password-success",
+    "/auth/reset-password",
+    "/auth/callback",
+    "/auth/error",
+  ]
+  
+  const isPublicPath = publicPaths.some(path => 
+    request.nextUrl.pathname === path || request.nextUrl.pathname.startsWith("/auth/")
+  )
+
+  // Skip auth check for public paths to avoid unnecessary token refresh errors
+  if (isPublicPath) {
+    return supabaseResponse
+  }
+
   try {
     // With Fluid compute, don't put this client in a global environment
     // variable. Always create a new one on each request.
@@ -32,42 +54,41 @@ export async function updateSession(request: NextRequest) {
       },
     })
 
-    // Do not run code between createServerClient and
-    // supabase.auth.getUser(). A simple mistake could make it very hard to debug
-    // issues with users being randomly logged out.
-
-    // IMPORTANT: If you remove getUser() and you use server-side rendering
-    // with the Supabase client, your users may be randomly logged out.
     const {
       data: { user },
+      error,
     } = await supabase.auth.getUser()
 
-    // Define public paths that don't require authentication
-    const publicPaths = [
-      "/",
-      "/auth/login",
-      "/auth/sign-up",
-      "/auth/sign-up-success",
-      "/auth/forgot-password",
-      "/auth/forgot-password-success",
-      "/auth/reset-password",
-      "/auth/callback",
-      "/auth/error",
-    ]
-    
-    const isPublicPath = publicPaths.some(path => 
-      request.nextUrl.pathname === path || request.nextUrl.pathname.startsWith("/auth/")
-    )
+    // Handle invalid refresh token by clearing cookies and redirecting to login
+    if (error && (error.message.includes("Refresh Token") || error.message.includes("refresh_token"))) {
+      // Clear auth cookies
+      const response = NextResponse.redirect(new URL("/auth/login", request.url))
+      response.cookies.delete("sb-access-token")
+      response.cookies.delete("sb-refresh-token")
+      // Delete all Supabase auth cookies
+      request.cookies.getAll().forEach((cookie) => {
+        if (cookie.name.startsWith("sb-")) {
+          response.cookies.delete(cookie.name)
+        }
+      })
+      return response
+    }
 
-    if (!user && !isPublicPath) {
+    if (!user) {
       // no user, redirect to login page
       const url = request.nextUrl.clone()
       url.pathname = "/auth/login"
       return NextResponse.redirect(url)
     }
   } catch (error) {
-    // If there's an error checking auth, allow the request
-    console.error("[v0] Auth check error:", error)
+    // If there's an auth error, redirect to login and clear cookies
+    const response = NextResponse.redirect(new URL("/auth/login", request.url))
+    request.cookies.getAll().forEach((cookie) => {
+      if (cookie.name.startsWith("sb-")) {
+        response.cookies.delete(cookie.name)
+      }
+    })
+    return response
   }
 
   // IMPORTANT: You *must* return the supabaseResponse object as it is.
