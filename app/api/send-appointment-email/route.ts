@@ -35,17 +35,26 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Appointment not found", details: appointmentError?.message }, { status: 404 })
     }
 
+    console.log("[v0] Appointment data:", JSON.stringify(appointment, null, 2))
+    console.log("[v0] Patient data:", appointment.patient)
+    console.log("[v0] Patient ID:", appointment.patient_id)
+
     // Try to get email from profile first, then from auth user
     let patientEmail = appointment.patient?.email
     const patientName = appointment.patient?.full_name || "Patient"
     
+    console.log("[v0] Email from profile:", patientEmail)
+    
     // If no email in profile, try to get from auth.users table
     if (!patientEmail && appointment.patient_id) {
       const { data: authUser } = await supabase.auth.admin.getUserById(appointment.patient_id)
+      console.log("[v0] Auth user data:", authUser?.user?.email)
       if (authUser?.user?.email) {
         patientEmail = authUser.user.email
       }
     }
+    
+    console.log("[v0] Final patient email:", patientEmail)
     const doctorName = appointment.doctor?.full_name || "Doctor"
     const doctorSpecialization = appointment.doctor?.specialization || ""
     const appointmentDate = new Date(appointment.appointment_date).toLocaleDateString("en-US", {
@@ -105,6 +114,9 @@ export async function POST(request: Request) {
     const brevoApiKey = process.env.BREVO_API_KEY
     const senderEmail = process.env.BREVO_SENDER_EMAIL
 
+    console.log("[v0] Brevo API Key exists:", !!brevoApiKey)
+    console.log("[v0] Brevo Sender Email:", senderEmail)
+
     if (!brevoApiKey || !senderEmail) {
       return NextResponse.json({ 
         error: "Email configuration missing",
@@ -127,6 +139,9 @@ export async function POST(request: Request) {
       htmlContent: emailBody,
     }
 
+    console.log("[v0] Sending email to:", patientEmail)
+    console.log("[v0] Email payload:", JSON.stringify(emailPayload, null, 2))
+
     const response = await fetch("https://api.brevo.com/v3/smtp/email", {
       method: "POST",
       headers: {
@@ -138,6 +153,9 @@ export async function POST(request: Request) {
 
     const responseData = await response.json()
     
+    console.log("[v0] Brevo response status:", response.status)
+    console.log("[v0] Brevo response data:", JSON.stringify(responseData))
+    
     if (!response.ok) {
       return NextResponse.json({ 
         error: "Failed to send email", 
@@ -145,7 +163,7 @@ export async function POST(request: Request) {
       }, { status: 500 })
     }
 
-    return NextResponse.json({ success: true, messageId: responseData.messageId })
+    return NextResponse.json({ success: true, messageId: responseData.messageId, sentTo: patientEmail })
   } catch (error) {
     return NextResponse.json({ 
       error: "Internal server error", 
