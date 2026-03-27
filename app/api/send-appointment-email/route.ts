@@ -1,17 +1,32 @@
-import { createClient } from "@/lib/supabase/server"
+import { createClient as createServerClient } from "@supabase/supabase-js"
 import { NextResponse } from "next/server"
 
 export async function POST(request: Request) {
   try {
     const { appointmentId, action } = await request.json()
 
+    console.log("[v0] ========== EMAIL API CALLED ==========")
+    console.log("[v0] Appointment ID:", appointmentId)
+    console.log("[v0] Action:", action)
+
     if (!appointmentId || !action) {
+      console.log("[v0] Missing required fields")
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 })
     }
 
-    const supabase = await createClient()
+    // Use service role client to bypass RLS and fetch patient email
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+
+    if (!supabaseUrl || !supabaseServiceKey) {
+      console.error("[v0] Missing Supabase credentials")
+      return NextResponse.json({ error: "Server configuration error" }, { status: 500 })
+    }
+
+    const supabase = createServerClient(supabaseUrl, supabaseServiceKey)
 
     // Fetch appointment with patient and doctor details
+    console.log("[v0] Fetching appointment data...")
     const { data: appointment, error: appointmentError } = await supabase
       .from("appointments")
       .select(`
@@ -22,8 +37,16 @@ export async function POST(request: Request) {
       .eq("id", appointmentId)
       .single()
 
+    console.log("[v0] Appointment fetch result:", { 
+      hasData: !!appointment, 
+      error: appointmentError?.message,
+      patientEmail: appointment?.patient?.email,
+      patientName: appointment?.patient?.full_name
+    })
+
     if (appointmentError || !appointment) {
-      return NextResponse.json({ error: "Appointment not found" }, { status: 404 })
+      console.error("[v0] Appointment not found:", appointmentError)
+      return NextResponse.json({ error: "Appointment not found", details: appointmentError?.message }, { status: 404 })
     }
 
     const patientEmail = appointment.patient?.email
@@ -42,8 +65,11 @@ export async function POST(request: Request) {
     const notes = appointment.notes || ""
 
     if (!patientEmail) {
+      console.error("[v0] Patient email not found in profile")
       return NextResponse.json({ error: "Patient email not found" }, { status: 400 })
     }
+
+    console.log("[v0] Patient email found:", patientEmail)
 
     let subject = ""
     let emailBody = ""
