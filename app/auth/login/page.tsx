@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 
 export default function LoginPage() {
   const [email, setEmail] = useState("")
@@ -17,6 +17,25 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
 
+  // Clear any stale session on login page load
+  useEffect(() => {
+    const clearStaleSession = async () => {
+      const supabase = createClient()
+      try {
+        // Try to get the current session
+        const { error } = await supabase.auth.getSession()
+        // If there's a refresh token error, sign out to clear stale cookies
+        if (error && (error.message.includes("Refresh Token") || error.message.includes("refresh_token"))) {
+          await supabase.auth.signOut()
+        }
+      } catch {
+        // If any error occurs, try to sign out
+        await supabase.auth.signOut()
+      }
+    }
+    clearStaleSession()
+  }, [])
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     const supabase = createClient()
@@ -24,6 +43,9 @@ export default function LoginPage() {
     setError(null)
 
     try {
+      // First, sign out any existing session to ensure clean login
+      await supabase.auth.signOut()
+      
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
