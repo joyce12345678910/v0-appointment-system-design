@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { useSearchParams } from "next/navigation"
+
 import { createClient } from "@/lib/supabase/client"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -9,18 +9,15 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { AddMedicalRecordDialog } from "@/components/add-medical-record-dialog"
 import { ViewMedicalRecordDialog } from "@/components/view-medical-record-dialog"
 import { DeleteMedicalRecordDialog } from "@/components/delete-medical-record-dialog"
-import type { MedicalRecord, Profile } from "@/lib/types"
+import type { MedicalRecord, Doctor } from "@/lib/types"
 import { Search, FileText } from "lucide-react"
 
 export default function MedicalRecordsPage() {
-  const searchParams = useSearchParams()
-  const patientIdFromUrl = searchParams.get("patient")
-
   const [records, setRecords] = useState<MedicalRecord[]>([])
   const [filteredRecords, setFilteredRecords] = useState<MedicalRecord[]>([])
-  const [patients, setPatients] = useState<Profile[]>([])
+  const [doctors, setDoctors] = useState<Doctor[]>([])
   const [searchQuery, setSearchQuery] = useState("")
-  const [selectedPatient, setSelectedPatient] = useState(patientIdFromUrl || "all")
+  const [selectedDoctor, setSelectedDoctor] = useState("all")
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
@@ -29,14 +26,14 @@ export default function MedicalRecordsPage() {
 
   useEffect(() => {
     filterRecords()
-  }, [records, searchQuery, selectedPatient])
+  }, [records, searchQuery, selectedDoctor])
 
   const fetchData = async () => {
     const supabase = createClient()
     setIsLoading(true)
 
     try {
-      const [{ data: recordsData }, { data: patientsData }] = await Promise.all([
+      const [{ data: recordsData }, { data: doctorsData }] = await Promise.all([
         supabase
           .from("medical_records")
           .select(
@@ -47,11 +44,11 @@ export default function MedicalRecordsPage() {
           `,
           )
           .order("visit_date", { ascending: false }),
-        supabase.from("profiles").select("*").eq("role", "patient").order("full_name"),
+        supabase.from("doctors").select("*").order("full_name"),
       ])
 
       if (recordsData) setRecords(recordsData)
-      if (patientsData) setPatients(patientsData)
+      if (doctorsData) setDoctors(doctorsData)
     } catch (error) {
       console.error("Error fetching data:", error)
     } finally {
@@ -62,8 +59,8 @@ export default function MedicalRecordsPage() {
   const filterRecords = () => {
     let filtered = records
 
-    if (selectedPatient !== "all") {
-      filtered = filtered.filter((record) => record.patient_id === selectedPatient)
+    if (selectedDoctor !== "all") {
+      filtered = filtered.filter((record) => record.doctor_id === selectedDoctor)
     }
 
     if (searchQuery) {
@@ -107,15 +104,15 @@ export default function MedicalRecordsPage() {
               />
             </div>
 
-            <Select value={selectedPatient} onValueChange={setSelectedPatient}>
+            <Select value={selectedDoctor} onValueChange={setSelectedDoctor}>
               <SelectTrigger className="w-full">
-                <SelectValue placeholder="Filter by patient" />
+                <SelectValue placeholder="Filter by doctor" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Patients</SelectItem>
-                {patients.map((patient) => (
-                  <SelectItem key={patient.id} value={patient.id}>
-                    {patient.full_name}
+                <SelectItem value="all">All Doctors</SelectItem>
+                {doctors.map((doctor) => (
+                  <SelectItem key={doctor.id} value={doctor.id}>
+                    Dr. {doctor.full_name} - {doctor.specialization}
                   </SelectItem>
                 ))}
               </SelectContent>
