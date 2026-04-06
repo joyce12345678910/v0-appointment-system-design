@@ -14,37 +14,11 @@ export default function HomePage() {
   useEffect(() => {
     const url = new URL(window.location.href)
     const code = url.searchParams.get("code")
-    const error = url.searchParams.get("error")
     
-    // Check hash fragment for tokens or errors (Supabase puts auth tokens here)
-    const hashParams = new URLSearchParams(url.hash.substring(1))
-    const hashError = hashParams.get("error")
-    const hashErrorDescription = hashParams.get("error_description")
-    const accessToken = hashParams.get("access_token")
-    const refreshToken = hashParams.get("refresh_token")
-    const type = hashParams.get("type")
-    
+    // Only redirect if there's an auth code - let the callback handle everything
     if (code) {
       // Redirect to callback with the code
       router.replace(`/auth/callback?code=${code}`)
-      return
-    }
-    
-    // If we have tokens in hash, user is verified - redirect to login with success
-    if (accessToken && refreshToken) {
-      // User successfully verified, redirect to login with success message
-      router.replace("/auth/login?verified=true")
-      return
-    }
-    
-    // Handle errors
-    if (error || hashError) {
-      // Check if it's an expired link
-      if (hashErrorDescription?.includes("expired") || hashError === "access_denied") {
-        router.replace("/auth/login?error=link_expired")
-      } else {
-        router.replace("/auth/login?error=verification_failed")
-      }
       return
     }
   }, [router])
