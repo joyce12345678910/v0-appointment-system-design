@@ -1,80 +1,12 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
+import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { MapPin, Facebook, Phone, Mail, Calendar, Shield, Users, Star, ChevronRight, Clock, Menu, X } from "lucide-react"
 
 export default function HomePage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const router = useRouter()
-
-  // Handle auth redirects - backup for middleware
-  useEffect(() => {
-    const url = new URL(window.location.href)
-    const code = url.searchParams.get("code")
-    const type = url.searchParams.get("type")
-    const error = url.searchParams.get("error")
-    
-    // Check for code in query params
-    if (code) {
-      // Redirect to callback with the code and type if present
-      const callbackUrl = type 
-        ? `/auth/callback?code=${code}&type=${type}`
-        : `/auth/callback?code=${code}`
-      router.replace(callbackUrl)
-      return
-    }
-    
-    // Check for hash fragment (Supabase sometimes uses this for recovery)
-    const hash = window.location.hash.substring(1)
-    if (hash) {
-      const hashParams = new URLSearchParams(hash)
-      const accessToken = hashParams.get("access_token")
-      const hashType = hashParams.get("type")
-      const hashError = hashParams.get("error")
-      
-      // If there's an access token in the hash, this is a direct auth flow
-      if (accessToken && hashType === "recovery") {
-        // Redirect to reset password page - the client will pick up the tokens
-        router.replace("/auth/reset-password" + window.location.hash)
-        return
-      }
-      
-      // If there's an error in the hash, redirect to forgot-password for expired/invalid links
-      if (hashError) {
-        const errorCode = hashParams.get("error_code") || ""
-        const errorDescription = hashParams.get("error_description") || ""
-        
-        // Check for OTP expired, access denied, or any link-related errors
-        if (hashError === "access_denied" || 
-            errorCode === "otp_expired" ||
-            errorDescription.toLowerCase().includes("expired") ||
-            errorDescription.toLowerCase().includes("invalid") ||
-            errorDescription.toLowerCase().includes("link")) {
-          router.replace("/auth/reset-password?error=expired")
-          return
-        }
-      }
-    }
-    
-    // If there's an error in query params (from Supabase redirect)
-    if (error) {
-      const errorCode = url.searchParams.get("error_code") || ""
-      const errorDescription = url.searchParams.get("error_description") || ""
-      
-      // Check for any auth errors that indicate expired/invalid link
-      if (error === "access_denied" || 
-          errorCode === "otp_expired" ||
-          errorDescription.toLowerCase().includes("expired") ||
-          errorDescription.toLowerCase().includes("invalid") ||
-          errorDescription.toLowerCase().includes("link")) {
-        router.replace("/auth/reset-password?error=expired")
-        return
-      }
-    }
-  }, [router])
 
   return (
     <div className="min-h-screen bg-white">

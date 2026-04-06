@@ -2,32 +2,41 @@ import { updateSession } from "@/lib/supabase/middleware"
 import { NextResponse, type NextRequest } from "next/server"
 
 export async function middleware(request: NextRequest) {
-  const { pathname } = request.nextUrl
-  const code = request.nextUrl.searchParams.get("code")
-  const error = request.nextUrl.searchParams.get("error")
+  const { pathname, searchParams } = request.nextUrl
+  const code = searchParams.get("code")
+  const error = searchParams.get("error")
+  const errorCode = searchParams.get("error_code")
   
-  // If there's a code parameter at root, redirect to auth callback
+  // PRIORITY 1: Handle auth code redirects at root URL BEFORE any session checks
+  // This is critical - Supabase sends password reset links to /?code=xxx
   if (pathname === "/" && code) {
     const redirectUrl = new URL("/auth/callback", request.url)
     redirectUrl.searchParams.set("code", code)
-    // Pass type parameter if present
-    const type = request.nextUrl.searchParams.get("type")
+    
+    // Preserve type parameter if present
+    const type = searchParams.get("type")
     if (type) {
       redirectUrl.searchParams.set("type", type)
     }
+    
+    // Return redirect immediately without any Supabase calls
     return NextResponse.redirect(redirectUrl)
   }
   
-  // If there's a code parameter on /auth/callback, pass through to let the route handler process it
-  // This handles cases where Supabase redirects directly to callback with a code
+  // PRIORITY 2: Handle auth errors at root URL
+  if (pathname === "/" && (error || errorCode)) {
+    const redirectUrl = new URL("/auth/reset-password", request.url)
+    redirectUrl.searchParams.set("error", "expired")
+    return NextResponse.redirect(redirectUrl)
+  }
   
-  // If there's an error parameter at root, check the error type
-  // Don't redirect - let the home page handle it or user can navigate manually
-  // This prevents incorrectly catching password reset errors
+  // PRIORITY 3: Allow /auth/callback through without session checks
+  // The callback route handles its own code exchange
+  if (pathname === "/auth/callback") {
+    return NextResponse.next()
+  }
   
-  // Don't redirect expired=true from forgot-password - let the page handle it
-  // This shows the user a message to request a new link
-  
+  // PRIORITY 4: For all other routes, update session normally
   return await updateSession(request)
 }
 
