@@ -18,11 +18,35 @@ function ForgotPasswordForm() {
   const searchParams = useSearchParams()
 
   useEffect(() => {
-    // Check if redirected due to expired link
+    // Check for error params from email verification redirect
+    // These should go to login, not forgot-password
+    const urlHash = window.location.hash
+    if (urlHash.includes("error=") || urlHash.includes("access_denied")) {
+      // This is from email verification, redirect to login
+      if (urlHash.includes("expired")) {
+        router.replace("/auth/login?error=link_expired")
+      } else {
+        router.replace("/auth/login?error=verification_failed")
+      }
+      return
+    }
+    
+    // Check if redirected due to expired password reset link specifically
     if (searchParams.get("expired") === "true") {
+      // Check if this is actually from email verification by looking at error_code
+      const errorCode = searchParams.get("error_code")
+      if (errorCode === "otp_expired") {
+        // This could be email verification OR password reset
+        // If there's "type=signup" it's email verification
+        const errorDescription = new URLSearchParams(urlHash.substring(1)).get("error_description")
+        if (errorDescription?.includes("Email link")) {
+          router.replace("/auth/login?error=link_expired")
+          return
+        }
+      }
       setError("Your password reset link has expired. Please request a new one.")
     }
-  }, [searchParams])
+  }, [searchParams, router])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
