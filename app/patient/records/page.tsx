@@ -4,8 +4,7 @@ import { useState, useEffect, useCallback } from "react"
 import { createClient } from "@/lib/supabase/client"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { FileText, RefreshCw } from "lucide-react"
+import { FileText, Loader2 } from "lucide-react"
 
 interface Doctor {
   full_name: string
@@ -65,22 +64,16 @@ export default function PatientRecordsPage() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <RefreshCw className="h-8 w-8 animate-spin text-blue-600" />
+        <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
       </div>
     )
   }
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold">Medical Records</h1>
-          <p className="text-muted-foreground">View your medical history and records</p>
-        </div>
-        <Button variant="outline" onClick={fetchRecords}>
-          <RefreshCw className="h-4 w-4 mr-2" />
-          Refresh
-        </Button>
+      <div>
+        <h1 className="text-3xl font-bold">Medical Records</h1>
+        <p className="text-muted-foreground">View your medical history and records</p>
       </div>
 
       <Card>

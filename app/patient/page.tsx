@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
-import { Calendar, Clock, Plus, Phone, Mail, Stethoscope, RefreshCw, XCircle } from "lucide-react"
+import { Calendar, Clock, Plus, Phone, Mail, Stethoscope, XCircle, Loader2 } from "lucide-react"
 import { toast } from "@/hooks/use-toast"
 import {
   Dialog,
@@ -166,7 +166,7 @@ export default function PatientDashboardPage() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <RefreshCw className="h-8 w-8 animate-spin text-blue-600" />
+        <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
       </div>
     )
   }
@@ -179,18 +179,12 @@ export default function PatientDashboardPage() {
           <h1 className="text-3xl font-bold text-blue-900">Welcome back, {profile?.full_name}!</h1>
           <p className="text-blue-600 mt-1">Manage your appointments and medical records</p>
         </div>
-        <div className="flex gap-2">
-          <Button variant="outline" onClick={fetchData} className="border-blue-200 text-blue-700 hover:bg-blue-50">
-            <RefreshCw className="h-4 w-4 mr-2" />
-            Refresh
-          </Button>
-          <Button asChild className="bg-blue-600 hover:bg-blue-700 text-white whitespace-nowrap">
-            <Link href="/patient/book">
-              <Plus className="h-4 w-4 mr-2" />
-              Book Appointment
-            </Link>
-          </Button>
-        </div>
+        <Button asChild className="bg-blue-600 hover:bg-blue-700 text-white whitespace-nowrap">
+          <Link href="/patient/book">
+            <Plus className="h-4 w-4 mr-2" />
+            Book Appointment
+          </Link>
+        </Button>
       </div>
 
       {/* Statistics */}
