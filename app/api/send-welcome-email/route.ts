@@ -9,30 +9,34 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 })
     }
 
-    const resendApiKey = process.env.RESEND_API_KEY
+    const brevoApiKey = process.env.BREVO_API_KEY
+    const senderEmail = process.env.BREVO_SENDER_EMAIL || "tactaybilledoclinic@gmail.com"
 
-    if (!resendApiKey) {
-      console.log("[v0] RESEND_API_KEY not set, skipping welcome email")
+    if (!brevoApiKey) {
+      console.log("[v0] BREVO_API_KEY not set, skipping welcome email")
       return NextResponse.json({ 
         success: true,
-        warning: "Email not sent - RESEND_API_KEY not set"
+        warning: "Email not sent - BREVO_API_KEY not set"
       })
     }
 
     const emailPayload = {
-      from: "TACTAY-BILLEDO DENTAL CLINIC <noreply@tactay-billedo.com>",
-      to: [email],
+      sender: {
+        name: "TACTAY-BILLEDO CLINIC",
+        email: senderEmail,
+      },
+      to: [{ email, name: fullName }],
       subject: "Welcome to TACTAY-BILLEDO CLINIC!",
-      html: generateWelcomeEmail(fullName),
+      htmlContent: generateWelcomeEmail(fullName),
     }
 
-    console.log("[v0] Sending welcome email via Resend to:", email)
+    console.log("[v0] Sending welcome email via Brevo to:", email)
 
-    const response = await fetch("https://api.resend.com/emails", {
+    const response = await fetch("https://api.brevo.com/v3/smtp/email", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": `Bearer ${resendApiKey}`,
+        "api-key": brevoApiKey,
       },
       body: JSON.stringify(emailPayload),
     })
@@ -40,7 +44,7 @@ export async function POST(request: Request) {
     const responseData = await response.json().catch(() => ({}))
 
     if (!response.ok) {
-      console.log("[v0] Resend error:", response.status, responseData)
+      console.log("[v0] Brevo error:", response.status, responseData)
       return NextResponse.json({ 
         success: true,
         warning: "Welcome email could not be sent",
@@ -48,8 +52,8 @@ export async function POST(request: Request) {
       })
     }
 
-    console.log("[v0] Welcome email sent successfully, ID:", responseData.id)
-    return NextResponse.json({ success: true, sentTo: email, messageId: responseData.id })
+    console.log("[v0] Welcome email sent successfully via Brevo, ID:", responseData.messageId)
+    return NextResponse.json({ success: true, sentTo: email, messageId: responseData.messageId })
   } catch (error) {
     console.log("[v0] Welcome email error:", error)
     return NextResponse.json({ 
