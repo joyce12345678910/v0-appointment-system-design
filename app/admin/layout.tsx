@@ -3,13 +3,18 @@ import { redirect } from "next/navigation"
 import { createClient } from "@/lib/supabase/server"
 import { AdminSidebar } from "@/components/admin-sidebar"
 
+export const dynamic = 'force-dynamic'
+
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient()
 
   let user = null
   try {
     const { data, error } = await supabase.auth.getUser()
-    if (error) throw error
+    if (error) {
+      console.error("[v0] Auth error in admin layout:", error.message)
+      throw error
+    }
     user = data.user
   } catch (error) {
     // Auth fetch failed - redirect to login
@@ -21,7 +26,16 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   }
 
   // Check if user is admin
-  const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single()
+  let profile = null
+  try {
+    const { data, error } = await supabase.from("profiles").select("role").eq("id", user.id).single()
+    if (error) {
+      console.error("[v0] Profile fetch error:", error.message)
+    }
+    profile = data
+  } catch (error) {
+    console.error("[v0] Profile fetch exception:", error)
+  }
 
   if (profile?.role !== "admin") {
     redirect("/patient")
