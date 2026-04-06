@@ -12,29 +12,41 @@ export async function GET(request: Request) {
 
   // Handle PKCE code exchange (OAuth flow)
   if (code) {
-    const { error } = await supabase.auth.exchangeCodeForSession(code)
+    const { error, data } = await supabase.auth.exchangeCodeForSession(code)
     
-    if (!error) {
-      // If type is recovery, redirect to reset password page
-      if (type === "recovery") {
+    if (!error && data?.session) {
+      const session = data.session
+      
+      // Check if this is a password recovery flow
+      // For password recovery, Supabase sets specific indicators:
+      // 1. The type parameter is "recovery"
+      // 2. The user's app_metadata may have recovery indicators
+      // 3. The AMR claim may include "recovery" method
+      const amr = session.user?.app_metadata?.amr
+      const hasRecoveryAmr = Array.isArray(amr) && amr.some((m: { method?: string }) => m.method === "recovery")
+      const isRecovery = type === "recovery" || hasRecoveryAmr
+      
+      if (isRecovery) {
         return NextResponse.redirect(`${origin}/auth/reset-password`)
       }
       
-      // Check session to determine where to redirect
-      const { data: { session } } = await supabase.auth.getSession()
-      if (session) {
-        // Check user role and redirect accordingly
-        const { data: profile } = await supabase
-          .from("profiles")
-          .select("role")
-          .eq("id", session.user.id)
-          .single()
-        
-        if (profile?.role === "admin") {
-          return NextResponse.redirect(`${origin}/admin`)
-        }
-        return NextResponse.redirect(`${origin}/patient`)
+      // Not recovery - this is either sign-up verification or regular login
+      // Redirect to patient dashboard or admin based on role
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("role")
+        .eq("id", session.user.id)
+        .single()
+      
+      if (profile?.role === "admin") {
+        return NextResponse.redirect(`${origin}/admin`)
       }
+      return NextResponse.redirect(`${origin}/patient`)
+    }
+    
+    // If code exchange failed, redirect to login with error
+    if (error) {
+      return NextResponse.redirect(`${origin}/auth/login?error=verification_failed`)
     }
   }
 
