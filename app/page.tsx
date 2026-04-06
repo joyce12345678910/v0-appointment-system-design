@@ -53,7 +53,7 @@ export default function HomePage() {
             errorDescription.toLowerCase().includes("expired") ||
             errorDescription.toLowerCase().includes("invalid") ||
             errorDescription.toLowerCase().includes("link")) {
-          router.replace("/auth/forgot-password?expired=true")
+          router.replace("/auth/reset-password?error=expired")
           return
         }
       }
@@ -70,7 +70,7 @@ export default function HomePage() {
           errorDescription.toLowerCase().includes("expired") ||
           errorDescription.toLowerCase().includes("invalid") ||
           errorDescription.toLowerCase().includes("link")) {
-        router.replace("/auth/forgot-password?expired=true")
+        router.replace("/auth/reset-password?error=expired")
         return
       }
     }

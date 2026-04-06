@@ -30,7 +30,7 @@ export async function GET(request: Request) {
         return NextResponse.redirect(`${origin}/auth/reset-password`)
       }
       // No valid session and code failed - link is expired or invalid
-      return NextResponse.redirect(`${origin}/auth/forgot-password?expired=true`)
+      return NextResponse.redirect(`${origin}/auth/reset-password?error=expired`)
     }
     
     // No code but type is recovery - check for session
@@ -39,8 +39,8 @@ export async function GET(request: Request) {
       return NextResponse.redirect(`${origin}/auth/reset-password`)
     }
     
-    // No code and no session - redirect to forgot password
-    return NextResponse.redirect(`${origin}/auth/forgot-password?expired=true`)
+    // No code and no session - redirect to reset password with error
+    return NextResponse.redirect(`${origin}/auth/reset-password?error=expired`)
   }
 
   // Handle PKCE code exchange for non-recovery flows (signup verification, etc.)
