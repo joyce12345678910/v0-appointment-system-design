@@ -70,11 +70,25 @@ export function ViewMedicalRecordDialog({ record }: ViewMedicalRecordDialogProps
             </div>
           )}
 
-          {/* Lab Results */}
+          {/* X-ray Image */}
           {record.lab_results && (
             <div>
-              <h3 className="text-sm font-medium text-muted-foreground mb-2">Lab Results</h3>
-              <p className="text-sm whitespace-pre-wrap">{record.lab_results}</p>
+              <h3 className="text-sm font-medium text-muted-foreground mb-2">X-ray Image</h3>
+              {record.lab_results.startsWith('http') ? (
+                <div className="border rounded-lg p-2">
+                  <img
+                    src={record.lab_results}
+                    alt="X-ray"
+                    className="w-full max-h-64 object-contain rounded cursor-pointer hover:opacity-90 transition-opacity"
+                    onClick={() => window.open(record.lab_results, '_blank')}
+                  />
+                  <p className="text-xs text-center text-muted-foreground mt-2">
+                    Click to view full size
+                  </p>
+                </div>
+              ) : (
+                <p className="text-sm whitespace-pre-wrap">{record.lab_results}</p>
+              )}
             </div>
           )}
 
