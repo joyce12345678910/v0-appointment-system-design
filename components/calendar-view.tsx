@@ -5,8 +5,15 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import type { Appointment } from "@/lib/types"
-import { ChevronLeft, ChevronRight } from "lucide-react"
+import { ChevronLeft, ChevronRight, Eye } from "lucide-react"
 import { AppointmentDetailsDialog } from "@/components/appointment-details-dialog"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
 
 interface CalendarViewProps {
   appointments: Appointment[]
@@ -16,6 +23,9 @@ export function CalendarView({ appointments }: CalendarViewProps) {
   const [currentDate, setCurrentDate] = useState(new Date())
   const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null)
   const [isDetailsOpen, setIsDetailsOpen] = useState(false)
+  const [selectedDayAppointments, setSelectedDayAppointments] = useState<Appointment[]>([])
+  const [selectedDayDate, setSelectedDayDate] = useState<string>("")
+  const [isDayDialogOpen, setIsDayDialogOpen] = useState(false)
 
   // Get calendar data
   const { year, month, daysInMonth, firstDayOfMonth, monthName } = useMemo(() => {
@@ -103,6 +113,13 @@ export function CalendarView({ appointments }: CalendarViewProps) {
     setIsDetailsOpen(true)
   }
 
+  const handleViewAllForDay = (day: number, appointments: Appointment[]) => {
+    const dateStr = `${monthName.split(" ")[0]} ${day}, ${year}`
+    setSelectedDayDate(dateStr)
+    setSelectedDayAppointments(appointments)
+    setIsDayDialogOpen(true)
+  }
+
   return (
     <>
       <Card>
@@ -155,7 +172,7 @@ export function CalendarView({ appointments }: CalendarViewProps) {
                       {cell.day}
                     </div>
                     <div className="space-y-1">
-                      {cell.appointments.slice(0, 3).map((appointment) => (
+                      {cell.appointments.slice(0, 2).map((appointment) => (
                         <button
                           key={appointment.id}
                           onClick={() => handleAppointmentClick(appointment)}
@@ -172,10 +189,14 @@ export function CalendarView({ appointments }: CalendarViewProps) {
                           </div>
                         </button>
                       ))}
-                      {cell.appointments.length > 3 && (
-                        <div className="text-xs text-muted-foreground text-center py-1">
-                          +{cell.appointments.length - 3} more
-                        </div>
+                      {cell.appointments.length > 2 && (
+                        <button
+                          onClick={() => handleViewAllForDay(cell.day!, cell.appointments)}
+                          className="w-full text-xs text-center py-1.5 rounded bg-emerald-50 text-emerald-700 hover:bg-emerald-100 transition-colors font-medium flex items-center justify-center gap-1"
+                        >
+                          <Eye className="h-3 w-3" />
+                          See All ({cell.appointments.length})
+                        </button>
                       )}
                     </div>
                   </>
@@ -202,6 +223,46 @@ export function CalendarView({ appointments }: CalendarViewProps) {
         open={isDetailsOpen}
         onOpenChange={setIsDetailsOpen}
       />
+
+      {/* Day Appointments Dialog */}
+      <Dialog open={isDayDialogOpen} onOpenChange={setIsDayDialogOpen}>
+        <DialogContent className="max-w-lg max-h-[80vh] overflow-hidden flex flex-col">
+          <DialogHeader>
+            <DialogTitle>Appointments for {selectedDayDate}</DialogTitle>
+            <DialogDescription>
+              {selectedDayAppointments.length} appointment{selectedDayAppointments.length !== 1 ? "s" : ""} scheduled
+            </DialogDescription>
+          </DialogHeader>
+          <div className="overflow-y-auto flex-1 pr-2 space-y-3">
+            {selectedDayAppointments.map((appointment) => (
+              <button
+                key={appointment.id}
+                onClick={() => {
+                  setIsDayDialogOpen(false)
+                  setTimeout(() => handleAppointmentClick(appointment), 150)
+                }}
+                className="w-full text-left p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors"
+              >
+                <div className="flex items-center justify-between mb-2">
+                  <Badge className={`${getStatusColor(appointment.status)} text-xs`}>
+                    {appointment.status}
+                  </Badge>
+                  <span className="text-sm font-medium text-muted-foreground">
+                    {appointment.appointment_time}
+                  </span>
+                </div>
+                <div className="font-medium">{appointment.patient?.full_name}</div>
+                <div className="text-sm text-muted-foreground">{appointment.patient?.email}</div>
+                {appointment.doctor && (
+                  <div className="text-sm text-muted-foreground mt-1">
+                    Dr. {appointment.doctor.full_name} - {appointment.doctor.specialization}
+                  </div>
+                )}
+              </button>
+            ))}
+          </div>
+        </DialogContent>
+      </Dialog>
     </>
   )
 }

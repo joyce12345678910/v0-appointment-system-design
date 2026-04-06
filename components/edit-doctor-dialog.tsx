@@ -36,7 +36,6 @@ export function EditDoctorDialog({ doctor }: EditDoctorDialogProps) {
     phone: doctor.phone,
     license_number: doctor.license_number,
     years_of_experience: doctor.years_of_experience?.toString() || "",
-    consultation_fee: doctor.consultation_fee?.toString() || "",
     available: doctor.available,
   })
   const router = useRouter()
@@ -57,7 +56,6 @@ export function EditDoctorDialog({ doctor }: EditDoctorDialogProps) {
           phone: formData.phone,
           license_number: formData.license_number,
           years_of_experience: formData.years_of_experience ? Number.parseInt(formData.years_of_experience) : null,
-          consultation_fee: formData.consultation_fee ? Number.parseFloat(formData.consultation_fee) : null,
           available: formData.available,
         })
         .eq("id", doctor.id)
@@ -151,28 +149,15 @@ export function EditDoctorDialog({ doctor }: EditDoctorDialogProps) {
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="edit_years_of_experience">Years of Experience</Label>
-                <Input
-                  id="edit_years_of_experience"
-                  type="number"
-                  min="0"
-                  value={formData.years_of_experience}
-                  onChange={(e) => setFormData({ ...formData, years_of_experience: e.target.value })}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="edit_consultation_fee">Consultation Fee (₱)</Label>
-                <Input
-                  id="edit_consultation_fee"
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  value={formData.consultation_fee}
-                  onChange={(e) => setFormData({ ...formData, consultation_fee: e.target.value })}
-                />
-              </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit_years_of_experience">Years of Experience</Label>
+              <Input
+                id="edit_years_of_experience"
+                type="number"
+                min="0"
+                value={formData.years_of_experience}
+                onChange={(e) => setFormData({ ...formData, years_of_experience: e.target.value })}
+              />
             </div>
 
             <div className="flex items-center space-x-2">

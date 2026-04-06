@@ -69,6 +69,20 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen w-full bg-gradient-to-br from-emerald-600 via-green-500 to-teal-500 flex items-center justify-center p-4 relative overflow-hidden">
+      {/* Home Navigation Button - Mobile Friendly */}
+      <Link href="/" className="fixed top-4 left-4 z-50 sm:top-6 sm:left-6">
+        <Button 
+          variant="ghost"
+          size="sm"
+          className="text-white hover:bg-white/15 transition-all duration-200 font-medium rounded-full"
+        >
+          <svg className="w-5 h-5 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+          </svg>
+          <span className="hidden xs:inline">Home</span>
+        </Button>
+      </Link>
+
       {/* Background Logo Watermark */}
       <div className="absolute inset-0 flex items-center justify-center opacity-5 pointer-events-none">
         <img 
