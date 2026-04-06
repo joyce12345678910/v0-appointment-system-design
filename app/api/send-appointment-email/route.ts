@@ -99,6 +99,16 @@ export async function POST(request: Request) {
         appointmentTime,
         notes,
       })
+    } else if (action === "cancelled") {
+      subject = `Appointment Cancelled - TACTAY-BILLEDO DENTAL CLINIC`
+      emailBody = generateCancellationEmail({
+        patientName,
+        doctorName,
+        doctorSpecialization,
+        appointmentDate,
+        appointmentTime,
+        notes,
+      })
     }
 
     // Send email using Resend API
@@ -350,6 +360,98 @@ function generateCompletionEmail(params: EmailParams): string {
           <tr>
             <td style="background-color: #f9fafb; padding: 20px 30px; text-align: center; border-radius: 0 0 16px 16px;">
               <p style="color: #9ca3af; margin: 0; font-size: 12px;">TACTAY-BILLEDO DENTAL CLINIC</p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+  `
+}
+
+function generateCancellationEmail(params: EmailParams): string {
+  const { patientName, doctorName, doctorSpecialization, appointmentDate, appointmentTime, notes } = params
+
+  return `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #fef2f2;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #fef2f2; padding: 40px 20px;">
+    <tr>
+      <td align="center">
+        <table width="100%" cellpadding="0" cellspacing="0" style="max-width: 600px; background-color: #ffffff; border-radius: 16px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);">
+          <tr>
+            <td style="background-color: #059669; padding: 30px; text-align: center; border-radius: 16px 16px 0 0;">
+              <h1 style="color: #ffffff; margin: 0; font-size: 24px;">TACTAY-BILLEDO CLINIC</h1>
+              <p style="color: #d1fae5; margin: 8px 0 0 0; font-size: 14px;">Dental & Medical Care</p>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 40px 30px; text-align: center;">
+              <div style="width: 60px; height: 60px; background-color: #fef2f2; border-radius: 50%; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center;">
+                <span style="font-size: 30px; color: #dc2626;">!</span>
+              </div>
+              <h2 style="color: #dc2626; margin: 0 0 20px; font-size: 24px;">Appointment Cancelled</h2>
+              <p style="color: #6b7280; margin: 0 0 20px; font-size: 16px;">Dear ${patientName},</p>
+              <p style="color: #6b7280; margin: 0 0 20px; font-size: 14px;">
+                We regret to inform you that your appointment scheduled for:
+              </p>
+              
+              <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #fef2f2; border-radius: 12px; margin: 20px 0; text-align: left;">
+                <tr>
+                  <td style="padding: 15px 20px; border-bottom: 1px solid #fecaca;">
+                    <strong style="color: #991b1b;">Date:</strong>
+                    <span style="color: #7f1d1d; margin-left: 10px;">${appointmentDate}</span>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding: 15px 20px; border-bottom: 1px solid #fecaca;">
+                    <strong style="color: #991b1b;">Time:</strong>
+                    <span style="color: #7f1d1d; margin-left: 10px;">${appointmentTime}</span>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding: 15px 20px;">
+                    <strong style="color: #991b1b;">Doctor:</strong>
+                    <span style="color: #7f1d1d; margin-left: 10px;">Dr. ${doctorName} (${doctorSpecialization})</span>
+                  </td>
+                </tr>
+              </table>
+
+              <p style="color: #6b7280; margin: 0 0 20px; font-size: 14px;">
+                <strong>has been cancelled.</strong>
+              </p>
+              
+              ${notes ? `
+              <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #fff7ed; border-radius: 12px; padding: 20px; text-align: left; margin: 20px 0; border-left: 4px solid #f97316;">
+                <tr>
+                  <td style="padding: 10px 20px;">
+                    <strong style="color: #9a3412;">Reason:</strong><br>
+                    <span style="color: #7c2d12; font-size: 14px;">${notes}</span>
+                  </td>
+                </tr>
+              </table>
+              ` : ''}
+              
+              <p style="color: #6b7280; margin: 30px 0 0; font-size: 14px;">
+                We sincerely apologize for any inconvenience this may cause. Please log in to your account to reschedule your appointment at your earliest convenience.
+              </p>
+              
+              <p style="color: #6b7280; margin: 20px 0 0; font-size: 14px;">
+                If you have any questions, please contact us directly.
+              </p>
+            </td>
+          </tr>
+          <tr>
+            <td style="background-color: #f9fafb; padding: 20px 30px; text-align: center; border-radius: 0 0 16px 16px;">
+              <p style="color: #9ca3af; margin: 0; font-size: 12px;">TACTAY-BILLEDO DENTAL CLINIC</p>
+              <p style="color: #9ca3af; margin: 5px 0 0 0; font-size: 11px;">We apologize for any inconvenience caused.</p>
             </td>
           </tr>
         </table>
