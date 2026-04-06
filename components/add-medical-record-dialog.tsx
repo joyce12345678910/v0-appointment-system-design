@@ -69,286 +69,349 @@ interface DentalChartProps {
 }
 
 function DentalChart({ selectedTeeth, onToothClick }: DentalChartProps) {
-  // Tooth positions for upper arch (arranged in U shape from overhead view)
-  const upperTeethPositions = [
-    // Right side (1-8) - patient's right
-    { number: 1, x: 45, y: 35, rotation: -70, type: "molar" },
-    { number: 2, x: 55, y: 55, rotation: -55, type: "molar" },
-    { number: 3, x: 70, y: 75, rotation: -40, type: "molar" },
-    { number: 4, x: 88, y: 95, rotation: -30, type: "premolar" },
-    { number: 5, x: 108, y: 112, rotation: -20, type: "premolar" },
-    { number: 6, x: 130, y: 125, rotation: -10, type: "canine" },
-    { number: 7, x: 152, y: 132, rotation: -3, type: "incisor" },
-    { number: 8, x: 175, y: 136, rotation: 0, type: "incisor" },
-    // Left side (9-16) - patient's left
-    { number: 9, x: 198, y: 136, rotation: 0, type: "incisor" },
-    { number: 10, x: 221, y: 132, rotation: 3, type: "incisor" },
-    { number: 11, x: 243, y: 125, rotation: 10, type: "canine" },
-    { number: 12, x: 265, y: 112, rotation: 20, type: "premolar" },
-    { number: 13, x: 285, y: 95, rotation: 30, type: "premolar" },
-    { number: 14, x: 303, y: 75, rotation: 40, type: "molar" },
-    { number: 15, x: 318, y: 55, rotation: 55, type: "molar" },
-    { number: 16, x: 328, y: 35, rotation: 70, type: "molar" },
-  ]
-
-  // Tooth positions for lower arch
-  const lowerTeethPositions = [
-    // Right side (32-25) - patient's right
-    { number: 32, x: 55, y: 35, rotation: 70, type: "molar" },
-    { number: 31, x: 68, y: 55, rotation: 55, type: "molar" },
-    { number: 30, x: 85, y: 72, rotation: 40, type: "molar" },
-    { number: 29, x: 103, y: 88, rotation: 28, type: "premolar" },
-    { number: 28, x: 123, y: 100, rotation: 18, type: "premolar" },
-    { number: 27, x: 143, y: 108, rotation: 8, type: "canine" },
-    { number: 26, x: 163, y: 112, rotation: 2, type: "incisor" },
-    { number: 25, x: 182, y: 114, rotation: 0, type: "incisor" },
-    // Left side (24-17) - patient's left
-    { number: 24, x: 200, y: 114, rotation: 0, type: "incisor" },
-    { number: 23, x: 219, y: 112, rotation: -2, type: "incisor" },
-    { number: 22, x: 239, y: 108, rotation: -8, type: "canine" },
-    { number: 21, x: 259, y: 100, rotation: -18, type: "premolar" },
-    { number: 20, x: 279, y: 88, rotation: -28, type: "premolar" },
-    { number: 19, x: 297, y: 72, rotation: -40, type: "molar" },
-    { number: 18, x: 314, y: 55, rotation: -55, type: "molar" },
-    { number: 17, x: 327, y: 35, rotation: -70, type: "molar" },
-  ]
-
-  const getToothDimensions = (type: string) => {
-    switch (type) {
-      case "molar": return { width: 26, height: 30 }
-      case "premolar": return { width: 20, height: 24 }
-      case "canine": return { width: 16, height: 22 }
-      case "incisor": return { width: 14, height: 20 }
-      default: return { width: 18, height: 22 }
-    }
-  }
-
+  // Front view tooth component with realistic shape
   const renderTooth = (
     number: number,
     x: number,
-    y: number,
-    rotation: number,
-    type: string,
-    isUpper: boolean
+    width: number,
+    height: number,
+    isUpper: boolean,
+    type: string
   ) => {
     const isSelected = selectedTeeth.includes(number)
-    const dims = getToothDimensions(type)
-    const fillColor = isSelected ? "#ef4444" : "#ffffff"
-    const strokeColor = isSelected ? "#dc2626" : "#d1d5db"
-    const grooveColor = isSelected ? "#fca5a5" : "#9ca3af"
+    const toothInfo = [...teethData.upper, ...teethData.lower].find(t => t.number === number)
+    
+    // Tooth crown shape variations based on type
+    const getToothPath = () => {
+      const hw = width / 2
+      const h = height
+      
+      if (type === "molar") {
+        if (isUpper) {
+          return `M${x - hw + 2},0 
+                  Q${x - hw},${h * 0.1} ${x - hw},${h * 0.2}
+                  L${x - hw + 1},${h * 0.85}
+                  Q${x - hw + 2},${h} ${x},${h}
+                  Q${x + hw - 2},${h} ${x + hw - 1},${h * 0.85}
+                  L${x + hw},${h * 0.2}
+                  Q${x + hw},${h * 0.1} ${x + hw - 2},0
+                  Z`
+        }
+        return `M${x - hw + 2},${h}
+                Q${x - hw},${h * 0.9} ${x - hw},${h * 0.8}
+                L${x - hw + 1},${h * 0.15}
+                Q${x - hw + 2},0 ${x},0
+                Q${x + hw - 2},0 ${x + hw - 1},${h * 0.15}
+                L${x + hw},${h * 0.8}
+                Q${x + hw},${h * 0.9} ${x + hw - 2},${h}
+                Z`
+      }
+      
+      if (type === "premolar") {
+        if (isUpper) {
+          return `M${x - hw + 1},0
+                  Q${x - hw - 1},${h * 0.15} ${x - hw},${h * 0.25}
+                  L${x - hw + 2},${h * 0.85}
+                  Q${x},${h + 2} ${x + hw - 2},${h * 0.85}
+                  L${x + hw},${h * 0.25}
+                  Q${x + hw + 1},${h * 0.15} ${x + hw - 1},0
+                  Z`
+        }
+        return `M${x - hw + 1},${h}
+                Q${x - hw - 1},${h * 0.85} ${x - hw},${h * 0.75}
+                L${x - hw + 2},${h * 0.15}
+                Q${x},${-2} ${x + hw - 2},${h * 0.15}
+                L${x + hw},${h * 0.75}
+                Q${x + hw + 1},${h * 0.85} ${x + hw - 1},${h}
+                Z`
+      }
+      
+      if (type === "canine") {
+        if (isUpper) {
+          return `M${x - hw + 2},0
+                  Q${x - hw - 1},${h * 0.2} ${x - hw},${h * 0.35}
+                  L${x - hw + 3},${h * 0.9}
+                  Q${x},${h + 4} ${x + hw - 3},${h * 0.9}
+                  L${x + hw},${h * 0.35}
+                  Q${x + hw + 1},${h * 0.2} ${x + hw - 2},0
+                  Z`
+        }
+        return `M${x - hw + 2},${h}
+                Q${x - hw - 1},${h * 0.8} ${x - hw},${h * 0.65}
+                L${x - hw + 3},${h * 0.1}
+                Q${x},${-4} ${x + hw - 3},${h * 0.1}
+                L${x + hw},${h * 0.65}
+                Q${x + hw + 1},${h * 0.8} ${x + hw - 2},${h}
+                Z`
+      }
+      
+      // Incisor - rectangular with rounded edges
+      if (isUpper) {
+        return `M${x - hw + 1},0
+                Q${x - hw - 1},${h * 0.1} ${x - hw},${h * 0.2}
+                L${x - hw + 1},${h * 0.92}
+                Q${x},${h + 1} ${x + hw - 1},${h * 0.92}
+                L${x + hw},${h * 0.2}
+                Q${x + hw + 1},${h * 0.1} ${x + hw - 1},0
+                Z`
+      }
+      return `M${x - hw + 1},${h}
+              Q${x - hw - 1},${h * 0.9} ${x - hw},${h * 0.8}
+              L${x - hw + 1},${h * 0.08}
+              Q${x},${-1} ${x + hw - 1},${h * 0.08}
+              L${x + hw},${h * 0.8}
+              Q${x + hw + 1},${h * 0.9} ${x + hw - 1},${h}
+              Z`
+    }
 
     return (
       <g
         key={number}
-        transform={`translate(${x}, ${y}) rotate(${rotation})`}
         onClick={() => onToothClick(number)}
-        className="cursor-pointer transition-all duration-150 hover:opacity-80"
-        style={{ filter: isSelected ? "drop-shadow(0 0 4px rgba(239, 68, 68, 0.5))" : "none" }}
+        className="cursor-pointer"
+        style={{ transition: "all 0.15s ease" }}
       >
-        <title>#{number} - {[...teethData.upper, ...teethData.lower].find(t => t.number === number)?.name}</title>
+        <title>#{number} - {toothInfo?.name}</title>
         
-        {/* Tooth shape based on type */}
-        {type === "molar" && (
-          <>
-            <rect
-              x={-dims.width / 2}
-              y={-dims.height / 2}
-              width={dims.width}
-              height={dims.height}
-              rx={5}
-              ry={5}
-              fill={fillColor}
-              stroke={strokeColor}
-              strokeWidth={2}
-            />
-            {/* Cross groove pattern for molars */}
-            <line x1={-dims.width / 4} y1={0} x2={dims.width / 4} y2={0} stroke={grooveColor} strokeWidth={1.5} />
-            <line x1={0} y1={-dims.height / 4} x2={0} y2={dims.height / 4} stroke={grooveColor} strokeWidth={1.5} />
-          </>
-        )}
+        {/* Tooth shape */}
+        <path
+          d={getToothPath()}
+          fill={isSelected ? "#ef4444" : "url(#toothGradient)"}
+          stroke={isSelected ? "#b91c1c" : "#d4d4d4"}
+          strokeWidth={1}
+          className="hover:brightness-95 transition-all"
+          style={{
+            filter: isSelected ? "drop-shadow(0 0 3px rgba(239, 68, 68, 0.5))" : "drop-shadow(0 1px 1px rgba(0,0,0,0.1))"
+          }}
+        />
         
-        {type === "premolar" && (
-          <>
-            <ellipse
-              cx={0}
-              cy={0}
-              rx={dims.width / 2}
-              ry={dims.height / 2}
-              fill={fillColor}
-              stroke={strokeColor}
-              strokeWidth={2}
-            />
-            {/* Simple groove for premolars */}
-            <line x1={-dims.width / 5} y1={0} x2={dims.width / 5} y2={0} stroke={grooveColor} strokeWidth={1.5} />
-          </>
-        )}
-        
-        {type === "canine" && (
-          <>
-            <ellipse
-              cx={0}
-              cy={0}
-              rx={dims.width / 2}
-              ry={dims.height / 2}
-              fill={fillColor}
-              stroke={strokeColor}
-              strokeWidth={2}
-            />
-            {/* Point indicator for canines */}
-            <circle cx={0} cy={0} r={3} fill={grooveColor} />
-          </>
-        )}
-        
-        {type === "incisor" && (
-          <>
-            <ellipse
-              cx={0}
-              cy={0}
-              rx={dims.width / 2}
-              ry={dims.height / 2}
-              fill={fillColor}
-              stroke={strokeColor}
-              strokeWidth={2}
-            />
-          </>
-        )}
+        {/* Tooth number label */}
+        <text
+          x={x}
+          y={isUpper ? -8 : height + 12}
+          textAnchor="middle"
+          fontSize={9}
+          fontWeight="600"
+          fill={isSelected ? "#dc2626" : "#64748b"}
+        >
+          {number}
+        </text>
       </g>
     )
   }
 
+  // Tooth widths and positions for upper teeth (front view, patient perspective)
+  const upperTeeth = [
+    { number: 1, width: 22, type: "molar" },
+    { number: 2, width: 22, type: "molar" },
+    { number: 3, width: 24, type: "molar" },
+    { number: 4, width: 16, type: "premolar" },
+    { number: 5, width: 16, type: "premolar" },
+    { number: 6, width: 18, type: "canine" },
+    { number: 7, width: 16, type: "incisor" },
+    { number: 8, width: 20, type: "incisor" },
+    { number: 9, width: 20, type: "incisor" },
+    { number: 10, width: 16, type: "incisor" },
+    { number: 11, width: 18, type: "canine" },
+    { number: 12, width: 16, type: "premolar" },
+    { number: 13, width: 16, type: "premolar" },
+    { number: 14, width: 24, type: "molar" },
+    { number: 15, width: 22, type: "molar" },
+    { number: 16, width: 22, type: "molar" },
+  ]
+
+  const lowerTeeth = [
+    { number: 32, width: 22, type: "molar" },
+    { number: 31, width: 22, type: "molar" },
+    { number: 30, width: 24, type: "molar" },
+    { number: 29, width: 16, type: "premolar" },
+    { number: 28, width: 16, type: "premolar" },
+    { number: 27, width: 16, type: "canine" },
+    { number: 26, width: 14, type: "incisor" },
+    { number: 25, width: 14, type: "incisor" },
+    { number: 24, width: 14, type: "incisor" },
+    { number: 23, width: 14, type: "incisor" },
+    { number: 22, width: 16, type: "canine" },
+    { number: 21, width: 16, type: "premolar" },
+    { number: 20, width: 16, type: "premolar" },
+    { number: 19, width: 24, type: "molar" },
+    { number: 18, width: 22, type: "molar" },
+    { number: 17, width: 22, type: "molar" },
+  ]
+
+  // Calculate x positions
+  const calculatePositions = (teeth: typeof upperTeeth) => {
+    const totalWidth = teeth.reduce((sum, t) => sum + t.width + 2, 0)
+    const startX = (460 - totalWidth) / 2
+    let currentX = startX
+    return teeth.map(tooth => {
+      const x = currentX + tooth.width / 2
+      currentX += tooth.width + 2
+      return { ...tooth, x }
+    })
+  }
+
+  const upperPositions = calculatePositions(upperTeeth)
+  const lowerPositions = calculatePositions(lowerTeeth)
+
   return (
-    <div className="w-full bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+    <div className="w-full bg-gradient-to-b from-slate-50 to-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
       {/* Header */}
-      <div className="bg-gradient-to-r from-slate-50 to-slate-100 px-4 py-3 border-b border-slate-200">
+      <div className="bg-white px-4 py-3 border-b border-slate-100">
         <div className="flex items-center justify-between">
           <div>
             <h4 className="font-semibold text-slate-800 text-sm">Dental Chart</h4>
-            <p className="text-xs text-slate-500">Click teeth to mark as affected</p>
+            <p className="text-xs text-slate-500">Click on teeth to mark as affected</p>
           </div>
           <div className="flex items-center gap-4 text-xs">
             <div className="flex items-center gap-1.5">
-              <div className="w-3 h-3 rounded-full bg-white border-2 border-gray-300"></div>
+              <div className="w-4 h-4 rounded bg-gradient-to-b from-white to-gray-100 border border-gray-300 shadow-sm"></div>
               <span className="text-slate-600">Normal</span>
             </div>
             <div className="flex items-center gap-1.5">
-              <div className="w-3 h-3 rounded-full bg-red-500 border-2 border-red-400"></div>
-              <span className="text-slate-600">Selected</span>
+              <div className="w-4 h-4 rounded bg-red-500 border border-red-400 shadow-sm"></div>
+              <span className="text-slate-600">Affected</span>
             </div>
           </div>
         </div>
       </div>
 
+      {/* Dental Chart SVG */}
       <div className="p-4">
-        <div className="flex flex-col md:flex-row gap-6 justify-center items-center">
-          {/* Upper Jaw */}
-          <div className="relative">
-            <div className="text-center mb-2">
-              <span className="text-xs font-semibold text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full">Upper Jaw (Maxilla)</span>
-            </div>
-            <div className="flex justify-between text-[10px] font-bold text-slate-400 mb-1 px-2">
-              <span>RIGHT</span>
-              <span>LEFT</span>
-            </div>
-            <svg viewBox="0 0 380 160" className="w-full max-w-[380px] h-auto">
-              {/* Palate/Gum area */}
-              <path
-                d="M45,30 Q50,140 190,150 Q330,140 335,30 Q330,10 190,5 Q50,10 45,30"
-                fill="#f9a8b8"
-                stroke="#e88a9c"
-                strokeWidth={2}
-              />
-              {/* Palate ridges */}
-              <path d="M140,60 Q190,70 240,60" fill="none" stroke="#e88a9c" strokeWidth={1.5} opacity={0.6} />
-              <path d="M130,80 Q190,95 250,80" fill="none" stroke="#e88a9c" strokeWidth={1.5} opacity={0.6} />
-              <path d="M125,100 Q190,118 255,100" fill="none" stroke="#e88a9c" strokeWidth={1.5} opacity={0.6} />
-              
-              {/* Teeth */}
-              {upperTeethPositions.map((tooth) =>
-                renderTooth(tooth.number, tooth.x, tooth.y, tooth.rotation, tooth.type, true)
-              )}
-              
-              {/* Tooth numbers */}
-              {upperTeethPositions.map((tooth) => {
-                const offset = tooth.number <= 8 ? -18 : 18
-                const xOffset = tooth.number <= 8 
-                  ? -Math.cos((tooth.rotation * Math.PI) / 180) * 20
-                  : Math.cos((tooth.rotation * Math.PI) / 180) * 20
-                const yOffset = -Math.abs(Math.sin((tooth.rotation * Math.PI) / 180)) * 15 - 5
-                return (
-                  <text
-                    key={`num-${tooth.number}`}
-                    x={tooth.x + (tooth.number <= 8 ? -15 : 15)}
-                    y={tooth.y - 18}
-                    textAnchor="middle"
-                    fontSize={8}
-                    fill={selectedTeeth.includes(tooth.number) ? "#dc2626" : "#64748b"}
-                    fontWeight="bold"
-                  >
-                    {tooth.number}
-                  </text>
-                )
-              })}
-            </svg>
-          </div>
+        <svg viewBox="0 0 460 340" className="w-full max-w-[500px] mx-auto">
+          <defs>
+            {/* Tooth gradient for realistic look */}
+            <linearGradient id="toothGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stopColor="#ffffff" />
+              <stop offset="50%" stopColor="#f8f8f8" />
+              <stop offset="100%" stopColor="#e8e8e8" />
+            </linearGradient>
+            
+            {/* Gum gradient for upper jaw */}
+            <linearGradient id="upperGumGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stopColor="#e8a0a0" />
+              <stop offset="30%" stopColor="#d48888" />
+              <stop offset="70%" stopColor="#c97878" />
+              <stop offset="100%" stopColor="#e89898" />
+            </linearGradient>
+            
+            {/* Gum gradient for lower jaw */}
+            <linearGradient id="lowerGumGradient" x1="0%" y1="100%" x2="0%" y2="0%">
+              <stop offset="0%" stopColor="#e8a0a0" />
+              <stop offset="30%" stopColor="#d48888" />
+              <stop offset="70%" stopColor="#c97878" />
+              <stop offset="100%" stopColor="#e89898" />
+            </linearGradient>
+            
+            {/* Shadow filter */}
+            <filter id="gumShadow" x="-10%" y="-10%" width="120%" height="120%">
+              <feDropShadow dx="0" dy="2" stdDeviation="3" floodOpacity="0.15"/>
+            </filter>
+          </defs>
 
-          {/* Lower Jaw */}
-          <div className="relative">
-            <div className="text-center mb-2">
-              <span className="text-xs font-semibold text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full">Lower Jaw (Mandible)</span>
-            </div>
-            <div className="flex justify-between text-[10px] font-bold text-slate-400 mb-1 px-2">
-              <span>RIGHT</span>
-              <span>LEFT</span>
-            </div>
-            <svg viewBox="0 0 380 140" className="w-full max-w-[380px] h-auto">
-              {/* Tongue/Gum area */}
+          {/* Upper Jaw Section */}
+          <g transform="translate(0, 20)">
+            {/* Upper gum/gingiva */}
+            <path
+              d="M30,0 
+                 Q35,5 60,8
+                 Q120,15 230,18
+                 Q340,15 400,8
+                 Q425,5 430,0
+                 L430,55
+                 Q400,52 230,50
+                 Q60,52 30,55
+                 Z"
+              fill="url(#upperGumGradient)"
+              filter="url(#gumShadow)"
+            />
+            
+            {/* Gum line detail */}
+            <path
+              d="M50,50 Q230,44 410,50"
+              fill="none"
+              stroke="#b87070"
+              strokeWidth={1.5}
+              opacity={0.6}
+            />
+
+            {/* Upper teeth */}
+            <g transform="translate(0, 55)">
+              {upperPositions.map((tooth) => {
+                const height = tooth.type === "molar" ? 42 : 
+                              tooth.type === "premolar" ? 38 : 
+                              tooth.type === "canine" ? 44 : 40
+                return renderTooth(tooth.number, tooth.x, tooth.width, height, true, tooth.type)
+              })}
+            </g>
+          </g>
+
+          {/* Center line / bite indicator */}
+          <line x1="80" y1="165" x2="380" y2="165" stroke="#f1f5f9" strokeWidth="3" strokeDasharray="8,4" />
+
+          {/* Lower Jaw Section */}
+          <g transform="translate(0, 170)">
+            {/* Lower teeth */}
+            <g transform="translate(0, 0)">
+              {lowerPositions.map((tooth) => {
+                const height = tooth.type === "molar" ? 38 : 
+                              tooth.type === "premolar" ? 34 : 
+                              tooth.type === "canine" ? 40 : 36
+                return renderTooth(tooth.number, tooth.x, tooth.width, height, false, tooth.type)
+              })}
+            </g>
+
+            {/* Lower gum/gingiva */}
+            <g transform="translate(0, 38)">
+              {/* Gum line detail */}
               <path
-                d="M55,130 Q60,20 190,10 Q320,20 327,130 Q320,140 190,145 Q60,140 55,130"
-                fill="#f9a8b8"
-                stroke="#e88a9c"
-                strokeWidth={2}
+                d="M50,12 Q230,18 410,12"
+                fill="none"
+                stroke="#b87070"
+                strokeWidth={1.5}
+                opacity={0.6}
               />
-              {/* Tongue indication */}
-              <ellipse cx={190} cy={75} rx={70} ry={40} fill="#e88a9c" opacity={0.4} />
               
-              {/* Teeth */}
-              {lowerTeethPositions.map((tooth) =>
-                renderTooth(tooth.number, tooth.x, tooth.y, tooth.rotation, tooth.type, false)
-              )}
-              
-              {/* Tooth numbers */}
-              {lowerTeethPositions.map((tooth) => (
-                <text
-                  key={`num-${tooth.number}`}
-                  x={tooth.x + (tooth.number >= 25 ? -15 : 15)}
-                  y={tooth.y - 18}
-                  textAnchor="middle"
-                  fontSize={8}
-                  fill={selectedTeeth.includes(tooth.number) ? "#dc2626" : "#64748b"}
-                  fontWeight="bold"
-                >
-                  {tooth.number}
-                </text>
-              ))}
-            </svg>
-          </div>
-        </div>
+              <path
+                d="M30,10
+                   Q35,8 60,6
+                   Q120,2 230,0
+                   Q340,2 400,6
+                   Q425,8 430,10
+                   L430,65
+                   Q400,60 230,58
+                   Q60,60 30,65
+                   Z"
+                fill="url(#lowerGumGradient)"
+                filter="url(#gumShadow)"
+              />
+            </g>
+          </g>
+
+          {/* Labels */}
+          <text x="230" y="12" textAnchor="middle" fontSize="11" fontWeight="600" fill="#64748b">UPPER (Maxillary)</text>
+          <text x="230" y="332" textAnchor="middle" fontSize="11" fontWeight="600" fill="#64748b">LOWER (Mandibular)</text>
+          <text x="15" y="170" textAnchor="middle" fontSize="9" fontWeight="500" fill="#94a3b8" transform="rotate(-90, 15, 170)">RIGHT</text>
+          <text x="445" y="170" textAnchor="middle" fontSize="9" fontWeight="500" fill="#94a3b8" transform="rotate(90, 445, 170)">LEFT</text>
+        </svg>
       </div>
 
       {/* Selected teeth summary */}
       {selectedTeeth.length > 0 && (
         <div className="bg-red-50 border-t border-red-100 px-4 py-3">
-          <div className="flex items-start gap-2">
-            <div className="w-2 h-2 rounded-full bg-red-500 mt-1.5 flex-shrink-0"></div>
+          <div className="flex items-start gap-3">
+            <div className="w-5 h-5 rounded-full bg-red-500 flex items-center justify-center flex-shrink-0 mt-0.5">
+              <span className="text-white text-xs font-bold">{selectedTeeth.length}</span>
+            </div>
             <div>
-              <p className="text-xs font-semibold text-red-700">
-                {selectedTeeth.length} tooth/teeth selected
+              <p className="text-sm font-semibold text-red-800">
+                Affected Teeth
               </p>
-              <p className="text-xs text-red-600 mt-0.5">
+              <p className="text-xs text-red-600 mt-1 leading-relaxed">
                 {selectedTeeth.sort((a, b) => a - b).map(num => {
                   const tooth = [...teethData.upper, ...teethData.lower].find(t => t.number === num)
-                  return `#${num} (${tooth?.name})`
-                }).join(', ')}
+                  return `#${num} ${tooth?.name}`
+                }).join(' | ')}
               </p>
             </div>
           </div>
