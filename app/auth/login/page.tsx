@@ -66,12 +66,16 @@ function LoginContent() {
     setIsCheckingRedirect(false)
   }, [searchParams])
 
-  // Check for query params (verified success message only)
+  // Check for query params (success messages)
   useEffect(() => {
     const verified = searchParams.get("verified")
+    const registered = searchParams.get("registered")
     
     if (verified === "true") {
       setSuccessMessage("Email verified successfully! You can now log in.")
+      setError(null)
+    } else if (registered === "true") {
+      setSuccessMessage("Account created successfully! Please log in to continue.")
       setError(null)
     }
   }, [searchParams])
