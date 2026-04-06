@@ -10,14 +10,16 @@ export async function middleware(request: NextRequest) {
   if (pathname === "/" && code) {
     const redirectUrl = new URL("/auth/callback", request.url)
     redirectUrl.searchParams.set("code", code)
-    // Pass type parameter if present - DO NOT default to recovery
-    // Let the callback determine the correct flow based on session
+    // Pass type parameter if present
     const type = request.nextUrl.searchParams.get("type")
     if (type) {
       redirectUrl.searchParams.set("type", type)
     }
     return NextResponse.redirect(redirectUrl)
   }
+  
+  // If there's a code parameter on /auth/callback, pass through to let the route handler process it
+  // This handles cases where Supabase redirects directly to callback with a code
   
   // If there's an error parameter at root, redirect to login with error message
   if (pathname === "/" && error) {

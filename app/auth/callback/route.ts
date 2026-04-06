@@ -15,18 +15,9 @@ export async function GET(request: Request) {
     const { error, data } = await supabase.auth.exchangeCodeForSession(code)
     
     if (!error && data?.session) {
-      const session = data.session
-      
-      // Check if this is a password recovery flow
-      // For password recovery, Supabase sets specific indicators:
-      // 1. The type parameter is "recovery"
-      // 2. The user's app_metadata may have recovery indicators
-      // 3. The AMR claim may include "recovery" method
-      const amr = session.user?.app_metadata?.amr
-      const hasRecoveryAmr = Array.isArray(amr) && amr.some((m: { method?: string }) => m.method === "recovery")
-      const isRecovery = type === "recovery" || hasRecoveryAmr
-      
-      if (isRecovery) {
+      // If type is explicitly recovery, redirect to reset password
+      // This is the most reliable check as it comes from our own redirect URL
+      if (type === "recovery") {
         return NextResponse.redirect(`${origin}/auth/reset-password`)
       }
       
@@ -35,7 +26,7 @@ export async function GET(request: Request) {
       const { data: profile } = await supabase
         .from("profiles")
         .select("role")
-        .eq("id", session.user.id)
+        .eq("id", data.session.user.id)
         .single()
       
       if (profile?.role === "admin") {
@@ -44,9 +35,20 @@ export async function GET(request: Request) {
       return NextResponse.redirect(`${origin}/patient`)
     }
     
-    // If code exchange failed, redirect to login with error
+    // If code exchange failed but type is recovery, still try to go to reset password
+    // The user might already have a session from clicking the link
+    if (type === "recovery") {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (session) {
+        return NextResponse.redirect(`${origin}/auth/reset-password`)
+      }
+      // No session and code failed - link may be expired
+      return NextResponse.redirect(`${origin}/auth/forgot-password?expired=true`)
+    }
+    
+    // If code exchange failed for non-recovery, redirect to login
     if (error) {
-      return NextResponse.redirect(`${origin}/auth/login?error=verification_failed`)
+      return NextResponse.redirect(`${origin}/auth/login`)
     }
   }
 
