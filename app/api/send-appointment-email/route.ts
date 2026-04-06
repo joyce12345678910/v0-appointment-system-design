@@ -394,9 +394,6 @@ function generateCancellationEmail(params: EmailParams): string {
           </tr>
           <tr>
             <td style="padding: 40px 30px; text-align: center;">
-              <div style="width: 60px; height: 60px; background-color: #fef2f2; border-radius: 50%; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center;">
-                <span style="font-size: 30px; color: #dc2626;">!</span>
-              </div>
               <h2 style="color: #dc2626; margin: 0 0 20px; font-size: 24px;">Appointment Cancelled</h2>
               <p style="color: #6b7280; margin: 0 0 20px; font-size: 16px;">Dear ${patientName},</p>
               <p style="color: #6b7280; margin: 0 0 20px; font-size: 14px;">
