@@ -65,6 +65,27 @@ function ResetPasswordForm() {
           }
         }
 
+        // Check for token_hash parameter (from our custom Resend email)
+        const tokenHash = searchParams.get("token_hash")
+        const type = searchParams.get("type")
+        if (tokenHash && type === "recovery") {
+          const { error: verifyError } = await supabase.auth.verifyOtp({
+            token_hash: tokenHash,
+            type: "recovery"
+          })
+          if (verifyError) {
+            console.log("[v0] Token hash verification failed:", verifyError.message)
+            setError("The password reset link is invalid or has expired. Please request a new one.")
+            setIsChecking(false)
+            return
+          }
+          // Clear the params from URL
+          window.history.replaceState(null, "", "/auth/reset-password")
+          setIsReady(true)
+          setIsChecking(false)
+          return
+        }
+
         // Check for code parameter (PKCE flow)
         const code = searchParams.get("code")
         if (code) {

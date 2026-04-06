@@ -1,38 +1,12 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
+import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { MapPin, Facebook, Phone, Mail, Calendar, Shield, Users, Star, ChevronRight, Clock, Menu, X } from "lucide-react"
 
 export default function HomePage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const router = useRouter()
-
-  // Handle hash fragments - these can only be read client-side
-  useEffect(() => {
-    const hash = window.location.hash.substring(1)
-    if (hash) {
-      const hashParams = new URLSearchParams(hash)
-      const accessToken = hashParams.get("access_token")
-      const hashType = hashParams.get("type")
-      const hashError = hashParams.get("error")
-      const errorCode = hashParams.get("error_code")
-      
-      // If there's an access token for recovery, redirect to reset password
-      if (accessToken && hashType === "recovery") {
-        router.replace("/auth/reset-password" + window.location.hash)
-        return
-      }
-      
-      // If there's an error in the hash
-      if (hashError || errorCode === "otp_expired") {
-        router.replace("/auth/reset-password?error=expired")
-        return
-      }
-    }
-  }, [router])
 
   return (
     <div className="min-h-screen bg-white">
