@@ -23,13 +23,11 @@ function ResetPasswordForm() {
 
   useEffect(() => {
     const handleAuth = async () => {
-      // Check for error in URL params
+      // Check for error in URL params - redirect to forgot-password silently
       const errorParam = searchParams.get("error")
-      const errorDescription = searchParams.get("error_description")
       
       if (errorParam) {
-        setError(errorDescription || "Invalid or expired reset link. Please request a new one.")
-        setIsReady(true)
+        router.push("/auth/forgot-password")
         return
       }
 
@@ -43,11 +41,9 @@ function ResetPasswordForm() {
         const hashError = hashParams.get("error")
         const hashErrorCode = hashParams.get("error_code")
         
-        // Check for errors in hash first
+        // Check for errors in hash - redirect to forgot-password silently
         if (hashError || hashErrorCode === "otp_expired") {
-          setError("Invalid or expired reset link. Please request a new one.")
-          window.history.replaceState(null, "", "/auth/reset-password")
-          setIsReady(true)
+          router.push("/auth/forgot-password")
           return
         }
         
@@ -59,8 +55,7 @@ function ResetPasswordForm() {
           })
           
           if (error) {
-            setError("Invalid or expired reset link. Please request a new one.")
-            setIsReady(true)
+            router.push("/auth/forgot-password")
             return
           }
           
@@ -76,8 +71,7 @@ function ResetPasswordForm() {
       if (code) {
         const { error } = await supabase.auth.exchangeCodeForSession(code)
         if (error) {
-          setError("Invalid or expired reset link. Please request a new one.")
-          setIsReady(true)
+          router.push("/auth/forgot-password")
           return
         }
         setIsReady(true)
@@ -93,13 +87,12 @@ function ResetPasswordForm() {
         return
       }
 
-      // No code and no session - show error
-      setError("Invalid or expired reset link. Please request a new one.")
-      setIsReady(true)
+      // No code and no session - redirect to forgot-password silently
+      router.push("/auth/forgot-password")
     }
     
     handleAuth()
-  }, [supabase.auth, searchParams])
+  }, [supabase.auth, searchParams, router])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -188,17 +181,6 @@ function ResetPasswordForm() {
                 <div className="rounded-lg bg-emerald-50 p-4 text-sm text-emerald-800 font-medium border border-emerald-100">
                   Password reset successful! Redirecting to login...
                 </div>
-              </div>
-            ) : error && !password ? (
-              <div className="flex flex-col gap-4">
-                <div className="rounded-lg bg-red-50 p-4 text-sm text-red-800 font-medium border border-red-100">
-                  {error}
-                </div>
-                <Link href="/auth/forgot-password">
-                  <Button className="w-full h-11 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-lg">
-                    Request New Reset Link
-                  </Button>
-                </Link>
               </div>
             ) : (
               <form onSubmit={handleSubmit} className="space-y-5">

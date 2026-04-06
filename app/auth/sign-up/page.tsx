@@ -1,7 +1,6 @@
 "use client"
 
 import type React from "react"
-import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -65,7 +64,6 @@ export default function SignUpPage() {
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault()
-    const supabase = createClient()
     setIsLoading(true)
     setError(null)
 
@@ -95,31 +93,29 @@ export default function SignUpPage() {
       const uploadData = await uploadResponse.json()
       validIdUrl = uploadData.url
 
-      // Create the user account
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          emailRedirectTo: `${window.location.origin}/auth/callback?type=signup`,
-          data: {
-            full_name: fullName,
-            role: "patient",
-            phone: phone,
-            date_of_birth: dateOfBirth,
-            address: address,
-            valid_id_url: validIdUrl,
-          },
-        },
+      // Create the user account via API (auto-confirms email and sends welcome email)
+      const signUpResponse = await fetch("/api/auth/sign-up", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email,
+          password,
+          fullName,
+          phone,
+          dateOfBirth,
+          address,
+          validIdUrl,
+        }),
       })
 
-      if (error) throw error
+      const signUpData = await signUpResponse.json()
 
-      console.log("[v0] Sign up successful, user:", data.user?.id)
-      console.log("[v0] Redirecting to sign-up-success page")
-      
-      if (data.user) {
-        router.push("/auth/sign-up-success")
+      if (!signUpResponse.ok) {
+        throw new Error(signUpData.error || "Failed to create account")
       }
+
+      // Redirect to login page with success message
+      router.push("/auth/login?registered=true")
     } catch (error: unknown) {
       console.error("[v0] Sign up error:", error)
       setError(error instanceof Error ? error.message : "An error occurred")
