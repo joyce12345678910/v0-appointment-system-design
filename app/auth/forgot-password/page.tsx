@@ -7,23 +7,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import Link from "next/link"
-import { useState, useEffect, Suspense } from "react"
-import { useSearchParams } from "next/navigation"
+import { useState, Suspense } from "react"
 
 function ForgotPasswordForm() {
   const [email, setEmail] = useState("")
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [success, setSuccess] = useState(false)
-  const [expiredLink, setExpiredLink] = useState(false)
-  const searchParams = useSearchParams()
-
-  useEffect(() => {
-    // Check if redirected from expired link
-    if (searchParams.get("expired") === "true") {
-      setExpiredLink(true)
-    }
-  }, [searchParams])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -115,11 +105,6 @@ function ForgotPasswordForm() {
               </div>
             ) : (
               <form onSubmit={handleSubmit} className="space-y-5">
-                {expiredLink && (
-                  <div className="rounded-lg bg-amber-50 p-4 text-sm text-amber-800 font-medium border border-amber-200">
-                    Your password reset link has expired. Please request a new one below.
-                  </div>
-                )}
                 <div className="space-y-2">
                   <Label htmlFor="email" className="text-gray-700 font-medium">
                     Email Address
