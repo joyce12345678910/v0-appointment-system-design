@@ -10,17 +10,44 @@ export async function GET(request: Request) {
 
   const supabase = await createClient()
 
-  // Handle PKCE code exchange (OAuth flow)
+  // For recovery flow, check for existing session FIRST
+  // This handles cases where the user already clicked the link and has a valid session
+  if (type === "recovery") {
+    // First try to exchange the code if provided
+    if (code) {
+      const { error, data } = await supabase.auth.exchangeCodeForSession(code)
+      
+      if (!error && data?.session) {
+        // Code exchange successful, redirect to reset password
+        return NextResponse.redirect(`${origin}/auth/reset-password`)
+      }
+      
+      // Code exchange failed, but check if there's already a valid session
+      // This can happen if user clicked the link multiple times
+      const { data: { session } } = await supabase.auth.getSession()
+      if (session) {
+        // User has a valid session, let them reset password
+        return NextResponse.redirect(`${origin}/auth/reset-password`)
+      }
+      // No valid session and code failed - link is expired or invalid
+      return NextResponse.redirect(`${origin}/auth/forgot-password?expired=true`)
+    }
+    
+    // No code but type is recovery - check for session
+    const { data: { session } } = await supabase.auth.getSession()
+    if (session) {
+      return NextResponse.redirect(`${origin}/auth/reset-password`)
+    }
+    
+    // No code and no session - redirect to forgot password
+    return NextResponse.redirect(`${origin}/auth/forgot-password?expired=true`)
+  }
+
+  // Handle PKCE code exchange for non-recovery flows (signup verification, etc.)
   if (code) {
     const { error, data } = await supabase.auth.exchangeCodeForSession(code)
     
     if (!error && data?.session) {
-      // If type is explicitly recovery, redirect to reset password
-      // This is the most reliable check as it comes from our own redirect URL
-      if (type === "recovery") {
-        return NextResponse.redirect(`${origin}/auth/reset-password`)
-      }
-      
       // Not recovery - this is either sign-up verification or regular login
       // Redirect to patient dashboard or admin based on role
       const { data: profile } = await supabase
@@ -35,21 +62,23 @@ export async function GET(request: Request) {
       return NextResponse.redirect(`${origin}/patient`)
     }
     
-    // If code exchange failed but type is recovery, still try to go to reset password
-    // The user might already have a session from clicking the link
-    if (type === "recovery") {
-      const { data: { session } } = await supabase.auth.getSession()
-      if (session) {
-        return NextResponse.redirect(`${origin}/auth/reset-password`)
+    // Code exchange failed for non-recovery, check for existing session
+    const { data: { session } } = await supabase.auth.getSession()
+    if (session) {
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("role")
+        .eq("id", session.user.id)
+        .single()
+      
+      if (profile?.role === "admin") {
+        return NextResponse.redirect(`${origin}/admin`)
       }
-      // No session and code failed - link may be expired
-      return NextResponse.redirect(`${origin}/auth/forgot-password?expired=true`)
+      return NextResponse.redirect(`${origin}/patient`)
     }
     
-    // If code exchange failed for non-recovery, redirect to login
-    if (error) {
-      return NextResponse.redirect(`${origin}/auth/login`)
-    }
+    // No session and code failed - redirect to login
+    return NextResponse.redirect(`${origin}/auth/login`)
   }
 
   // Handle token-based verification (email verification, magic link)

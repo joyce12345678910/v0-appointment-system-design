@@ -15,6 +15,7 @@ export default function HomePage() {
     const url = new URL(window.location.href)
     const code = url.searchParams.get("code")
     const type = url.searchParams.get("type")
+    const error = url.searchParams.get("error")
     
     // Check for code in query params
     if (code) {
@@ -32,11 +33,35 @@ export default function HomePage() {
       const hashParams = new URLSearchParams(hash)
       const accessToken = hashParams.get("access_token")
       const hashType = hashParams.get("type")
+      const hashError = hashParams.get("error")
       
       // If there's an access token in the hash, this is a direct auth flow
       if (accessToken && hashType === "recovery") {
         // Redirect to reset password page - the client will pick up the tokens
         router.replace("/auth/reset-password" + window.location.hash)
+        return
+      }
+      
+      // If there's an error in the hash, check if it's recovery-related
+      if (hashError) {
+        const errorDescription = hashParams.get("error_description") || ""
+        // Don't redirect to login for recovery errors - go to forgot password
+        if (errorDescription.toLowerCase().includes("recovery") || 
+            errorDescription.toLowerCase().includes("reset") ||
+            errorDescription.toLowerCase().includes("expired")) {
+          router.replace("/auth/forgot-password?expired=true")
+          return
+        }
+      }
+    }
+    
+    // If there's an error in query params (from Supabase redirect)
+    if (error) {
+      const errorDescription = url.searchParams.get("error_description") || ""
+      // Check if it's a recovery-related error
+      if (errorDescription.toLowerCase().includes("recovery") || 
+          errorDescription.toLowerCase().includes("reset")) {
+        router.replace("/auth/forgot-password?expired=true")
         return
       }
     }

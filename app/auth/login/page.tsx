@@ -16,8 +16,61 @@ function LoginContent() {
   const [error, setError] = useState<string | null>(null)
   const [successMessage, setSuccessMessage] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
-  const router = useRouter()
+  const [isCheckingRedirect, setIsCheckingRedirect] = useState(true)
+  const router = useRouter() // Used for login redirect
   const searchParams = useSearchParams()
+
+  // Check for hash fragment errors AND query param errors (from Supabase auth redirects)
+  // This runs FIRST and blocks rendering until checked
+  useEffect(() => {
+    // Debug: Log the full URL to understand what we're receiving
+    console.log("[v0] Login page loaded with URL:", window.location.href)
+    console.log("[v0] Hash:", window.location.hash)
+    console.log("[v0] Search:", window.location.search)
+    
+    // Check hash fragment first
+    const hash = window.location.hash.substring(1)
+    if (hash) {
+      console.log("[v0] Found hash fragment:", hash)
+      const hashParams = new URLSearchParams(hash)
+      const hashError = hashParams.get("error")
+      const errorCode = hashParams.get("error_code")
+      const errorDescription = hashParams.get("error_description")
+      
+      console.log("[v0] Hash params:", { hashError, errorCode, errorDescription })
+      
+      // If there's an OTP expired error or access denied, redirect to forgot-password
+      if (hashError === "access_denied" || errorCode === "otp_expired" || 
+          (errorDescription && errorDescription.toLowerCase().includes("expired"))) {
+        console.log("[v0] Redirecting to forgot-password due to expired link")
+        window.location.href = "/auth/forgot-password?expired=true"
+        return
+      }
+      
+      // For other auth errors in hash, show a message
+      if (hashError) {
+        setError(errorDescription ? decodeURIComponent(errorDescription.replace(/\+/g, ' ')) : "Authentication error occurred")
+        window.history.replaceState(null, "", "/auth/login")
+      }
+    }
+    
+    // Also check query params for errors
+    const queryError = searchParams.get("error")
+    const queryErrorCode = searchParams.get("error_code")
+    const queryErrorDescription = searchParams.get("error_description")
+    
+    console.log("[v0] Query params:", { queryError, queryErrorCode, queryErrorDescription })
+    
+    if (queryError === "link_expired" || queryError === "access_denied" || 
+        queryErrorCode === "otp_expired" ||
+        (queryErrorDescription && queryErrorDescription.toLowerCase().includes("expired"))) {
+      console.log("[v0] Redirecting to forgot-password due to query param error")
+      window.location.href = "/auth/forgot-password?expired=true"
+      return
+    }
+    
+    setIsCheckingRedirect(false)
+  }, [searchParams])
 
   // Check for query params (verified success message only)
   useEffect(() => {
@@ -77,6 +130,15 @@ function LoginContent() {
     } finally {
       setIsLoading(false)
     }
+  }
+
+  // Show loading while checking for redirects
+  if (isCheckingRedirect) {
+    return (
+      <div className="min-h-screen w-full bg-gradient-to-br from-emerald-600 via-green-500 to-teal-500 flex items-center justify-center">
+        <div className="text-white text-lg">Loading...</div>
+      </div>
+    )
   }
 
   return (

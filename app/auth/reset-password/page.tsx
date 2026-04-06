@@ -40,6 +40,16 @@ function ResetPasswordForm() {
         const accessToken = hashParams.get("access_token")
         const refreshToken = hashParams.get("refresh_token")
         const hashType = hashParams.get("type")
+        const hashError = hashParams.get("error")
+        const hashErrorCode = hashParams.get("error_code")
+        
+        // Check for errors in hash first
+        if (hashError || hashErrorCode === "otp_expired") {
+          setError("Invalid or expired reset link. Please request a new one.")
+          window.history.replaceState(null, "", "/auth/reset-password")
+          setIsReady(true)
+          return
+        }
         
         if (accessToken && refreshToken && hashType === "recovery") {
           // Set the session from the hash tokens
