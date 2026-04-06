@@ -7,28 +7,44 @@ export async function GET(request: Request) {
   const token = searchParams.get("token")
   const type = searchParams.get("type")
   const next = searchParams.get("next") ?? searchParams.get("redirect_to") ?? "/patient"
+  
+  // Debug logging
+  console.log("[v0] Auth callback received:", { 
+    code: code ? "present" : "missing", 
+    token: token ? "present" : "missing", 
+    type, 
+    origin,
+    fullUrl: request.url 
+  })
 
   const supabase = await createClient()
 
   // For recovery flow, check for existing session FIRST
   // This handles cases where the user already clicked the link and has a valid session
   if (type === "recovery") {
+    console.log("[v0] Recovery flow detected")
     // First try to exchange the code if provided
     if (code) {
+      console.log("[v0] Attempting code exchange for recovery")
       const { error, data } = await supabase.auth.exchangeCodeForSession(code)
       
       if (!error && data?.session) {
+        console.log("[v0] Code exchange successful, redirecting to reset-password")
         // Code exchange successful, redirect to reset password
         return NextResponse.redirect(`${origin}/auth/reset-password`)
       }
+      
+      console.log("[v0] Code exchange failed:", error?.message)
       
       // Code exchange failed, but check if there's already a valid session
       // This can happen if user clicked the link multiple times
       const { data: { session } } = await supabase.auth.getSession()
       if (session) {
+        console.log("[v0] Existing session found, redirecting to reset-password")
         // User has a valid session, let them reset password
         return NextResponse.redirect(`${origin}/auth/reset-password`)
       }
+      console.log("[v0] No session, redirecting to forgot-password with expired=true")
       // No valid session and code failed - link is expired or invalid
       return NextResponse.redirect(`${origin}/auth/forgot-password?expired=true`)
     }
