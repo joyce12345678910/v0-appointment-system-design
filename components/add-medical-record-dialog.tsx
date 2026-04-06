@@ -63,93 +63,157 @@ const teethData = {
   ],
 }
 
-// Modern tooth icon component
-function ToothIcon({ 
-  type, 
-  isSelected, 
-  isUpper 
-}: { 
-  type: string
-  isSelected: boolean
-  isUpper: boolean 
-}) {
-  const baseColor = isSelected ? "#ef4444" : "#e2e8f0"
-  const strokeColor = isSelected ? "#dc2626" : "#94a3b8"
-  const rootColor = isSelected ? "#fca5a5" : "#cbd5e1"
-  
-  // Crown shapes for different tooth types
-  if (type === "molar") {
-    return (
-      <svg viewBox="0 0 40 56" className="w-full h-full">
-        {/* Roots */}
-        <g transform={isUpper ? "translate(0, 0)" : "rotate(180, 20, 28)"}>
-          <path d="M10,36 L8,52 Q7,56 10,54 L12,40" fill={rootColor} stroke={strokeColor} strokeWidth="0.5" />
-          <path d="M20,38 L20,54 Q20,56 22,54 L22,38" fill={rootColor} stroke={strokeColor} strokeWidth="0.5" />
-          <path d="M30,36 L32,52 Q33,56 30,54 L28,40" fill={rootColor} stroke={strokeColor} strokeWidth="0.5" />
-        </g>
-        {/* Crown */}
-        <rect x="4" y={isUpper ? "8" : "12"} width="32" height="28" rx="4" fill={baseColor} stroke={strokeColor} strokeWidth="1.5" />
-        {/* Occlusal surface detail */}
-        <path d={`M12,${isUpper ? "16" : "20"} L28,${isUpper ? "16" : "20"} M12,${isUpper ? "28" : "32"} L28,${isUpper ? "28" : "32"} M20,${isUpper ? "14" : "18"} L20,${isUpper ? "30" : "34"}`} stroke={strokeColor} strokeWidth="0.75" opacity="0.5" />
-      </svg>
-    )
-  }
-  
-  if (type === "premolar") {
-    return (
-      <svg viewBox="0 0 32 52" className="w-full h-full">
-        {/* Root */}
-        <g transform={isUpper ? "translate(0, 0)" : "rotate(180, 16, 26)"}>
-          <path d="M16,36 L14,48 Q13,52 16,50 Q19,52 18,48 L16,36" fill={rootColor} stroke={strokeColor} strokeWidth="0.5" />
-        </g>
-        {/* Crown */}
-        <rect x="4" y={isUpper ? "8" : "10"} width="24" height="26" rx="4" fill={baseColor} stroke={strokeColor} strokeWidth="1.5" />
-        {/* Surface detail */}
-        <ellipse cx="16" cy={isUpper ? "21" : "23"} rx="6" ry="4" fill="none" stroke={strokeColor} strokeWidth="0.75" opacity="0.5" />
-      </svg>
-    )
-  }
-  
-  if (type === "canine") {
-    return (
-      <svg viewBox="0 0 28 54" className="w-full h-full">
-        {/* Root */}
-        <g transform={isUpper ? "translate(0, 0)" : "rotate(180, 14, 27)"}>
-          <path d="M14,36 L12,50 Q11,54 14,52 Q17,54 16,50 L14,36" fill={rootColor} stroke={strokeColor} strokeWidth="0.5" />
-        </g>
-        {/* Crown - pointed */}
-        <path d={`M4,${isUpper ? "34" : "18"} L14,${isUpper ? "8" : "36"} L24,${isUpper ? "34" : "18"} Q26,${isUpper ? "36" : "16"} 24,${isUpper ? "38" : "14"} L4,${isUpper ? "38" : "14"} Q2,${isUpper ? "36" : "16"} 4,${isUpper ? "34" : "18"}`} fill={baseColor} stroke={strokeColor} strokeWidth="1.5" />
-      </svg>
-    )
-  }
-  
-  // Incisor
-  return (
-    <svg viewBox="0 0 24 50" className="w-full h-full">
-      {/* Root */}
-      <g transform={isUpper ? "translate(0, 0)" : "rotate(180, 12, 25)"}>
-        <path d="M12,32 L10,46 Q9,50 12,48 Q15,50 14,46 L12,32" fill={rootColor} stroke={strokeColor} strokeWidth="0.5" />
-      </g>
-      {/* Crown - rectangular */}
-      <rect x="3" y={isUpper ? "8" : "12"} width="18" height="22" rx="3" fill={baseColor} stroke={strokeColor} strokeWidth="1.5" />
-    </svg>
-  )
-}
-
 interface DentalChartProps {
   selectedTeeth: number[]
   onToothClick: (toothNumber: number) => void
 }
 
 function DentalChart({ selectedTeeth, onToothClick }: DentalChartProps) {
-  const getToothSize = (type: string) => {
+  // Tooth positions for upper arch (arranged in U shape from overhead view)
+  const upperTeethPositions = [
+    // Right side (1-8) - patient's right
+    { number: 1, x: 45, y: 35, rotation: -70, type: "molar" },
+    { number: 2, x: 55, y: 55, rotation: -55, type: "molar" },
+    { number: 3, x: 70, y: 75, rotation: -40, type: "molar" },
+    { number: 4, x: 88, y: 95, rotation: -30, type: "premolar" },
+    { number: 5, x: 108, y: 112, rotation: -20, type: "premolar" },
+    { number: 6, x: 130, y: 125, rotation: -10, type: "canine" },
+    { number: 7, x: 152, y: 132, rotation: -3, type: "incisor" },
+    { number: 8, x: 175, y: 136, rotation: 0, type: "incisor" },
+    // Left side (9-16) - patient's left
+    { number: 9, x: 198, y: 136, rotation: 0, type: "incisor" },
+    { number: 10, x: 221, y: 132, rotation: 3, type: "incisor" },
+    { number: 11, x: 243, y: 125, rotation: 10, type: "canine" },
+    { number: 12, x: 265, y: 112, rotation: 20, type: "premolar" },
+    { number: 13, x: 285, y: 95, rotation: 30, type: "premolar" },
+    { number: 14, x: 303, y: 75, rotation: 40, type: "molar" },
+    { number: 15, x: 318, y: 55, rotation: 55, type: "molar" },
+    { number: 16, x: 328, y: 35, rotation: 70, type: "molar" },
+  ]
+
+  // Tooth positions for lower arch
+  const lowerTeethPositions = [
+    // Right side (32-25) - patient's right
+    { number: 32, x: 55, y: 35, rotation: 70, type: "molar" },
+    { number: 31, x: 68, y: 55, rotation: 55, type: "molar" },
+    { number: 30, x: 85, y: 72, rotation: 40, type: "molar" },
+    { number: 29, x: 103, y: 88, rotation: 28, type: "premolar" },
+    { number: 28, x: 123, y: 100, rotation: 18, type: "premolar" },
+    { number: 27, x: 143, y: 108, rotation: 8, type: "canine" },
+    { number: 26, x: 163, y: 112, rotation: 2, type: "incisor" },
+    { number: 25, x: 182, y: 114, rotation: 0, type: "incisor" },
+    // Left side (24-17) - patient's left
+    { number: 24, x: 200, y: 114, rotation: 0, type: "incisor" },
+    { number: 23, x: 219, y: 112, rotation: -2, type: "incisor" },
+    { number: 22, x: 239, y: 108, rotation: -8, type: "canine" },
+    { number: 21, x: 259, y: 100, rotation: -18, type: "premolar" },
+    { number: 20, x: 279, y: 88, rotation: -28, type: "premolar" },
+    { number: 19, x: 297, y: 72, rotation: -40, type: "molar" },
+    { number: 18, x: 314, y: 55, rotation: -55, type: "molar" },
+    { number: 17, x: 327, y: 35, rotation: -70, type: "molar" },
+  ]
+
+  const getToothDimensions = (type: string) => {
     switch (type) {
-      case "molar": return { width: 40, height: 56 }
-      case "premolar": return { width: 32, height: 52 }
-      case "canine": return { width: 28, height: 54 }
-      case "incisor": return { width: 24, height: 50 }
-      default: return { width: 28, height: 50 }
+      case "molar": return { width: 26, height: 30 }
+      case "premolar": return { width: 20, height: 24 }
+      case "canine": return { width: 16, height: 22 }
+      case "incisor": return { width: 14, height: 20 }
+      default: return { width: 18, height: 22 }
     }
+  }
+
+  const renderTooth = (
+    number: number,
+    x: number,
+    y: number,
+    rotation: number,
+    type: string,
+    isUpper: boolean
+  ) => {
+    const isSelected = selectedTeeth.includes(number)
+    const dims = getToothDimensions(type)
+    const fillColor = isSelected ? "#ef4444" : "#ffffff"
+    const strokeColor = isSelected ? "#dc2626" : "#d1d5db"
+    const grooveColor = isSelected ? "#fca5a5" : "#9ca3af"
+
+    return (
+      <g
+        key={number}
+        transform={`translate(${x}, ${y}) rotate(${rotation})`}
+        onClick={() => onToothClick(number)}
+        className="cursor-pointer transition-all duration-150 hover:opacity-80"
+        style={{ filter: isSelected ? "drop-shadow(0 0 4px rgba(239, 68, 68, 0.5))" : "none" }}
+      >
+        <title>#{number} - {[...teethData.upper, ...teethData.lower].find(t => t.number === number)?.name}</title>
+        
+        {/* Tooth shape based on type */}
+        {type === "molar" && (
+          <>
+            <rect
+              x={-dims.width / 2}
+              y={-dims.height / 2}
+              width={dims.width}
+              height={dims.height}
+              rx={5}
+              ry={5}
+              fill={fillColor}
+              stroke={strokeColor}
+              strokeWidth={2}
+            />
+            {/* Cross groove pattern for molars */}
+            <line x1={-dims.width / 4} y1={0} x2={dims.width / 4} y2={0} stroke={grooveColor} strokeWidth={1.5} />
+            <line x1={0} y1={-dims.height / 4} x2={0} y2={dims.height / 4} stroke={grooveColor} strokeWidth={1.5} />
+          </>
+        )}
+        
+        {type === "premolar" && (
+          <>
+            <ellipse
+              cx={0}
+              cy={0}
+              rx={dims.width / 2}
+              ry={dims.height / 2}
+              fill={fillColor}
+              stroke={strokeColor}
+              strokeWidth={2}
+            />
+            {/* Simple groove for premolars */}
+            <line x1={-dims.width / 5} y1={0} x2={dims.width / 5} y2={0} stroke={grooveColor} strokeWidth={1.5} />
+          </>
+        )}
+        
+        {type === "canine" && (
+          <>
+            <ellipse
+              cx={0}
+              cy={0}
+              rx={dims.width / 2}
+              ry={dims.height / 2}
+              fill={fillColor}
+              stroke={strokeColor}
+              strokeWidth={2}
+            />
+            {/* Point indicator for canines */}
+            <circle cx={0} cy={0} r={3} fill={grooveColor} />
+          </>
+        )}
+        
+        {type === "incisor" && (
+          <>
+            <ellipse
+              cx={0}
+              cy={0}
+              rx={dims.width / 2}
+              ry={dims.height / 2}
+              fill={fillColor}
+              stroke={strokeColor}
+              strokeWidth={2}
+            />
+          </>
+        )}
+      </g>
+    )
   }
 
   return (
@@ -159,15 +223,15 @@ function DentalChart({ selectedTeeth, onToothClick }: DentalChartProps) {
         <div className="flex items-center justify-between">
           <div>
             <h4 className="font-semibold text-slate-800 text-sm">Dental Chart</h4>
-            <p className="text-xs text-slate-500">Click to select affected teeth</p>
+            <p className="text-xs text-slate-500">Click teeth to mark as affected</p>
           </div>
           <div className="flex items-center gap-4 text-xs">
             <div className="flex items-center gap-1.5">
-              <div className="w-3 h-3 rounded-sm bg-slate-200 border border-slate-300"></div>
+              <div className="w-3 h-3 rounded-full bg-white border-2 border-gray-300"></div>
               <span className="text-slate-600">Normal</span>
             </div>
             <div className="flex items-center gap-1.5">
-              <div className="w-3 h-3 rounded-sm bg-red-500 border border-red-400"></div>
+              <div className="w-3 h-3 rounded-full bg-red-500 border-2 border-red-400"></div>
               <span className="text-slate-600">Selected</span>
             </div>
           </div>
@@ -175,94 +239,98 @@ function DentalChart({ selectedTeeth, onToothClick }: DentalChartProps) {
       </div>
 
       <div className="p-4">
-        {/* Upper Jaw */}
-        <div className="mb-1">
-          <div className="flex items-center justify-between px-2 mb-2">
-            <span className="text-[10px] font-bold text-slate-400 tracking-wider">RIGHT</span>
-            <span className="text-xs font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded">UPPER JAW</span>
-            <span className="text-[10px] font-bold text-slate-400 tracking-wider">LEFT</span>
-          </div>
-          
-          {/* Upper teeth row */}
-          <div className="flex justify-center items-end gap-0.5 pb-2">
-            {teethData.upper.map((tooth) => {
-              const size = getToothSize(tooth.type)
-              const isSelected = selectedTeeth.includes(tooth.number)
-              return (
-                <button
-                  key={tooth.number}
-                  onClick={() => onToothClick(tooth.number)}
-                  className={`relative flex flex-col items-center transition-all duration-150 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-1 rounded ${isSelected ? 'z-10' : ''}`}
-                  title={`#${tooth.number} - ${tooth.name}`}
-                  style={{ width: size.width, height: size.height + 16 }}
-                >
-                  <div style={{ width: size.width, height: size.height }}>
-                    <ToothIcon type={tooth.type} isSelected={isSelected} isUpper={true} />
-                  </div>
-                  <span className={`text-[9px] font-bold mt-0.5 ${isSelected ? 'text-red-600' : 'text-slate-500'}`}>
+        <div className="flex flex-col md:flex-row gap-6 justify-center items-center">
+          {/* Upper Jaw */}
+          <div className="relative">
+            <div className="text-center mb-2">
+              <span className="text-xs font-semibold text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full">Upper Jaw (Maxilla)</span>
+            </div>
+            <div className="flex justify-between text-[10px] font-bold text-slate-400 mb-1 px-2">
+              <span>RIGHT</span>
+              <span>LEFT</span>
+            </div>
+            <svg viewBox="0 0 380 160" className="w-full max-w-[380px] h-auto">
+              {/* Palate/Gum area */}
+              <path
+                d="M45,30 Q50,140 190,150 Q330,140 335,30 Q330,10 190,5 Q50,10 45,30"
+                fill="#f9a8b8"
+                stroke="#e88a9c"
+                strokeWidth={2}
+              />
+              {/* Palate ridges */}
+              <path d="M140,60 Q190,70 240,60" fill="none" stroke="#e88a9c" strokeWidth={1.5} opacity={0.6} />
+              <path d="M130,80 Q190,95 250,80" fill="none" stroke="#e88a9c" strokeWidth={1.5} opacity={0.6} />
+              <path d="M125,100 Q190,118 255,100" fill="none" stroke="#e88a9c" strokeWidth={1.5} opacity={0.6} />
+              
+              {/* Teeth */}
+              {upperTeethPositions.map((tooth) =>
+                renderTooth(tooth.number, tooth.x, tooth.y, tooth.rotation, tooth.type, true)
+              )}
+              
+              {/* Tooth numbers */}
+              {upperTeethPositions.map((tooth) => {
+                const offset = tooth.number <= 8 ? -18 : 18
+                const xOffset = tooth.number <= 8 
+                  ? -Math.cos((tooth.rotation * Math.PI) / 180) * 20
+                  : Math.cos((tooth.rotation * Math.PI) / 180) * 20
+                const yOffset = -Math.abs(Math.sin((tooth.rotation * Math.PI) / 180)) * 15 - 5
+                return (
+                  <text
+                    key={`num-${tooth.number}`}
+                    x={tooth.x + (tooth.number <= 8 ? -15 : 15)}
+                    y={tooth.y - 18}
+                    textAnchor="middle"
+                    fontSize={8}
+                    fill={selectedTeeth.includes(tooth.number) ? "#dc2626" : "#64748b"}
+                    fontWeight="bold"
+                  >
                     {tooth.number}
-                  </span>
-                </button>
-              )
-            })}
+                  </text>
+                )
+              })}
+            </svg>
           </div>
-        </div>
 
-        {/* Divider */}
-        <div className="flex items-center gap-3 my-3">
-          <div className="flex-1 h-px bg-gradient-to-r from-transparent via-slate-300 to-transparent"></div>
-          <div className="flex items-center gap-2 text-[10px] text-slate-400 font-medium">
-            <span>8</span>
-            <span>7</span>
-            <span>6</span>
-            <span>5</span>
-            <span>4</span>
-            <span>3</span>
-            <span>2</span>
-            <span>1</span>
-            <span className="mx-1 text-slate-300">|</span>
-            <span>1</span>
-            <span>2</span>
-            <span>3</span>
-            <span>4</span>
-            <span>5</span>
-            <span>6</span>
-            <span>7</span>
-            <span>8</span>
-          </div>
-          <div className="flex-1 h-px bg-gradient-to-r from-transparent via-slate-300 to-transparent"></div>
-        </div>
-
-        {/* Lower Jaw */}
-        <div className="mt-1">
-          {/* Lower teeth row */}
-          <div className="flex justify-center items-start gap-0.5 pt-2">
-            {teethData.lower.map((tooth) => {
-              const size = getToothSize(tooth.type)
-              const isSelected = selectedTeeth.includes(tooth.number)
-              return (
-                <button
-                  key={tooth.number}
-                  onClick={() => onToothClick(tooth.number)}
-                  className={`relative flex flex-col items-center transition-all duration-150 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-1 rounded ${isSelected ? 'z-10' : ''}`}
-                  title={`#${tooth.number} - ${tooth.name}`}
-                  style={{ width: size.width, height: size.height + 16 }}
+          {/* Lower Jaw */}
+          <div className="relative">
+            <div className="text-center mb-2">
+              <span className="text-xs font-semibold text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full">Lower Jaw (Mandible)</span>
+            </div>
+            <div className="flex justify-between text-[10px] font-bold text-slate-400 mb-1 px-2">
+              <span>RIGHT</span>
+              <span>LEFT</span>
+            </div>
+            <svg viewBox="0 0 380 140" className="w-full max-w-[380px] h-auto">
+              {/* Tongue/Gum area */}
+              <path
+                d="M55,130 Q60,20 190,10 Q320,20 327,130 Q320,140 190,145 Q60,140 55,130"
+                fill="#f9a8b8"
+                stroke="#e88a9c"
+                strokeWidth={2}
+              />
+              {/* Tongue indication */}
+              <ellipse cx={190} cy={75} rx={70} ry={40} fill="#e88a9c" opacity={0.4} />
+              
+              {/* Teeth */}
+              {lowerTeethPositions.map((tooth) =>
+                renderTooth(tooth.number, tooth.x, tooth.y, tooth.rotation, tooth.type, false)
+              )}
+              
+              {/* Tooth numbers */}
+              {lowerTeethPositions.map((tooth) => (
+                <text
+                  key={`num-${tooth.number}`}
+                  x={tooth.x + (tooth.number >= 25 ? -15 : 15)}
+                  y={tooth.y - 18}
+                  textAnchor="middle"
+                  fontSize={8}
+                  fill={selectedTeeth.includes(tooth.number) ? "#dc2626" : "#64748b"}
+                  fontWeight="bold"
                 >
-                  <span className={`text-[9px] font-bold mb-0.5 ${isSelected ? 'text-red-600' : 'text-slate-500'}`}>
-                    {tooth.number}
-                  </span>
-                  <div style={{ width: size.width, height: size.height }}>
-                    <ToothIcon type={tooth.type} isSelected={isSelected} isUpper={false} />
-                  </div>
-                </button>
-              )
-            })}
-          </div>
-          
-          <div className="flex items-center justify-between px-2 mt-2">
-            <span className="text-[10px] font-bold text-slate-400 tracking-wider">RIGHT</span>
-            <span className="text-xs font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded">LOWER JAW</span>
-            <span className="text-[10px] font-bold text-slate-400 tracking-wider">LEFT</span>
+                  {tooth.number}
+                </text>
+              ))}
+            </svg>
           </div>
         </div>
       </div>
@@ -279,7 +347,7 @@ function DentalChart({ selectedTeeth, onToothClick }: DentalChartProps) {
               <p className="text-xs text-red-600 mt-0.5">
                 {selectedTeeth.sort((a, b) => a - b).map(num => {
                   const tooth = [...teethData.upper, ...teethData.lower].find(t => t.number === num)
-                  return `#${num}`
+                  return `#${num} (${tooth?.name})`
                 }).join(', ')}
               </p>
             </div>
