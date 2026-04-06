@@ -187,30 +187,28 @@ export default function HomePage() {
                 </div>
                 
                 {/* Additional Stats/Trust Section for Mobile */}
-                <div className="mt-4 px-2">
-                  <div className="bg-gradient-to-r from-emerald-500 to-green-500 rounded-2xl p-4 shadow-lg">
-                    <div className="grid grid-cols-3 gap-2 text-center text-white">
-                      <div className="flex flex-col items-center">
-                        <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center mb-1">
-                          <Users className="h-5 w-5 text-white" />
-                        </div>
-                        <p className="text-lg font-bold">500+</p>
-                        <p className="text-[10px] text-white/80">Happy Patients</p>
+                <div className="mt-3 px-2">
+                  <div className="grid grid-cols-3 gap-3">
+                    <div className="bg-white rounded-xl shadow-lg p-3 flex flex-col items-center border border-gray-100">
+                      <div className="w-9 h-9 bg-emerald-100 rounded-full flex items-center justify-center mb-1">
+                        <Users className="h-4 w-4 text-emerald-600" />
                       </div>
-                      <div className="flex flex-col items-center border-x border-white/20">
-                        <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center mb-1">
-                          <Star className="h-5 w-5 text-white" />
-                        </div>
-                        <p className="text-lg font-bold">9+</p>
-                        <p className="text-[10px] text-white/80">Years Exp.</p>
+                      <p className="text-base font-bold text-gray-900">180+</p>
+                      <p className="text-[10px] text-gray-500">Happy Patients</p>
+                    </div>
+                    <div className="bg-white rounded-xl shadow-lg p-3 flex flex-col items-center border border-gray-100">
+                      <div className="w-9 h-9 bg-green-100 rounded-full flex items-center justify-center mb-1">
+                        <Star className="h-4 w-4 text-green-600" />
                       </div>
-                      <div className="flex flex-col items-center">
-                        <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center mb-1">
-                          <Clock className="h-5 w-5 text-white" />
-                        </div>
-                        <p className="text-lg font-bold">24/7</p>
-                        <p className="text-[10px] text-white/80">Booking</p>
+                      <p className="text-base font-bold text-gray-900">3+</p>
+                      <p className="text-[10px] text-gray-500">Years Exp.</p>
+                    </div>
+                    <div className="bg-white rounded-xl shadow-lg p-3 flex flex-col items-center border border-gray-100">
+                      <div className="w-9 h-9 bg-teal-100 rounded-full flex items-center justify-center mb-1">
+                        <Clock className="h-4 w-4 text-teal-600" />
                       </div>
+                      <p className="text-base font-bold text-gray-900">24/7</p>
+                      <p className="text-[10px] text-gray-500">Booking</p>
                     </div>
                   </div>
                 </div>
