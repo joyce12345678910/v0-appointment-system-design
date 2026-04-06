@@ -69,7 +69,7 @@ export default function HomePage() {
       </nav>
 
       {/* Hero Section */}
-      <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-16">
+      <section className="relative min-h-[calc(100vh-60px)] md:min-h-screen flex items-start md:items-center justify-center overflow-hidden pt-20 md:pt-16">
         {/* Background Logo - Large and Subtle */}
         <div className="absolute inset-0 flex items-center justify-center opacity-[0.04] pointer-events-none">
           <img 
@@ -88,10 +88,10 @@ export default function HomePage() {
 
         <div className="container mx-auto max-w-7xl px-4 relative z-10">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <div className="space-y-6">
-              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 leading-tight text-balance">
+            <div className="space-y-5 md:space-y-6">
+              <h1 className="text-4xl sm:text-5xl md:text-5xl lg:text-6xl font-bold text-gray-900 leading-tight text-balance">
                 <span className="text-emerald-600">TACTAY-BILLEDO</span>{" "}
-                <span className="block sm:inline">DENTAL CLINIC</span>
+                <span className="block">DENTAL CLINIC</span>
               </h1>
 
               <div className="flex flex-col sm:flex-row gap-4">
@@ -118,9 +118,9 @@ export default function HomePage() {
 
 
               {/* Mobile Logo and Feature Cards */}
-              <div className="lg:hidden pt-4 pb-8">
+              <div className="lg:hidden pt-2 pb-6">
                 {/* Mobile Logo with Attractive Background Design */}
-                <div className="relative flex justify-center items-center mb-4 mx-auto" style={{ minHeight: '220px', maxWidth: '280px' }}>
+                <div className="relative flex justify-center items-center mb-3 mx-auto" style={{ minHeight: '200px', maxWidth: '260px' }}>
                   {/* Outer Glow Effect */}
                   <div className="absolute inset-0 bg-gradient-to-br from-emerald-200/40 via-green-100/30 to-teal-200/40 rounded-3xl blur-xl"></div>
                   
