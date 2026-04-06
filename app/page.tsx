@@ -185,6 +185,35 @@ export default function HomePage() {
                     </div>
                   </div>
                 </div>
+                
+                {/* Additional Stats/Trust Section for Mobile */}
+                <div className="mt-4 px-2">
+                  <div className="bg-gradient-to-r from-emerald-500 to-green-500 rounded-2xl p-4 shadow-lg">
+                    <div className="grid grid-cols-3 gap-2 text-center text-white">
+                      <div className="flex flex-col items-center">
+                        <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center mb-1">
+                          <Users className="h-5 w-5 text-white" />
+                        </div>
+                        <p className="text-lg font-bold">500+</p>
+                        <p className="text-[10px] text-white/80">Happy Patients</p>
+                      </div>
+                      <div className="flex flex-col items-center border-x border-white/20">
+                        <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center mb-1">
+                          <Star className="h-5 w-5 text-white" />
+                        </div>
+                        <p className="text-lg font-bold">9+</p>
+                        <p className="text-[10px] text-white/80">Years Exp.</p>
+                      </div>
+                      <div className="flex flex-col items-center">
+                        <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center mb-1">
+                          <Clock className="h-5 w-5 text-white" />
+                        </div>
+                        <p className="text-lg font-bold">24/7</p>
+                        <p className="text-[10px] text-white/80">Booking</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
 
