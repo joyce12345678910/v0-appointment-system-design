@@ -140,9 +140,9 @@ function generateWelcomeEmail(patientName: string): string {
                 </tr>
               </table>
               
-              <a href="https://tactay-billedo.com/auth/login" style="display: inline-block; background-color: #059669; color: #ffffff; padding: 14px 40px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 16px;">
-                Login to Your Account
-              </a>
+              <p style="color: #6b7280; margin: 0; font-size: 16px; line-height: 1.6;">
+                You can now log in to your account at <strong>tactay-billedo.com</strong> to book appointments and access your medical records.
+              </p>
               
               <p style="color: #9ca3af; margin: 30px 0 0; font-size: 14px;">
                 If you have any questions, feel free to contact us anytime.
