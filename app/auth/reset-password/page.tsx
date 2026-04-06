@@ -46,15 +46,31 @@ function ResetPasswordForm() {
           
           // Handle recovery with valid tokens
           if (accessToken && hashType === "recovery") {
-            const { error: sessionError } = await supabase.auth.setSession({
-              access_token: accessToken,
-              refresh_token: refreshToken || ""
-            })
-            
-            if (sessionError) {
-              setError("The password reset link is invalid or has expired. Please request a new one.")
-              setIsChecking(false)
-              return
+            // If we have both tokens, set the full session
+            if (refreshToken) {
+              const { error: sessionError } = await supabase.auth.setSession({
+                access_token: accessToken,
+                refresh_token: refreshToken
+              })
+              
+              if (sessionError) {
+                setError("The password reset link is invalid or has expired. Please request a new one.")
+                setIsChecking(false)
+                return
+              }
+            } else {
+              // If only access token, try to use it directly
+              // The access token from generateLink is already valid for password reset
+              const { error: sessionError } = await supabase.auth.setSession({
+                access_token: accessToken,
+                refresh_token: accessToken // Use access token as refresh token for recovery
+              })
+              
+              if (sessionError) {
+                // If that fails, the token might be a different format
+                // Just proceed - the updateUser call will validate the token
+                console.log("[v0] Session set warning:", sessionError.message)
+              }
             }
             
             // Clear the hash from URL

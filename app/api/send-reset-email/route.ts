@@ -46,13 +46,13 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: true })
     }
 
-    if (!data?.properties?.action_link) {
-      console.log("[v0] No action link generated")
+    if (!data?.properties?.hashed_token) {
+      console.log("[v0] No hashed token generated")
       return NextResponse.json({ success: true })
     }
 
-    // Extract the token from the link
-    const resetLink = data.properties.action_link
+    // Build direct reset link with token_hash parameter
+    const resetLink = `https://tactay-billedo.com/auth/reset-password?token_hash=${data.properties.hashed_token}&type=recovery`
     console.log("[v0] Reset link generated successfully")
 
     // Send email via Resend
