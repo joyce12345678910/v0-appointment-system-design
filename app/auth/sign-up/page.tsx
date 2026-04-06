@@ -8,7 +8,8 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { useState } from "react"
+import { useState, useRef } from "react"
+import { Upload, X, FileText } from "lucide-react"
 
 export default function SignUpPage() {
   const [email, setEmail] = useState("")
@@ -17,9 +18,50 @@ export default function SignUpPage() {
   const [phone, setPhone] = useState("")
   const [dateOfBirth, setDateOfBirth] = useState("")
   const [address, setAddress] = useState("")
+  const [validIdFile, setValidIdFile] = useState<File | null>(null)
+  const [validIdPreview, setValidIdPreview] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
   const router = useRouter()
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      // Validate file type
+      const validTypes = ['image/jpeg', 'image/png', 'image/jpg', 'application/pdf']
+      if (!validTypes.includes(file.type)) {
+        setError("Please upload a valid image (JPG, PNG) or PDF file")
+        return
+      }
+      // Validate file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        setError("File size must be less than 5MB")
+        return
+      }
+      setValidIdFile(file)
+      setError(null)
+      
+      // Create preview for images
+      if (file.type.startsWith('image/')) {
+        const reader = new FileReader()
+        reader.onloadend = () => {
+          setValidIdPreview(reader.result as string)
+        }
+        reader.readAsDataURL(file)
+      } else {
+        setValidIdPreview(null)
+      }
+    }
+  }
+
+  const removeFile = () => {
+    setValidIdFile(null)
+    setValidIdPreview(null)
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ""
+    }
+  }
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -27,25 +69,59 @@ export default function SignUpPage() {
     setIsLoading(true)
     setError(null)
 
+    // Validate valid ID is uploaded
+    if (!validIdFile) {
+      setError("Please upload a valid ID")
+      setIsLoading(false)
+      return
+    }
+
     try {
+      // First, upload the valid ID to Vercel Blob
+      let validIdUrl = ""
+      
+      const formData = new FormData()
+      formData.append("file", validIdFile)
+      
+      const uploadResponse = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      })
+      
+      if (!uploadResponse.ok) {
+        throw new Error("Failed to upload valid ID")
+      }
+      
+      const uploadData = await uploadResponse.json()
+      validIdUrl = uploadData.url
+
+      // Create the user account
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
-          emailRedirectTo: process.env.NEXT_PUBLIC_DEV_SUPABASE_REDIRECT_URL || `${window.location.origin}/patient`,
+          emailRedirectTo: `${window.location.origin}/auth/callback?type=signup`,
           data: {
             full_name: fullName,
             role: "patient",
+            phone: phone,
+            date_of_birth: dateOfBirth,
+            address: address,
+            valid_id_url: validIdUrl,
           },
         },
       })
 
       if (error) throw error
 
+      console.log("[v0] Sign up successful, user:", data.user?.id)
+      console.log("[v0] Redirecting to sign-up-success page")
+      
       if (data.user) {
         router.push("/auth/sign-up-success")
       }
     } catch (error: unknown) {
+      console.error("[v0] Sign up error:", error)
       setError(error instanceof Error ? error.message : "An error occurred")
     } finally {
       setIsLoading(false)
@@ -194,6 +270,66 @@ export default function SignUpPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                 />
+              </div>
+
+              {/* Valid ID Upload */}
+              <div className="space-y-2">
+                <Label htmlFor="validId" className="text-gray-700 font-medium">
+                  Valid ID <span className="text-red-500">*</span>
+                </Label>
+                <p className="text-xs text-gray-500">Upload a government-issued ID (JPG, PNG, or PDF, max 5MB)</p>
+                
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  id="validId"
+                  accept="image/jpeg,image/png,image/jpg,application/pdf"
+                  onChange={handleFileChange}
+                  className="hidden"
+                />
+                
+                {!validIdFile ? (
+                  <div
+                    onClick={() => fileInputRef.current?.click()}
+                    className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center cursor-pointer hover:border-emerald-500 hover:bg-emerald-50/50 transition-colors"
+                  >
+                    <Upload className="h-8 w-8 mx-auto text-gray-400 mb-2" />
+                    <p className="text-sm text-gray-600">Click to upload your valid ID</p>
+                  </div>
+                ) : (
+                  <div className="border border-gray-200 rounded-lg p-3 bg-gray-50">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        {validIdPreview ? (
+                          <img
+                            src={validIdPreview}
+                            alt="ID Preview"
+                            className="w-12 h-12 object-cover rounded border"
+                          />
+                        ) : (
+                          <div className="w-12 h-12 bg-emerald-100 rounded flex items-center justify-center">
+                            <FileText className="h-6 w-6 text-emerald-600" />
+                          </div>
+                        )}
+                        <div>
+                          <p className="text-sm font-medium text-gray-700 truncate max-w-[150px]">
+                            {validIdFile.name}
+                          </p>
+                          <p className="text-xs text-gray-500">
+                            {(validIdFile.size / 1024).toFixed(1)} KB
+                          </p>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={removeFile}
+                        className="p-1 hover:bg-gray-200 rounded-full transition-colors"
+                      >
+                        <X className="h-4 w-4 text-gray-500" />
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
 
               {error && <p className="text-sm text-destructive font-medium bg-red-50 p-3 rounded-lg">{error}</p>}

@@ -7,15 +7,34 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { useState, useEffect } from "react"
 
 export default function LoginPage() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [error, setError] = useState<string | null>(null)
+  const [successMessage, setSuccessMessage] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
+  const searchParams = useSearchParams()
+
+  // Check for query params (verified, error)
+  useEffect(() => {
+    const verified = searchParams.get("verified")
+    const errorParam = searchParams.get("error")
+    
+    if (verified === "true") {
+      setSuccessMessage("Email verified successfully! You can now log in.")
+      setError(null)
+    } else if (errorParam === "link_expired") {
+      setError("Your verification link has expired. Please sign up again or request a new verification email.")
+      setSuccessMessage(null)
+    } else if (errorParam === "verification_failed") {
+      setError("Email verification failed. Please try signing up again.")
+      setSuccessMessage(null)
+    }
+  }, [searchParams])
 
   // Clear any stale session on login page load
   useEffect(() => {
@@ -128,6 +147,11 @@ export default function LoginPage() {
           </CardHeader>
           <CardContent>
             <form onSubmit={handleLogin} className="space-y-5">
+              {successMessage && (
+                <p className="text-sm text-emerald-700 font-medium bg-emerald-50 p-3 rounded-lg border border-emerald-200">
+                  {successMessage}
+                </p>
+              )}
               <div className="space-y-2">
                 <Label htmlFor="email" className="text-gray-700 font-medium">
                   Email Address

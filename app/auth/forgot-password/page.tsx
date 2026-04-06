@@ -31,10 +31,9 @@ function ForgotPasswordForm() {
     setError(null)
 
     try {
-      // Supabase PKCE flow will redirect to Site URL with code parameter
-      // The middleware will intercept and redirect to /auth/callback
-      // which then redirects to /auth/reset-password
-      const { error } = await supabase.auth.resetPasswordForEmail(email)
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/auth/callback?type=recovery`,
+      })
 
       if (error) throw error
       

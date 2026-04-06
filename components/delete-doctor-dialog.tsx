@@ -19,9 +19,10 @@ import { toast } from "@/hooks/use-toast"
 interface DeleteDoctorDialogProps {
   doctorId: string
   doctorName: string
+  onSuccess?: () => void
 }
 
-export function DeleteDoctorDialog({ doctorId, doctorName }: DeleteDoctorDialogProps) {
+export function DeleteDoctorDialog({ doctorId, doctorName, onSuccess }: DeleteDoctorDialogProps) {
   const [open, setOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
@@ -42,6 +43,7 @@ export function DeleteDoctorDialog({ doctorId, doctorName }: DeleteDoctorDialogP
       })
 
       setOpen(false)
+      onSuccess?.()
       router.refresh()
     } catch (error) {
       toast({

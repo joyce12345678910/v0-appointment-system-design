@@ -172,7 +172,7 @@ export function CalendarView({ appointments }: CalendarViewProps) {
                       {cell.day}
                     </div>
                     <div className="space-y-1">
-                      {cell.appointments.slice(0, 2).map((appointment) => (
+                      {cell.appointments.slice(0, 1).map((appointment) => (
                         <button
                           key={appointment.id}
                           onClick={() => handleAppointmentClick(appointment)}
@@ -189,7 +189,7 @@ export function CalendarView({ appointments }: CalendarViewProps) {
                           </div>
                         </button>
                       ))}
-                      {cell.appointments.length > 2 && (
+                      {cell.appointments.length >= 2 && (
                         <button
                           onClick={() => handleViewAllForDay(cell.day!, cell.appointments)}
                           className="w-full text-xs text-center py-1.5 rounded bg-emerald-50 text-emerald-700 hover:bg-emerald-100 transition-colors font-medium flex items-center justify-center gap-1"

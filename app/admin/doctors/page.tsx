@@ -64,7 +64,7 @@ export default function DoctorsPage() {
           <h1 className="text-3xl font-bold">Doctors</h1>
           <p className="text-muted-foreground">Manage doctor profiles and availability</p>
         </div>
-        <AddDoctorDialog />
+        <AddDoctorDialog onSuccess={fetchDoctors} />
       </div>
 
       <Card>
@@ -136,8 +136,8 @@ export default function DoctorsPage() {
                     )}
 
                     <div className="flex gap-2 pt-2">
-                      <EditDoctorDialog doctor={doctor} />
-                      <DeleteDoctorDialog doctorId={doctor.id} doctorName={doctor.full_name} />
+                      <EditDoctorDialog doctor={doctor} onSuccess={fetchDoctors} />
+                      <DeleteDoctorDialog doctorId={doctor.id} doctorName={doctor.full_name} onSuccess={fetchDoctors} />
                     </div>
                   </CardContent>
                 </Card>

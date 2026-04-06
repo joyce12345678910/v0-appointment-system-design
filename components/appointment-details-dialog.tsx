@@ -54,8 +54,38 @@ export function AppointmentDetailsDialog({ appointment, open, onOpenChange }: Ap
               {appointment.patient?.phone && (
                 <p className="text-sm text-muted-foreground">{appointment.patient.phone}</p>
               )}
+              {appointment.patient?.address && (
+                <p className="text-sm text-muted-foreground">{appointment.patient.address}</p>
+              )}
             </div>
           </div>
+
+          {/* Patient Valid ID */}
+          {appointment.patient?.valid_id_url && (
+            <div>
+              <h3 className="text-sm font-medium text-muted-foreground mb-2">Patient Valid ID</h3>
+              <div className="flex items-center justify-between p-4 bg-blue-50 border border-blue-200 rounded-xl">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-blue-100 rounded-lg">
+                    <FileText className="h-5 w-5 text-blue-600" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-blue-900">Valid ID Document</p>
+                    <p className="text-xs text-blue-600">Government-issued identification</p>
+                  </div>
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="gap-2 bg-white border-blue-200 text-blue-700 hover:bg-blue-50"
+                  onClick={() => window.open(appointment.patient?.valid_id_url, "_blank")}
+                >
+                  <ExternalLink className="h-4 w-4" />
+                  View ID
+                </Button>
+              </div>
+            </div>
+          )}
 
           {/* Doctor Information */}
           <div>
@@ -103,34 +133,7 @@ export function AppointmentDetailsDialog({ appointment, open, onOpenChange }: Ap
             </div>
           )}
 
-          {/* Uploaded Document */}
-          {appointment.document_url && (
-            <div>
-              <h3 className="text-sm font-medium text-muted-foreground mb-2">Supporting Document</h3>
-              <div className="flex items-center justify-between p-4 bg-primary/5 border border-primary/20 rounded-xl">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-primary/10 rounded-lg">
-                    <FileText className="h-5 w-5 text-primary" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium">{appointment.document_file_name}</p>
-                    <p className="text-xs text-muted-foreground">
-                      Uploaded {new Date(appointment.document_uploaded_at || "").toLocaleDateString()}
-                    </p>
-                  </div>
-                </div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="gap-2 bg-transparent"
-                  onClick={() => window.open(appointment.document_url, "_blank")}
-                >
-                  <ExternalLink className="h-4 w-4" />
-                  View
-                </Button>
-              </div>
-            </div>
-          )}
+          
 
           {/* Approval Information */}
           {appointment.approved_at && (

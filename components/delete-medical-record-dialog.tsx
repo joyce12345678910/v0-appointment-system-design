@@ -19,9 +19,10 @@ import { toast } from "@/hooks/use-toast"
 interface DeleteMedicalRecordDialogProps {
   recordId: string
   patientName: string
+  onSuccess?: () => void
 }
 
-export function DeleteMedicalRecordDialog({ recordId, patientName }: DeleteMedicalRecordDialogProps) {
+export function DeleteMedicalRecordDialog({ recordId, patientName, onSuccess }: DeleteMedicalRecordDialogProps) {
   const [open, setOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
@@ -42,6 +43,7 @@ export function DeleteMedicalRecordDialog({ recordId, patientName }: DeleteMedic
       })
 
       setOpen(false)
+      onSuccess?.()
       router.refresh()
     } catch (error) {
       toast({

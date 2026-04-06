@@ -39,7 +39,7 @@ export default function AppointmentsPage() {
         .select(
           `
           *,
-          patient:profiles!appointments_patient_id_fkey(id, full_name, email, phone),
+          patient:profiles!appointments_patient_id_fkey(id, full_name, email, phone, address, valid_id_url),
           doctor:doctors(id, full_name, specialization, email, phone)
         `,
         )

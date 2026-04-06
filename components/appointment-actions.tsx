@@ -29,6 +29,7 @@ export function AppointmentActions({ appointmentId, currentStatus, appointmentDa
   const [isRejectOpen, setIsRejectOpen] = useState(false)
   const [isDeleteOpen, setIsDeleteOpen] = useState(false)
   const [isCompleteOpen, setIsCompleteOpen] = useState(false)
+  const [isCancelOpen, setIsCancelOpen] = useState(false)
   const [notes, setNotes] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
@@ -233,6 +234,57 @@ export function AppointmentActions({ appointmentId, currentStatus, appointmentDa
     }
   }
 
+  const handleCancel = async () => {
+    setIsLoading(true)
+    const supabase = createClient()
+
+    try {
+      const { error } = await supabase
+        .from("appointments")
+        .update({
+          status: "cancelled",
+          notes: notes || "Cancelled by admin - Doctor emergency/unavailable",
+        })
+        .eq("id", appointmentId)
+
+      if (error) throw error
+
+      // Send cancellation email to patient
+      try {
+        await fetch("/api/send-appointment-email", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ appointmentId, action: "cancelled" }),
+        })
+      } catch (emailError) {
+        // Email sending failed silently
+      }
+
+      toast({
+        title: "Appointment Cancelled",
+        description: "The appointment has been cancelled and the patient has been notified via email.",
+      })
+
+      setIsCancelOpen(false)
+      setNotes("")
+      
+      // Refresh the appointments list
+      if (onActionComplete) {
+        onActionComplete()
+      } else {
+        router.refresh()
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to cancel appointment. Please try again.",
+        variant: "destructive",
+      })
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
   return (
     <div className="flex gap-1 md:gap-2 flex-wrap">
       {currentStatus === "pending" && (
@@ -250,17 +302,31 @@ export function AppointmentActions({ appointmentId, currentStatus, appointmentDa
         </>
       )}
 
-      {currentStatus === "approved" && isAppointmentPassed && (
-        <Button
-          size="sm"
-          variant="default"
-          onClick={() => setIsCompleteOpen(true)}
-          className="text-xs md:text-sm bg-blue-600 hover:bg-blue-700"
-        >
-          <CheckCircle className="h-4 w-4 mr-1" />
-          <span className="hidden md:inline">Complete</span>
-          <span className="md:hidden">Done</span>
-        </Button>
+      {currentStatus === "approved" && (
+        <>
+          {isAppointmentPassed && (
+            <Button
+              size="sm"
+              variant="default"
+              onClick={() => setIsCompleteOpen(true)}
+              className="text-xs md:text-sm bg-emerald-600 hover:bg-emerald-700"
+            >
+              <CheckCircle className="h-4 w-4 mr-1" />
+              <span className="hidden md:inline">Complete</span>
+              <span className="md:hidden">Done</span>
+            </Button>
+          )}
+          <Button
+            size="sm"
+            variant="destructive"
+            onClick={() => setIsCancelOpen(true)}
+            className="text-xs md:text-sm"
+          >
+            <XCircle className="h-4 w-4 mr-1" />
+            <span className="hidden md:inline">Cancel</span>
+            <span className="md:hidden">Cancel</span>
+          </Button>
+        </>
       )}
 
       <Button size="sm" variant="outline" onClick={() => setIsDeleteOpen(true)} className="text-xs md:text-sm">
@@ -394,9 +460,51 @@ export function AppointmentActions({ appointmentId, currentStatus, appointmentDa
             <Button
               onClick={handleComplete}
               disabled={isLoading}
-              className="w-full md:w-auto bg-blue-600 hover:bg-blue-700"
+              className="w-full md:w-auto bg-emerald-600 hover:bg-emerald-700"
             >
               {isLoading ? "Completing..." : "Complete"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Cancel Approved Appointment Dialog */}
+      <Dialog open={isCancelOpen} onOpenChange={setIsCancelOpen}>
+        <DialogContent className="w-[95vw] md:w-full">
+          <DialogHeader>
+            <DialogTitle>Cancel Appointment</DialogTitle>
+            <DialogDescription>
+              Cancel this approved appointment due to doctor emergency or unavailability. The patient will be notified via email.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="cancel-notes">Reason for Cancellation</Label>
+              <Textarea
+                id="cancel-notes"
+                placeholder="e.g., Doctor emergency, scheduling conflict, clinic closure..."
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                rows={3}
+              />
+            </div>
+          </div>
+          <DialogFooter className="flex-col-reverse md:flex-row gap-2 md:gap-0">
+            <Button
+              variant="outline"
+              onClick={() => setIsCancelOpen(false)}
+              disabled={isLoading}
+              className="w-full md:w-auto"
+            >
+              Go Back
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleCancel}
+              disabled={isLoading}
+              className="w-full md:w-auto"
+            >
+              {isLoading ? "Cancelling..." : "Cancel Appointment"}
             </Button>
           </DialogFooter>
         </DialogContent>

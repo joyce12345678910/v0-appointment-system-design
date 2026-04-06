@@ -6,6 +6,7 @@ export interface Profile {
   phone?: string
   date_of_birth?: string
   address?: string
+  valid_id_url?: string
   created_at: string
 }
 
