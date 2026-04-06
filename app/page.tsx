@@ -14,12 +14,31 @@ export default function HomePage() {
   useEffect(() => {
     const url = new URL(window.location.href)
     const code = url.searchParams.get("code")
+    const type = url.searchParams.get("type")
     
-    // Only redirect if there's an auth code - let the callback handle everything
+    // Check for code in query params
     if (code) {
-      // Redirect to callback with the code
-      router.replace(`/auth/callback?code=${code}`)
+      // Redirect to callback with the code and type if present
+      const callbackUrl = type 
+        ? `/auth/callback?code=${code}&type=${type}`
+        : `/auth/callback?code=${code}`
+      router.replace(callbackUrl)
       return
+    }
+    
+    // Check for hash fragment (Supabase sometimes uses this for recovery)
+    const hash = window.location.hash.substring(1)
+    if (hash) {
+      const hashParams = new URLSearchParams(hash)
+      const accessToken = hashParams.get("access_token")
+      const hashType = hashParams.get("type")
+      
+      // If there's an access token in the hash, this is a direct auth flow
+      if (accessToken && hashType === "recovery") {
+        // Redirect to reset password page - the client will pick up the tokens
+        router.replace("/auth/reset-password" + window.location.hash)
+        return
+      }
     }
   }, [router])
 

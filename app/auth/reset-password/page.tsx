@@ -33,6 +33,34 @@ function ResetPasswordForm() {
         return
       }
 
+      // Check for hash fragment tokens (Supabase recovery flow)
+      const hash = window.location.hash.substring(1)
+      if (hash) {
+        const hashParams = new URLSearchParams(hash)
+        const accessToken = hashParams.get("access_token")
+        const refreshToken = hashParams.get("refresh_token")
+        const hashType = hashParams.get("type")
+        
+        if (accessToken && refreshToken && hashType === "recovery") {
+          // Set the session from the hash tokens
+          const { error } = await supabase.auth.setSession({
+            access_token: accessToken,
+            refresh_token: refreshToken
+          })
+          
+          if (error) {
+            setError("Invalid or expired reset link. Please request a new one.")
+            setIsReady(true)
+            return
+          }
+          
+          // Clear the hash from URL
+          window.history.replaceState(null, "", "/auth/reset-password")
+          setIsReady(true)
+          return
+        }
+      }
+
       // Check for code parameter (PKCE flow from Supabase)
       const code = searchParams.get("code")
       if (code) {
