@@ -149,9 +149,6 @@ export default function MedicalRecordsPage() {
                         <span className="font-medium">Visit Date:</span>{" "}
                         {new Date(record.visit_date).toLocaleDateString()}
                       </div>
-                      <div>
-                        <span className="font-medium">Created:</span> {new Date(record.created_at).toLocaleDateString()}
-                      </div>
                     </div>
 
                     <div className="text-xs md:text-sm pl-8">
