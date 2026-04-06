@@ -16,9 +16,13 @@ export default function HomePage() {
     const code = url.searchParams.get("code")
     const error = url.searchParams.get("error")
     
-    // Also check hash fragment for errors
+    // Check hash fragment for tokens or errors (Supabase puts auth tokens here)
     const hashParams = new URLSearchParams(url.hash.substring(1))
     const hashError = hashParams.get("error")
+    const hashErrorDescription = hashParams.get("error_description")
+    const accessToken = hashParams.get("access_token")
+    const refreshToken = hashParams.get("refresh_token")
+    const type = hashParams.get("type")
     
     if (code) {
       // Redirect to callback with the code
@@ -26,9 +30,21 @@ export default function HomePage() {
       return
     }
     
+    // If we have tokens in hash, user is verified - redirect to login with success
+    if (accessToken && refreshToken) {
+      // User successfully verified, redirect to login with success message
+      router.replace("/auth/login?verified=true")
+      return
+    }
+    
+    // Handle errors
     if (error || hashError) {
-      // Redirect to forgot-password with expired flag
-      router.replace("/auth/forgot-password?expired=true")
+      // Check if it's an expired link
+      if (hashErrorDescription?.includes("expired") || hashError === "access_denied") {
+        router.replace("/auth/login?error=link_expired")
+      } else {
+        router.replace("/auth/login?error=verification_failed")
+      }
       return
     }
   }, [router])
