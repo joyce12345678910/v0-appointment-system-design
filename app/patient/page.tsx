@@ -1,36 +1,152 @@
-import { createClient } from "@/lib/supabase/server"
+"use client"
+
+import { useState, useEffect, useCallback } from "react"
+import { createClient } from "@/lib/supabase/client"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
-import { Calendar, Clock, Plus, Phone, Mail, Stethoscope } from "lucide-react"
+import { Calendar, Clock, Plus, Phone, Mail, Stethoscope, RefreshCw, XCircle } from "lucide-react"
+import { toast } from "@/hooks/use-toast"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
+import { Textarea } from "@/components/ui/textarea"
+import { Label } from "@/components/ui/label"
 
-export default async function PatientDashboardPage() {
-  const supabase = await createClient()
+interface Profile {
+  id: string
+  full_name: string
+  email: string
+  role: string
+}
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+interface Doctor {
+  full_name: string
+  specialization: string
+  phone?: string
+  email?: string
+}
 
-  // Fetch patient profile
-  const { data: profile } = await supabase.from("profiles").select("*").eq("id", user?.id).single()
+interface Appointment {
+  id: string
+  patient_id: string
+  doctor_id: string
+  appointment_date: string
+  appointment_time: string
+  status: string
+  reason?: string
+  notes?: string
+  appointment_type?: string
+  doctor?: Doctor
+}
 
-  // Fetch appointments
-  const { data: appointments } = await supabase
-    .from("appointments")
-    .select(
-      `
-      *,
-      doctor:doctors(full_name, specialization, phone, email)
-    `,
-    )
-    .eq("patient_id", user?.id)
-    .order("appointment_date", { ascending: true })
+export default function PatientDashboardPage() {
+  const [profile, setProfile] = useState<Profile | null>(null)
+  const [appointments, setAppointments] = useState<Appointment[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [isCancelOpen, setIsCancelOpen] = useState(false)
+  const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null)
+  const [cancelReason, setCancelReason] = useState("")
+  const [isCancelling, setIsCancelling] = useState(false)
+
+  const fetchData = useCallback(async () => {
+    const supabase = createClient()
+    setIsLoading(true)
+
+    try {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser()
+
+      if (!user) return
+
+      // Fetch profile
+      const { data: profileData } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", user.id)
+        .single()
+
+      if (profileData) {
+        setProfile(profileData)
+      }
+
+      // Fetch appointments
+      const { data: appointmentsData } = await supabase
+        .from("appointments")
+        .select(`
+          *,
+          doctor:doctors(full_name, specialization, phone, email)
+        `)
+        .eq("patient_id", user.id)
+        .order("appointment_date", { ascending: true })
+
+      if (appointmentsData) {
+        setAppointments(appointmentsData)
+      }
+    } catch (error) {
+      console.error("Error fetching data:", error)
+    } finally {
+      setIsLoading(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    fetchData()
+  }, [fetchData])
+
+  const handleCancelAppointment = async () => {
+    if (!selectedAppointment) return
+
+    setIsCancelling(true)
+    const supabase = createClient()
+
+    try {
+      const { error } = await supabase
+        .from("appointments")
+        .update({
+          status: "cancelled",
+          notes: cancelReason || "Cancelled by patient",
+        })
+        .eq("id", selectedAppointment.id)
+
+      if (error) throw error
+
+      toast({
+        title: "Appointment Cancelled",
+        description: "Your appointment has been cancelled successfully.",
+      })
+
+      setIsCancelOpen(false)
+      setCancelReason("")
+      setSelectedAppointment(null)
+      fetchData()
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to cancel appointment. Please try again.",
+        variant: "destructive",
+      })
+    } finally {
+      setIsCancelling(false)
+    }
+  }
+
+  const openCancelDialog = (appointment: Appointment) => {
+    setSelectedAppointment(appointment)
+    setIsCancelOpen(true)
+  }
 
   // Separate upcoming and past appointments
   const today = new Date().toISOString().split("T")[0]
-  const upcomingAppointments = appointments?.filter((apt) => apt.appointment_date >= today) || []
-  const pastAppointments = appointments?.filter((apt) => apt.appointment_date < today) || []
+  const upcomingAppointments = appointments.filter((apt) => apt.appointment_date >= today) || []
+  const pastAppointments = appointments.filter((apt) => apt.appointment_date < today) || []
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -47,6 +163,14 @@ export default async function PatientDashboardPage() {
     }
   }
 
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <RefreshCw className="h-8 w-8 animate-spin text-blue-600" />
+      </div>
+    )
+  }
+
   return (
     <div className="space-y-6">
       {/* Welcome Section */}
@@ -55,12 +179,18 @@ export default async function PatientDashboardPage() {
           <h1 className="text-3xl font-bold text-blue-900">Welcome back, {profile?.full_name}!</h1>
           <p className="text-blue-600 mt-1">Manage your appointments and medical records</p>
         </div>
-        <Button asChild className="bg-blue-600 hover:bg-blue-700 text-white whitespace-nowrap">
-          <Link href="/patient/book">
-            <Plus className="h-4 w-4 mr-2" />
-            Book Appointment
-          </Link>
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={fetchData} className="border-blue-200 text-blue-700 hover:bg-blue-50">
+            <RefreshCw className="h-4 w-4 mr-2" />
+            Refresh
+          </Button>
+          <Button asChild className="bg-blue-600 hover:bg-blue-700 text-white whitespace-nowrap">
+            <Link href="/patient/book">
+              <Plus className="h-4 w-4 mr-2" />
+              Book Appointment
+            </Link>
+          </Button>
+        </div>
       </div>
 
       {/* Statistics */}
@@ -71,7 +201,7 @@ export default async function PatientDashboardPage() {
             <Calendar className="h-5 w-5 text-blue-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-blue-900">{appointments?.length || 0}</div>
+            <div className="text-3xl font-bold text-blue-900">{appointments.length || 0}</div>
             <p className="text-xs text-blue-600 mt-1">All appointments</p>
           </CardContent>
         </Card>
@@ -92,7 +222,7 @@ export default async function PatientDashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold text-orange-900">
-              {appointments?.filter((apt) => apt.status === "pending").length || 0}
+              {appointments.filter((apt) => apt.status === "pending").length || 0}
             </div>
             <p className="text-xs text-orange-600 mt-1">Awaiting confirmation</p>
           </CardContent>
@@ -121,6 +251,18 @@ export default async function PatientDashboardPage() {
                           </span>
                         )}
                       </div>
+                      {/* Cancel button for pending or approved appointments */}
+                      {(appointment.status === "pending" || appointment.status === "approved") && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => openCancelDialog(appointment)}
+                          className="text-red-600 border-red-200 hover:bg-red-50 hover:border-red-300"
+                        >
+                          <XCircle className="h-4 w-4 mr-1" />
+                          Cancel
+                        </Button>
+                      )}
                     </div>
 
                     {/* Doctor Information */}
@@ -228,6 +370,61 @@ export default async function PatientDashboardPage() {
           </CardContent>
         </Card>
       )}
+
+      {/* Cancel Appointment Dialog */}
+      <Dialog open={isCancelOpen} onOpenChange={setIsCancelOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Cancel Appointment</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to cancel this appointment? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          {selectedAppointment && (
+            <div className="bg-gray-50 rounded-lg p-4 space-y-2">
+              <p className="font-medium">Dr. {selectedAppointment.doctor?.full_name}</p>
+              <p className="text-sm text-gray-600">
+                {new Date(selectedAppointment.appointment_date).toLocaleDateString("en-US", { 
+                  weekday: "long", 
+                  month: "long", 
+                  day: "numeric", 
+                  year: "numeric" 
+                })} at {selectedAppointment.appointment_time}
+              </p>
+            </div>
+          )}
+          <div className="space-y-2">
+            <Label htmlFor="cancel-reason">Reason for Cancellation (Optional)</Label>
+            <Textarea
+              id="cancel-reason"
+              placeholder="e.g., Schedule conflict, feeling better, etc."
+              value={cancelReason}
+              onChange={(e) => setCancelReason(e.target.value)}
+              rows={3}
+            />
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setIsCancelOpen(false)
+                setCancelReason("")
+                setSelectedAppointment(null)
+              }}
+              disabled={isCancelling}
+            >
+              Keep Appointment
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleCancelAppointment}
+              disabled={isCancelling}
+            >
+              {isCancelling ? "Cancelling..." : "Cancel Appointment"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
