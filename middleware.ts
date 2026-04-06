@@ -21,17 +21,9 @@ export async function middleware(request: NextRequest) {
   // If there's a code parameter on /auth/callback, pass through to let the route handler process it
   // This handles cases where Supabase redirects directly to callback with a code
   
-  // If there's an error parameter at root, redirect to login with error message
-  if (pathname === "/" && error) {
-    const errorDescription = request.nextUrl.searchParams.get("error_description")
-    const redirectUrl = new URL("/auth/login", request.url)
-    if (errorDescription?.includes("expired")) {
-      redirectUrl.searchParams.set("error", "link_expired")
-    } else {
-      redirectUrl.searchParams.set("error", "verification_failed")
-    }
-    return NextResponse.redirect(redirectUrl)
-  }
+  // If there's an error parameter at root, check the error type
+  // Don't redirect - let the home page handle it or user can navigate manually
+  // This prevents incorrectly catching password reset errors
   
   // Don't redirect expired=true from forgot-password - let the page handle it
   // This shows the user a message to request a new link

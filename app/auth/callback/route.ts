@@ -29,7 +29,6 @@ export async function GET(request: Request) {
         // User has a valid session, let them reset password
         return NextResponse.redirect(`${origin}/auth/reset-password`)
       }
-      
       // No valid session and code failed - link is expired or invalid
       return NextResponse.redirect(`${origin}/auth/forgot-password?expired=true`)
     }
