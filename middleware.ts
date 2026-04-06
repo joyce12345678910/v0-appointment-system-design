@@ -21,10 +21,27 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(redirectUrl)
   }
   
-  // If there's an error parameter at root, redirect to forgot password
+  // If there's an error parameter at root, redirect to login with error message
   if (pathname === "/" && error) {
-    const redirectUrl = new URL("/auth/forgot-password", request.url)
-    redirectUrl.searchParams.set("expired", "true")
+    const errorDescription = request.nextUrl.searchParams.get("error_description")
+    const redirectUrl = new URL("/auth/login", request.url)
+    if (errorDescription?.includes("expired")) {
+      redirectUrl.searchParams.set("error", "link_expired")
+    } else {
+      redirectUrl.searchParams.set("error", "verification_failed")
+    }
+    return NextResponse.redirect(redirectUrl)
+  }
+  
+  // Handle errors on forgot-password page - redirect to login
+  if (pathname === "/auth/forgot-password" && (error || request.nextUrl.searchParams.get("expired"))) {
+    const errorCode = request.nextUrl.searchParams.get("error_code")
+    const redirectUrl = new URL("/auth/login", request.url)
+    if (errorCode === "otp_expired") {
+      redirectUrl.searchParams.set("error", "link_expired")
+    } else {
+      redirectUrl.searchParams.set("error", "verification_failed")
+    }
     return NextResponse.redirect(redirectUrl)
   }
   

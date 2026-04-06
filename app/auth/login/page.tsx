@@ -19,10 +19,20 @@ export default function LoginPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
 
-  // Check for verified=true query param
+  // Check for query params (verified, error)
   useEffect(() => {
-    if (searchParams.get("verified") === "true") {
+    const verified = searchParams.get("verified")
+    const errorParam = searchParams.get("error")
+    
+    if (verified === "true") {
       setSuccessMessage("Email verified successfully! You can now log in.")
+      setError(null)
+    } else if (errorParam === "link_expired") {
+      setError("Your verification link has expired. Please sign up again or request a new verification email.")
+      setSuccessMessage(null)
+    } else if (errorParam === "verification_failed") {
+      setError("Email verification failed. Please try signing up again.")
+      setSuccessMessage(null)
     }
   }, [searchParams])
 
