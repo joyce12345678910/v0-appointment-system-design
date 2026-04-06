@@ -46,29 +46,25 @@ export async function POST(request: Request) {
 
     console.log("[v0] User created successfully:", userData.user.id)
 
-    // Send welcome email via Brevo directly (same as appointment emails)
-    const brevoApiKey = process.env.BREVO_API_KEY
-    const senderEmail = process.env.BREVO_SENDER_EMAIL || "tactaybilledoclinic@gmail.com"
+    // Send welcome email via Resend API (same as appointment emails)
+    const resendApiKey = process.env.RESEND_API_KEY
 
-    if (brevoApiKey) {
+    if (resendApiKey) {
       try {
-        console.log("[v0] Sending welcome email to:", email)
+        console.log("[v0] Sending welcome email via Resend to:", email)
         
         const emailPayload = {
-          sender: {
-            name: "TACTAY-BILLEDO CLINIC",
-            email: senderEmail,
-          },
-          to: [{ email, name: fullName }],
+          from: "TACTAY-BILLEDO DENTAL CLINIC <noreply@tactay-billedo.com>",
+          to: [email],
           subject: "Welcome to TACTAY-BILLEDO CLINIC!",
-          htmlContent: generateWelcomeEmail(fullName),
+          html: generateWelcomeEmail(fullName),
         }
 
-        const emailResponse = await fetch("https://api.brevo.com/v3/smtp/email", {
+        const emailResponse = await fetch("https://api.resend.com/emails", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            "api-key": brevoApiKey,
+            "Authorization": `Bearer ${resendApiKey}`,
           },
           body: JSON.stringify(emailPayload),
         })
@@ -76,7 +72,7 @@ export async function POST(request: Request) {
         const emailData = await emailResponse.json().catch(() => ({}))
         
         if (emailResponse.ok) {
-          console.log("[v0] Welcome email sent successfully, ID:", emailData.messageId)
+          console.log("[v0] Welcome email sent successfully via Resend, ID:", emailData.id)
         } else {
           console.log("[v0] Failed to send welcome email:", emailResponse.status, emailData)
         }
@@ -84,7 +80,7 @@ export async function POST(request: Request) {
         console.log("[v0] Error sending welcome email:", emailError)
       }
     } else {
-      console.log("[v0] BREVO_API_KEY not set, skipping welcome email")
+      console.log("[v0] RESEND_API_KEY not set, skipping welcome email")
     }
 
     return NextResponse.json({ 
