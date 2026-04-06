@@ -193,14 +193,14 @@ export default function HomePage() {
                       <div className="w-9 h-9 bg-emerald-100 rounded-full flex items-center justify-center mb-1">
                         <Users className="h-4 w-4 text-emerald-600" />
                       </div>
-                      <p className="text-base font-bold text-gray-900">500+</p>
+                      <p className="text-base font-bold text-gray-900">180+</p>
                       <p className="text-[10px] text-gray-500">Happy Patients</p>
                     </div>
                     <div className="bg-white rounded-xl shadow-lg p-3 flex flex-col items-center border border-gray-100">
                       <div className="w-9 h-9 bg-green-100 rounded-full flex items-center justify-center mb-1">
                         <Star className="h-4 w-4 text-green-600" />
                       </div>
-                      <p className="text-base font-bold text-gray-900">9+</p>
+                      <p className="text-base font-bold text-gray-900">3+</p>
                       <p className="text-[10px] text-gray-500">Years Exp.</p>
                     </div>
                     <div className="bg-white rounded-xl shadow-lg p-3 flex flex-col items-center border border-gray-100">
