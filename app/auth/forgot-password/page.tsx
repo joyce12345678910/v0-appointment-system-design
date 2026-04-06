@@ -8,45 +8,21 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import Link from "next/link"
 import { useState, useEffect, Suspense } from "react"
-import { useRouter, useSearchParams } from "next/navigation"
+import { useSearchParams } from "next/navigation"
 
 function ForgotPasswordForm() {
   const [email, setEmail] = useState("")
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
-  const router = useRouter()
+  const [success, setSuccess] = useState(false)
   const searchParams = useSearchParams()
 
   useEffect(() => {
-    // Check for error params from email verification redirect
-    // These should go to login, not forgot-password
-    const urlHash = window.location.hash
-    if (urlHash.includes("error=") || urlHash.includes("access_denied")) {
-      // This is from email verification, redirect to login
-      if (urlHash.includes("expired")) {
-        router.replace("/auth/login?error=link_expired")
-      } else {
-        router.replace("/auth/login?error=verification_failed")
-      }
-      return
-    }
-    
-    // Check if redirected due to expired password reset link specifically
+    // Check if redirected due to expired password reset link
     if (searchParams.get("expired") === "true") {
-      // Check if this is actually from email verification by looking at error_code
-      const errorCode = searchParams.get("error_code")
-      if (errorCode === "otp_expired") {
-        // This could be email verification OR password reset
-        // If there's "type=signup" it's email verification
-        const errorDescription = new URLSearchParams(urlHash.substring(1)).get("error_description")
-        if (errorDescription?.includes("Email link")) {
-          router.replace("/auth/login?error=link_expired")
-          return
-        }
-      }
-      setError("Your password reset link has expired. Please request a new one.")
+      setError("Your password reset link has expired or was already used. Please request a new one.")
     }
-  }, [searchParams, router])
+  }, [searchParams])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -61,8 +37,8 @@ function ForgotPasswordForm() {
 
       if (error) throw error
       
-      // Redirect to success page
-      router.push('/auth/forgot-password-success')
+      // Show success message
+      setSuccess(true)
     } catch (error: unknown) {
       setError(error instanceof Error ? error.message : "An error occurred")
     } finally {
@@ -118,44 +94,64 @@ function ForgotPasswordForm() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-5">
-              <div className="space-y-2">
-                <Label htmlFor="email" className="text-gray-700 font-medium">
-                  Email Address
-                </Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="your@email.com"
-                  className="h-11 border-gray-300 focus:border-emerald-500 focus:ring-emerald-500"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                />
+            {success ? (
+              <div className="space-y-5">
+                <div className="rounded-lg bg-emerald-50 p-4 text-sm text-emerald-800 font-medium border border-emerald-100">
+                  Password reset link sent! Check your email inbox and click the link to reset your password.
+                </div>
+                <div className="pt-4 border-t border-gray-200 text-center text-sm">
+                  <p className="text-gray-600">
+                    Didn&apos;t receive the email?{" "}
+                    <button
+                      type="button"
+                      onClick={() => setSuccess(false)}
+                      className="text-emerald-600 hover:text-emerald-700 font-semibold transition-colors"
+                    >
+                      Try again
+                    </button>
+                  </p>
+                </div>
               </div>
+            ) : (
+              <form onSubmit={handleSubmit} className="space-y-5">
+                <div className="space-y-2">
+                  <Label htmlFor="email" className="text-gray-700 font-medium">
+                    Email Address
+                  </Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="your@email.com"
+                    className="h-11 border-gray-300 focus:border-emerald-500 focus:ring-emerald-500"
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                  />
+                </div>
 
-              {error && <p className="text-sm text-destructive font-medium bg-red-50 p-3 rounded-lg">{error}</p>}
+                {error && <p className="text-sm text-destructive font-medium bg-red-50 p-3 rounded-lg">{error}</p>}
 
-              <Button
-                type="submit"
-                className="w-full h-11 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-lg transition-all shadow-lg hover:shadow-xl"
-                disabled={isLoading}
-              >
-                {isLoading ? "Sending..." : "Send Reset Link"}
-              </Button>
+                <Button
+                  type="submit"
+                  className="w-full h-11 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-lg transition-all shadow-lg hover:shadow-xl"
+                  disabled={isLoading}
+                >
+                  {isLoading ? "Sending..." : "Send Reset Link"}
+                </Button>
 
-              <div className="pt-4 border-t border-gray-200 text-center text-sm">
-                <p className="text-gray-600">
-                  Remember your password?{" "}
-                  <Link
-                    href="/auth/login"
-                    className="text-emerald-600 hover:text-emerald-700 font-semibold transition-colors"
-                  >
-                    Login here
-                  </Link>
-                </p>
-              </div>
-            </form>
+                <div className="pt-4 border-t border-gray-200 text-center text-sm">
+                  <p className="text-gray-600">
+                    Remember your password?{" "}
+                    <Link
+                      href="/auth/login"
+                      className="text-emerald-600 hover:text-emerald-700 font-semibold transition-colors"
+                    >
+                      Login here
+                    </Link>
+                  </p>
+                </div>
+              </form>
+            )}
           </CardContent>
         </Card>
 

@@ -33,21 +33,8 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(redirectUrl)
   }
   
-  // Handle errors on forgot-password page - redirect to login
-  // Note: error details are in hash fragment which isn't visible server-side
-  // So we check for expired=true query param which Supabase adds
-  if (pathname === "/auth/forgot-password" && request.nextUrl.searchParams.get("expired") === "true") {
-    const redirectUrl = new URL("/auth/login", request.url)
-    redirectUrl.searchParams.set("error", "link_expired")
-    return NextResponse.redirect(redirectUrl)
-  }
-  
-  // Also handle if there's an error param on forgot-password
-  if (pathname === "/auth/forgot-password" && error) {
-    const redirectUrl = new URL("/auth/login", request.url)
-    redirectUrl.searchParams.set("error", "verification_failed")
-    return NextResponse.redirect(redirectUrl)
-  }
+  // Don't redirect expired=true from forgot-password - let the page handle it
+  // This shows the user a message to request a new link
   
   return await updateSession(request)
 }
