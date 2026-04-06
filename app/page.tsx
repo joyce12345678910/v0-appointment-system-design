@@ -42,13 +42,17 @@ export default function HomePage() {
         return
       }
       
-      // If there's an error in the hash, check if it's recovery-related
+      // If there's an error in the hash, redirect to forgot-password for expired/invalid links
       if (hashError) {
+        const errorCode = hashParams.get("error_code") || ""
         const errorDescription = hashParams.get("error_description") || ""
-        // Don't redirect to login for recovery errors - go to forgot password
-        if (errorDescription.toLowerCase().includes("recovery") || 
-            errorDescription.toLowerCase().includes("reset") ||
-            errorDescription.toLowerCase().includes("expired")) {
+        
+        // Check for OTP expired, access denied, or any link-related errors
+        if (hashError === "access_denied" || 
+            errorCode === "otp_expired" ||
+            errorDescription.toLowerCase().includes("expired") ||
+            errorDescription.toLowerCase().includes("invalid") ||
+            errorDescription.toLowerCase().includes("link")) {
           router.replace("/auth/forgot-password?expired=true")
           return
         }
@@ -57,10 +61,15 @@ export default function HomePage() {
     
     // If there's an error in query params (from Supabase redirect)
     if (error) {
+      const errorCode = url.searchParams.get("error_code") || ""
       const errorDescription = url.searchParams.get("error_description") || ""
-      // Check if it's a recovery-related error
-      if (errorDescription.toLowerCase().includes("recovery") || 
-          errorDescription.toLowerCase().includes("reset")) {
+      
+      // Check for any auth errors that indicate expired/invalid link
+      if (error === "access_denied" || 
+          errorCode === "otp_expired" ||
+          errorDescription.toLowerCase().includes("expired") ||
+          errorDescription.toLowerCase().includes("invalid") ||
+          errorDescription.toLowerCase().includes("link")) {
         router.replace("/auth/forgot-password?expired=true")
         return
       }

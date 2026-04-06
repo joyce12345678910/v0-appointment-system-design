@@ -29,11 +29,14 @@ function LoginContent() {
       const hashParams = new URLSearchParams(hash)
       const hashError = hashParams.get("error")
       const errorCode = hashParams.get("error_code")
-      const errorDescription = hashParams.get("error_description")
+      const errorDescription = hashParams.get("error_description") || ""
       
-      // If there's an OTP expired error or access denied, redirect to forgot-password
-      if (hashError === "access_denied" || errorCode === "otp_expired" || 
-          (errorDescription && errorDescription.toLowerCase().includes("expired"))) {
+      // If there's an OTP expired, access denied, or link-related error, redirect to forgot-password
+      if (hashError === "access_denied" || 
+          errorCode === "otp_expired" || 
+          errorDescription.toLowerCase().includes("expired") ||
+          errorDescription.toLowerCase().includes("invalid") ||
+          errorDescription.toLowerCase().includes("link")) {
         window.location.href = "/auth/forgot-password?expired=true"
         return
       }
@@ -48,11 +51,14 @@ function LoginContent() {
     // Also check query params for errors
     const queryError = searchParams.get("error")
     const queryErrorCode = searchParams.get("error_code")
-    const queryErrorDescription = searchParams.get("error_description")
+    const queryErrorDescription = searchParams.get("error_description") || ""
     
-    if (queryError === "link_expired" || queryError === "access_denied" || 
+    if (queryError === "link_expired" || 
+        queryError === "access_denied" || 
         queryErrorCode === "otp_expired" ||
-        (queryErrorDescription && queryErrorDescription.toLowerCase().includes("expired"))) {
+        queryErrorDescription.toLowerCase().includes("expired") ||
+        queryErrorDescription.toLowerCase().includes("invalid") ||
+        queryErrorDescription.toLowerCase().includes("link")) {
       window.location.href = "/auth/forgot-password?expired=true"
       return
     }
