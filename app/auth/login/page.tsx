@@ -23,17 +23,9 @@ function LoginContent() {
   // Check for hash fragment errors AND query param errors (from Supabase auth redirects)
   // This runs FIRST and blocks rendering until checked
   useEffect(() => {
-    // Debug logging to trace redirect flow
-    console.log("[v0] Login page loaded")
-    console.log("[v0] Full URL:", window.location.href)
-    console.log("[v0] Hash:", window.location.hash)
-    console.log("[v0] Search:", window.location.search)
-    console.log("[v0] Referrer:", document.referrer)
-    
     // Check hash fragment first
     const hash = window.location.hash.substring(1)
     if (hash) {
-      console.log("[v0] Detected hash fragment:", hash)
       const hashParams = new URLSearchParams(hash)
       const hashError = hashParams.get("error")
       const errorCode = hashParams.get("error_code")
