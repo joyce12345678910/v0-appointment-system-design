@@ -23,18 +23,26 @@ function LoginContent() {
   // Check for hash fragment errors AND query param errors (from Supabase auth redirects)
   // This runs FIRST and blocks rendering until checked
   useEffect(() => {
+    // Debug: Log the full URL to understand what we're receiving
+    console.log("[v0] Login page loaded with URL:", window.location.href)
+    console.log("[v0] Hash:", window.location.hash)
+    console.log("[v0] Search:", window.location.search)
+    
     // Check hash fragment first
     const hash = window.location.hash.substring(1)
     if (hash) {
+      console.log("[v0] Found hash fragment:", hash)
       const hashParams = new URLSearchParams(hash)
       const hashError = hashParams.get("error")
       const errorCode = hashParams.get("error_code")
       const errorDescription = hashParams.get("error_description")
       
+      console.log("[v0] Hash params:", { hashError, errorCode, errorDescription })
+      
       // If there's an OTP expired error or access denied, redirect to forgot-password
       if (hashError === "access_denied" || errorCode === "otp_expired" || 
           (errorDescription && errorDescription.toLowerCase().includes("expired"))) {
-        // Use window.location for immediate redirect (more reliable than router)
+        console.log("[v0] Redirecting to forgot-password due to expired link")
         window.location.href = "/auth/forgot-password?expired=true"
         return
       }
@@ -51,10 +59,12 @@ function LoginContent() {
     const queryErrorCode = searchParams.get("error_code")
     const queryErrorDescription = searchParams.get("error_description")
     
+    console.log("[v0] Query params:", { queryError, queryErrorCode, queryErrorDescription })
+    
     if (queryError === "link_expired" || queryError === "access_denied" || 
         queryErrorCode === "otp_expired" ||
         (queryErrorDescription && queryErrorDescription.toLowerCase().includes("expired"))) {
-      // Use window.location for immediate redirect
+      console.log("[v0] Redirecting to forgot-password due to query param error")
       window.location.href = "/auth/forgot-password?expired=true"
       return
     }
