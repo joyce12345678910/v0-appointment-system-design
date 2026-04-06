@@ -30,7 +30,6 @@ export function AddDoctorDialog() {
     phone: "",
     license_number: "",
     years_of_experience: "",
-    consultation_fee: "",
   })
   const router = useRouter()
 
@@ -48,7 +47,6 @@ export function AddDoctorDialog() {
         phone: formData.phone,
         license_number: formData.license_number,
         years_of_experience: formData.years_of_experience ? Number.parseInt(formData.years_of_experience) : null,
-        consultation_fee: formData.consultation_fee ? Number.parseFloat(formData.consultation_fee) : null,
         available: true,
       })
 
@@ -67,7 +65,6 @@ export function AddDoctorDialog() {
         phone: "",
         license_number: "",
         years_of_experience: "",
-        consultation_fee: "",
       })
       router.refresh()
     } catch (error) {
@@ -150,28 +147,15 @@ export function AddDoctorDialog() {
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="years_of_experience">Years of Experience</Label>
-                <Input
-                  id="years_of_experience"
-                  type="number"
-                  min="0"
-                  value={formData.years_of_experience}
-                  onChange={(e) => setFormData({ ...formData, years_of_experience: e.target.value })}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="consultation_fee">Consultation Fee (₱)</Label>
-                <Input
-                  id="consultation_fee"
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  value={formData.consultation_fee}
-                  onChange={(e) => setFormData({ ...formData, consultation_fee: e.target.value })}
-                />
-              </div>
+            <div className="space-y-2">
+              <Label htmlFor="years_of_experience">Years of Experience</Label>
+              <Input
+                id="years_of_experience"
+                type="number"
+                min="0"
+                value={formData.years_of_experience}
+                onChange={(e) => setFormData({ ...formData, years_of_experience: e.target.value })}
+              />
             </div>
           </div>
 
