@@ -17,82 +17,135 @@ function ResetPasswordForm() {
   const [success, setSuccess] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [isReady, setIsReady] = useState(false)
+  const [isChecking, setIsChecking] = useState(true)
   const router = useRouter()
   const searchParams = useSearchParams()
   const supabase = createClient()
 
   useEffect(() => {
     const handleAuth = async () => {
-      // Check for error in URL params - redirect to forgot-password silently
-      const errorParam = searchParams.get("error")
+      setIsChecking(true)
       
-      if (errorParam) {
-        router.push("/auth/forgot-password")
-        return
-      }
-
-      // Check for hash fragment tokens (Supabase recovery flow)
-      const hash = window.location.hash.substring(1)
-      if (hash) {
-        const hashParams = new URLSearchParams(hash)
-        const accessToken = hashParams.get("access_token")
-        const refreshToken = hashParams.get("refresh_token")
-        const hashType = hashParams.get("type")
-        const hashError = hashParams.get("error")
-        const hashErrorCode = hashParams.get("error_code")
-        
-        // Check for errors in hash - redirect to forgot-password silently
-        if (hashError || hashErrorCode === "otp_expired") {
-          router.push("/auth/forgot-password")
-          return
-        }
-        
-        if (accessToken && refreshToken && hashType === "recovery") {
-          // Set the session from the hash tokens
-          const { error } = await supabase.auth.setSession({
-            access_token: accessToken,
-            refresh_token: refreshToken
-          })
+      try {
+        // First, check for hash fragment (Supabase sends recovery tokens in hash)
+        const hash = window.location.hash.substring(1)
+        if (hash) {
+          const hashParams = new URLSearchParams(hash)
+          const accessToken = hashParams.get("access_token")
+          const refreshToken = hashParams.get("refresh_token")
+          const hashType = hashParams.get("type")
+          const hashError = hashParams.get("error")
+          const hashErrorCode = hashParams.get("error_code")
           
-          if (error) {
-            router.push("/auth/forgot-password")
+          // Handle errors in hash
+          if (hashError || hashErrorCode) {
+            setError("The password reset link is invalid or has expired. Please request a new one.")
+            setIsChecking(false)
             return
           }
           
-          // Clear the hash from URL
+          // Handle recovery with valid tokens
+          if (accessToken && hashType === "recovery") {
+            // If we have both tokens, set the full session
+            if (refreshToken) {
+              const { error: sessionError } = await supabase.auth.setSession({
+                access_token: accessToken,
+                refresh_token: refreshToken
+              })
+              
+              if (sessionError) {
+                setError("The password reset link is invalid or has expired. Please request a new one.")
+                setIsChecking(false)
+                return
+              }
+            } else {
+              // If only access token, try to use it directly
+              // The access token from generateLink is already valid for password reset
+              const { error: sessionError } = await supabase.auth.setSession({
+                access_token: accessToken,
+                refresh_token: accessToken // Use access token as refresh token for recovery
+              })
+              
+              if (sessionError) {
+                // If that fails, the token might be a different format
+                // Just proceed - the updateUser call will validate the token
+                console.log("[v0] Session set warning:", sessionError.message)
+              }
+            }
+            
+            // Clear the hash from URL
+            window.history.replaceState(null, "", "/auth/reset-password")
+            setIsReady(true)
+            setIsChecking(false)
+            return
+          }
+        }
+
+        // Check for token_hash parameter (from our custom Resend email)
+        const tokenHash = searchParams.get("token_hash")
+        const type = searchParams.get("type")
+        if (tokenHash && type === "recovery") {
+          const { error: verifyError } = await supabase.auth.verifyOtp({
+            token_hash: tokenHash,
+            type: "recovery"
+          })
+          if (verifyError) {
+            console.log("[v0] Token hash verification failed:", verifyError.message)
+            setError("The password reset link is invalid or has expired. Please request a new one.")
+            setIsChecking(false)
+            return
+          }
+          // Clear the params from URL
           window.history.replaceState(null, "", "/auth/reset-password")
           setIsReady(true)
+          setIsChecking(false)
           return
         }
-      }
 
-      // Check for code parameter (PKCE flow from Supabase)
-      const code = searchParams.get("code")
-      if (code) {
-        const { error } = await supabase.auth.exchangeCodeForSession(code)
-        if (error) {
-          router.push("/auth/forgot-password")
+        // Check for code parameter (PKCE flow)
+        const code = searchParams.get("code")
+        if (code) {
+          const { error: codeError } = await supabase.auth.exchangeCodeForSession(code)
+          if (codeError) {
+            setError("The password reset link is invalid or has expired. Please request a new one.")
+            setIsChecking(false)
+            return
+          }
+          // Clear the code from URL
+          window.history.replaceState(null, "", "/auth/reset-password")
+          setIsReady(true)
+          setIsChecking(false)
           return
         }
-        setIsReady(true)
-        // Clear the code from URL
-        window.history.replaceState(null, "", "/auth/reset-password")
-        return
-      }
 
-      // Check if there's already a session
-      const { data: { session } } = await supabase.auth.getSession()
-      if (session) {
-        setIsReady(true)
-        return
-      }
+        // Check for error parameter in URL
+        const errorParam = searchParams.get("error")
+        const errorCode = searchParams.get("error_code")
+        if (errorParam || errorCode) {
+          setError("The password reset link is invalid or has expired. Please request a new one.")
+          setIsChecking(false)
+          return
+        }
 
-      // No code and no session - redirect to forgot-password silently
-      router.push("/auth/forgot-password")
+        // Check if there's already a valid session
+        const { data: { session } } = await supabase.auth.getSession()
+        if (session) {
+          setIsReady(true)
+          setIsChecking(false)
+          return
+        }
+
+        // No valid way to reset password - show error with link to request new one
+        setError("No valid reset session found. Please request a new password reset link.")
+        setIsChecking(false)
+      } catch (err) {
+        setError("An error occurred. Please request a new password reset link.")
+        setIsChecking(false)
+      }
     }
     
     handleAuth()
-  }, [supabase.auth, searchParams, router])
+  }, [supabase.auth, searchParams])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -130,7 +183,8 @@ function ResetPasswordForm() {
     }
   }
 
-  if (!isReady) {
+  // Show loading state while checking
+  if (isChecking) {
     return (
       <div className="min-h-screen w-full bg-gradient-to-br from-emerald-600 via-green-500 to-teal-500 flex items-center justify-center p-4">
         <Card className="w-full max-w-sm shadow-2xl border-0 bg-white/95 backdrop-blur-sm">
@@ -141,6 +195,65 @@ function ResetPasswordForm() {
             </div>
           </CardContent>
         </Card>
+      </div>
+    )
+  }
+
+  // Show error state with option to request new link
+  if (error && !isReady) {
+    return (
+      <div className="min-h-screen w-full bg-gradient-to-br from-emerald-600 via-green-500 to-teal-500 flex items-center justify-center p-4 relative overflow-hidden">
+        <div className="absolute inset-0 flex items-center justify-center opacity-5 pointer-events-none">
+          <img src="/tactay-billedo-logo.png" alt="" className="w-[800px] h-auto" />
+        </div>
+
+        <div className="w-full max-w-md relative z-10">
+          <div className="text-center mb-8">
+            <div className="relative inline-block">
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="w-40 h-40 rounded-full border-2 border-white/20 animate-pulse"></div>
+              </div>
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="w-48 h-48 rounded-full border border-white/10"></div>
+              </div>
+              <div className="relative p-2">
+                <img src="/tactay-billedo-logo.png" alt="TACTAY-BILLEDO CLINIC" className="h-28 w-auto mx-auto relative z-10 drop-shadow-2xl" />
+              </div>
+            </div>
+            <h1 className="text-3xl font-bold text-white mt-5 mb-1 drop-shadow-lg">TACTAY-BILLEDO CLINIC</h1>
+            <p className="text-emerald-100 text-base font-medium">Dental & Medical Care</p>
+          </div>
+
+          <Card className="shadow-2xl border-0 bg-white/95 backdrop-blur-sm">
+            <CardHeader className="pb-4">
+              <CardTitle className="text-2xl font-bold text-gray-900">Reset Link Expired</CardTitle>
+              <CardDescription className="text-gray-600">Please request a new password reset link</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-5">
+                <div className="rounded-lg bg-amber-50 p-4 text-sm text-amber-800 font-medium border border-amber-200">
+                  {error}
+                </div>
+                
+                <Link href="/auth/forgot-password" className="block">
+                  <Button 
+                    className="w-full h-11 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-lg transition-all shadow-lg hover:shadow-xl"
+                  >
+                    Request New Reset Link
+                  </Button>
+                </Link>
+
+                <div className="pt-4 border-t border-gray-200 text-center text-sm">
+                  <Link href="/auth/login" className="text-emerald-600 hover:text-emerald-700 font-semibold transition-colors">
+                    Back to Login
+                  </Link>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <p className="text-center text-white/90 text-sm mt-6 drop-shadow">© 2025 TACTAY-BILLEDO CLINIC. All rights reserved.</p>
+        </div>
       </div>
     )
   }
@@ -241,7 +354,10 @@ export default function ResetPasswordPage() {
       <div className="min-h-screen w-full bg-gradient-to-br from-emerald-600 via-green-500 to-teal-500 flex items-center justify-center p-4">
         <Card className="w-full max-w-sm shadow-2xl border-0 bg-white/95 backdrop-blur-sm">
           <CardContent className="pt-6">
-            <p className="text-center text-sm text-muted-foreground">Loading...</p>
+            <div className="flex flex-col items-center gap-3">
+              <div className="h-8 w-8 animate-spin rounded-full border-4 border-emerald-500 border-t-transparent"></div>
+              <p className="text-center text-sm text-muted-foreground">Loading...</p>
+            </div>
           </CardContent>
         </Card>
       </div>

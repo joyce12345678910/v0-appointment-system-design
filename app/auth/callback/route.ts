@@ -30,7 +30,7 @@ export async function GET(request: Request) {
         return NextResponse.redirect(`${origin}/auth/reset-password`)
       }
       // No valid session and code failed - link is expired or invalid
-      return NextResponse.redirect(`${origin}/auth/forgot-password?expired=true`)
+      return NextResponse.redirect(`${origin}/auth/reset-password?error=expired`)
     }
     
     // No code but type is recovery - check for session
@@ -39,8 +39,8 @@ export async function GET(request: Request) {
       return NextResponse.redirect(`${origin}/auth/reset-password`)
     }
     
-    // No code and no session - redirect to forgot password
-    return NextResponse.redirect(`${origin}/auth/forgot-password?expired=true`)
+    // No code and no session - redirect to reset password with error
+    return NextResponse.redirect(`${origin}/auth/reset-password?error=expired`)
   }
 
   // Handle PKCE code exchange for non-recovery flows (signup verification, etc.)
@@ -48,6 +48,17 @@ export async function GET(request: Request) {
     const { error, data } = await supabase.auth.exchangeCodeForSession(code)
     
     if (!error && data?.session) {
+      // Check if this session was created for password recovery
+      // Supabase includes aal1 for recovery sessions
+      const isRecoverySession = data.session.user?.aud === "authenticated" && 
+        data.session.user?.app_metadata?.provider === "email" &&
+        data.session.user?.recovery_sent_at
+      
+      // If the user just got their session from a recovery code, send to reset password
+      if (isRecoverySession || data.session.user?.recovery_sent_at) {
+        return NextResponse.redirect(`${origin}/auth/reset-password`)
+      }
+      
       // Not recovery - this is either sign-up verification or regular login
       // Redirect to patient dashboard or admin based on role
       const { data: profile } = await supabase
@@ -65,6 +76,11 @@ export async function GET(request: Request) {
     // Code exchange failed for non-recovery, check for existing session
     const { data: { session } } = await supabase.auth.getSession()
     if (session) {
+      // Check if this is a recovery session
+      if (session.user?.recovery_sent_at) {
+        return NextResponse.redirect(`${origin}/auth/reset-password`)
+      }
+      
       const { data: profile } = await supabase
         .from("profiles")
         .select("role")
@@ -75,6 +91,13 @@ export async function GET(request: Request) {
         return NextResponse.redirect(`${origin}/admin`)
       }
       return NextResponse.redirect(`${origin}/patient`)
+    }
+    
+    // No session and code failed - this might be an expired recovery link
+    // Check the error to determine what to show
+    if (error?.message?.toLowerCase().includes("expired") || 
+        error?.message?.toLowerCase().includes("invalid")) {
+      return NextResponse.redirect(`${origin}/auth/reset-password?error=expired`)
     }
     
     // No session and code failed - redirect to login
