@@ -140,28 +140,7 @@ export default function HomePage() {
                 </Button>
               </div>
 
-              <div className="flex flex-wrap items-center gap-4 sm:gap-8 pt-4">
-                <div className="flex items-center gap-2">
-                  <div className="flex -space-x-2">
-                    {[1, 2, 3, 4].map((i) => (
-                      <div key={i} className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-br from-emerald-400 to-green-500 border-2 border-white flex items-center justify-center text-white text-xs font-bold">
-                        {String.fromCharCode(64 + i)}
-                      </div>
-                    ))}
-                  </div>
-                  <div className="text-sm">
-                    <p className="font-semibold text-gray-900">1000+ Patients</p>
-                    <p className="text-gray-500">Trust us</p>
-                  </div>
-                </div>
-                <div className="h-12 w-px bg-gray-200 hidden sm:block"></div>
-                <div className="flex items-center gap-1">
-                  {[1, 2, 3, 4, 5].map((i) => (
-                    <Star key={i} className="h-4 w-4 sm:h-5 sm:w-5 fill-yellow-400 text-yellow-400" />
-                  ))}
-                  <span className="ml-2 font-semibold text-gray-900">4.9</span>
-                </div>
-              </div>
+
 
               {/* Mobile Logo and Feature Cards */}
               <div className="lg:hidden pt-4 pb-8">
