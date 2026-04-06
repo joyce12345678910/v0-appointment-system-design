@@ -47,14 +47,27 @@ function ResetPasswordForm() {
           return
         }
         
-        if (accessToken && refreshToken && hashType === "recovery") {
+        // Handle recovery type with access token
+        // Note: refreshToken might be empty string, so only check for accessToken and type
+        if (accessToken && hashType === "recovery") {
+          // Validate that accessToken looks like a JWT (should start with "ey" and have dots)
+          const isValidJWT = accessToken.startsWith("ey") && accessToken.includes(".")
+          
+          if (!isValidJWT) {
+            // Invalid token format - redirect to forgot password
+            console.log("[v0] Invalid token format, redirecting to forgot-password")
+            router.push("/auth/forgot-password")
+            return
+          }
+          
           // Set the session from the hash tokens
           const { error } = await supabase.auth.setSession({
             access_token: accessToken,
-            refresh_token: refreshToken
+            refresh_token: refreshToken || ""
           })
           
           if (error) {
+            console.log("[v0] Error setting session:", error.message)
             router.push("/auth/forgot-password")
             return
           }
