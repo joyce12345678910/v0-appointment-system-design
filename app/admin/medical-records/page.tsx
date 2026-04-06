@@ -10,7 +10,8 @@ import { AddMedicalRecordDialog } from "@/components/add-medical-record-dialog"
 import { ViewMedicalRecordDialog } from "@/components/view-medical-record-dialog"
 import { DeleteMedicalRecordDialog } from "@/components/delete-medical-record-dialog"
 import type { MedicalRecord, Doctor } from "@/lib/types"
-import { Search, FileText } from "lucide-react"
+import { Search, FileText, Printer } from "lucide-react"
+import { Button } from "@/components/ui/button"
 
 export default function MedicalRecordsPage() {
   const [records, setRecords] = useState<MedicalRecord[]>([])
@@ -73,6 +74,156 @@ export default function MedicalRecordsPage() {
     }
 
     setFilteredRecords(filtered)
+  }
+
+  const printPatientRecords = (patientId: string, patientName: string, patientEmail: string) => {
+    // Get all records for this specific patient
+    const patientRecords = records.filter((record) => record.patient_id === patientId)
+    
+    const printWindow = window.open("", "_blank")
+    if (!printWindow) return
+
+    const printContent = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>Medical Records - ${patientName}</title>
+          <style>
+            body {
+              font-family: Arial, sans-serif;
+              padding: 20px;
+              max-width: 800px;
+              margin: 0 auto;
+            }
+            .header {
+              text-align: center;
+              margin-bottom: 30px;
+              border-bottom: 2px solid #16a34a;
+              padding-bottom: 20px;
+            }
+            .clinic-name {
+              font-size: 24px;
+              font-weight: bold;
+              color: #16a34a;
+            }
+            .clinic-subtitle {
+              color: #666;
+              margin-top: 5px;
+            }
+            .patient-info {
+              background: #f5f5f5;
+              padding: 15px;
+              border-radius: 8px;
+              margin-bottom: 20px;
+            }
+            .patient-name {
+              font-size: 18px;
+              font-weight: bold;
+            }
+            .patient-email {
+              color: #666;
+              font-size: 14px;
+            }
+            .record {
+              border: 1px solid #ddd;
+              border-radius: 8px;
+              padding: 15px;
+              margin-bottom: 15px;
+            }
+            .record-header {
+              display: flex;
+              justify-content: space-between;
+              border-bottom: 1px solid #eee;
+              padding-bottom: 10px;
+              margin-bottom: 10px;
+            }
+            .record-date {
+              font-weight: bold;
+              color: #16a34a;
+            }
+            .record-doctor {
+              color: #666;
+            }
+            .record-section {
+              margin-top: 10px;
+            }
+            .record-label {
+              font-weight: bold;
+              color: #333;
+            }
+            .record-value {
+              margin-top: 3px;
+              color: #555;
+            }
+            .print-date {
+              text-align: center;
+              margin-top: 30px;
+              color: #999;
+              font-size: 12px;
+            }
+            @media print {
+              body { padding: 0; }
+              .record { break-inside: avoid; }
+            }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <div class="clinic-name">Tactay-Billedo Clinic</div>
+            <div class="clinic-subtitle">Dental & Medical Care</div>
+          </div>
+          
+          <div class="patient-info">
+            <div class="patient-name">${patientName}</div>
+            <div class="patient-email">${patientEmail}</div>
+            <div style="margin-top: 5px; font-size: 14px;">Total Records: ${patientRecords.length}</div>
+          </div>
+
+          ${patientRecords
+            .map(
+              (record) => `
+            <div class="record">
+              <div class="record-header">
+                <span class="record-date">Visit Date: ${new Date(record.visit_date).toLocaleDateString()}</span>
+                <span class="record-doctor">Dr. ${record.doctor?.full_name} (${record.doctor?.specialization})</span>
+              </div>
+              <div class="record-section">
+                <div class="record-label">Diagnosis:</div>
+                <div class="record-value">${record.diagnosis}</div>
+              </div>
+              ${record.treatment ? `
+              <div class="record-section">
+                <div class="record-label">Treatment:</div>
+                <div class="record-value">${record.treatment}</div>
+              </div>
+              ` : ""}
+              ${record.prescription ? `
+              <div class="record-section">
+                <div class="record-label">Prescription:</div>
+                <div class="record-value">${record.prescription}</div>
+              </div>
+              ` : ""}
+              ${record.notes ? `
+              <div class="record-section">
+                <div class="record-label">Notes:</div>
+                <div class="record-value">${record.notes}</div>
+              </div>
+              ` : ""}
+            </div>
+          `,
+            )
+            .join("")}
+
+          <div class="print-date">
+            Printed on: ${new Date().toLocaleString()}
+          </div>
+        </body>
+      </html>
+    `
+
+    printWindow.document.write(printContent)
+    printWindow.document.close()
+    printWindow.print()
   }
 
   return (
@@ -155,6 +306,19 @@ export default function MedicalRecordsPage() {
 
                     <div className="flex flex-wrap items-center gap-2 pt-2 pl-8">
                       <ViewMedicalRecordDialog record={record} />
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => printPatientRecords(
+                          record.patient_id,
+                          record.patient?.full_name || "Patient",
+                          record.patient?.email || ""
+                        )}
+                        className="text-emerald-600 border-emerald-200 hover:bg-emerald-50 hover:text-emerald-700"
+                      >
+                        <Printer className="h-4 w-4 mr-1" />
+                        Print All
+                      </Button>
                       <DeleteMedicalRecordDialog
                         recordId={record.id}
                         patientName={record.patient?.full_name || "Patient"}
