@@ -17,55 +17,50 @@ function LoginContent() {
   const [successMessage, setSuccessMessage] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [isCheckingRedirect, setIsCheckingRedirect] = useState(true)
-  const router = useRouter()
+  const router = useRouter() // Used for login redirect
   const searchParams = useSearchParams()
 
   // Check for hash fragment errors AND query param errors (from Supabase auth redirects)
   // This runs FIRST and blocks rendering until checked
   useEffect(() => {
-    const checkForAuthErrors = () => {
-      // Check hash fragment first
-      const hash = window.location.hash.substring(1)
-      if (hash) {
-        const hashParams = new URLSearchParams(hash)
-        const hashError = hashParams.get("error")
-        const errorCode = hashParams.get("error_code")
-        const errorDescription = hashParams.get("error_description")
-        
-        // If there's an OTP expired error, redirect to forgot-password
-        if (hashError === "access_denied" || errorCode === "otp_expired" || 
-            (errorDescription && errorDescription.toLowerCase().includes("expired"))) {
-          router.replace("/auth/forgot-password?expired=true")
-          return true
-        }
-        
-        // For other auth errors in hash, show a message
-        if (hashError) {
-          setError(errorDescription ? decodeURIComponent(errorDescription.replace(/\+/g, ' ')) : "Authentication error occurred")
-          window.history.replaceState(null, "", "/auth/login")
-        }
+    // Check hash fragment first
+    const hash = window.location.hash.substring(1)
+    if (hash) {
+      const hashParams = new URLSearchParams(hash)
+      const hashError = hashParams.get("error")
+      const errorCode = hashParams.get("error_code")
+      const errorDescription = hashParams.get("error_description")
+      
+      // If there's an OTP expired error or access denied, redirect to forgot-password
+      if (hashError === "access_denied" || errorCode === "otp_expired" || 
+          (errorDescription && errorDescription.toLowerCase().includes("expired"))) {
+        // Use window.location for immediate redirect (more reliable than router)
+        window.location.href = "/auth/forgot-password?expired=true"
+        return
       }
       
-      // Also check query params for errors
-      const queryError = searchParams.get("error")
-      const queryErrorCode = searchParams.get("error_code")
-      const queryErrorDescription = searchParams.get("error_description")
-      
-      if (queryError === "link_expired" || queryError === "access_denied" || 
-          queryErrorCode === "otp_expired" ||
-          (queryErrorDescription && queryErrorDescription.toLowerCase().includes("expired"))) {
-        router.replace("/auth/forgot-password?expired=true")
-        return true
+      // For other auth errors in hash, show a message
+      if (hashError) {
+        setError(errorDescription ? decodeURIComponent(errorDescription.replace(/\+/g, ' ')) : "Authentication error occurred")
+        window.history.replaceState(null, "", "/auth/login")
       }
-      
-      return false
     }
     
-    const shouldRedirect = checkForAuthErrors()
-    if (!shouldRedirect) {
-      setIsCheckingRedirect(false)
+    // Also check query params for errors
+    const queryError = searchParams.get("error")
+    const queryErrorCode = searchParams.get("error_code")
+    const queryErrorDescription = searchParams.get("error_description")
+    
+    if (queryError === "link_expired" || queryError === "access_denied" || 
+        queryErrorCode === "otp_expired" ||
+        (queryErrorDescription && queryErrorDescription.toLowerCase().includes("expired"))) {
+      // Use window.location for immediate redirect
+      window.location.href = "/auth/forgot-password?expired=true"
+      return
     }
-  }, [router, searchParams])
+    
+    setIsCheckingRedirect(false)
+  }, [searchParams])
 
   // Check for query params (verified success message only)
   useEffect(() => {
