@@ -21,6 +21,7 @@ export default function SignUpPage() {
   const [validIdPreview, setValidIdPreview] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
+  const [success, setSuccess] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const router = useRouter()
 
@@ -114,8 +115,8 @@ export default function SignUpPage() {
         throw new Error(signUpData.error || "Failed to create account")
       }
 
-      // Redirect to login page with success message
-      router.push("/auth/login?registered=true")
+      // Show success message on this page
+      setSuccess(true)
     } catch (error: unknown) {
       console.error("[v0] Sign up error:", error)
       setError(error instanceof Error ? error.message : "An error occurred")
@@ -179,12 +180,37 @@ export default function SignUpPage() {
 
         {/* Sign Up Card */}
         <Card className="shadow-2xl border-0 bg-white/95 backdrop-blur-sm">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-2xl font-bold text-gray-900">Create Account</CardTitle>
-            <CardDescription className="text-gray-600">Register as a patient</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSignUp} className="space-y-4">
+          {success ? (
+            <>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-2xl font-bold text-gray-900">Registration Successful!</CardTitle>
+                <CardDescription className="text-gray-600">Your account has been created</CardDescription>
+              </CardHeader>
+              <CardContent className="text-center py-8">
+                <div className="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <svg className="w-10 h-10 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">Welcome to Tactay-Billedo Clinic!</h3>
+                <p className="text-gray-600 mb-6">
+                  Please check your email for a welcome message from us.
+                </p>
+                <Link href="/auth/login">
+                  <Button className="w-full h-11 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-lg transition-all shadow-lg hover:shadow-xl">
+                    Go to Login
+                  </Button>
+                </Link>
+              </CardContent>
+            </>
+          ) : (
+            <>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-2xl font-bold text-gray-900">Create Account</CardTitle>
+                <CardDescription className="text-gray-600">Register as a patient</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <form onSubmit={handleSignUp} className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="fullName" className="text-gray-700 font-medium">
                   Full Name
@@ -350,7 +376,9 @@ export default function SignUpPage() {
                 </p>
               </div>
             </form>
-          </CardContent>
+              </CardContent>
+            </>
+          )}
         </Card>
 
         {/* Footer */}
