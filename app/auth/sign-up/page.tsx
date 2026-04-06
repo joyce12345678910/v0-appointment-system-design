@@ -66,6 +66,16 @@ export default function SignUpPage() {
       <div className="w-full max-w-md relative z-10">
         {/* Modern Logo Header with Decorative Elements */}
         <div className="text-center mb-6">
+          <div className="absolute top-4 left-4 z-20">
+            <Link href="/">
+              <Button 
+                variant="outline" 
+                className="bg-white/20 border-white/40 text-white hover:bg-white/30 hover:border-white/60 font-semibold"
+              >
+                ← Home
+              </Button>
+            </Link>
+          </div>
           <div className="relative inline-block">
             {/* Decorative Rings */}
             <div className="absolute inset-0 flex items-center justify-center">
