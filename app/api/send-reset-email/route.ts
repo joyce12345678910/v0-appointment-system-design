@@ -19,11 +19,16 @@ export async function POST(request: Request) {
 
     if (error) {
       console.log("[v0] Password reset error:", error.message)
-      // Don't reveal if user exists or not
-      if (error.message.includes("rate limit")) {
-        return NextResponse.json({ error: "Too many requests. Please try again later." }, { status: 429 })
+      // Handle rate limiting with user-friendly message
+      if (error.message.includes("rate") || error.message.includes("security") || error.message.includes("seconds")) {
+        // Extract seconds from message if available
+        const secondsMatch = error.message.match(/(\d+)\s*seconds?/)
+        const seconds = secondsMatch ? secondsMatch[1] : "60"
+        return NextResponse.json({ 
+          error: `Please wait ${seconds} seconds before requesting another reset email.` 
+        }, { status: 429 })
       }
-      // Return success even on error to prevent email enumeration
+      // Return success even on other errors to prevent email enumeration
       return NextResponse.json({ success: true })
     }
 
