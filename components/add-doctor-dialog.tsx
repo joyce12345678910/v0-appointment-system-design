@@ -20,7 +20,11 @@ import { Label } from "@/components/ui/label"
 import { Plus } from "lucide-react"
 import { toast } from "@/hooks/use-toast"
 
-export function AddDoctorDialog() {
+interface AddDoctorDialogProps {
+  onSuccess?: () => void
+}
+
+export function AddDoctorDialog({ onSuccess }: AddDoctorDialogProps) {
   const [open, setOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [formData, setFormData] = useState({
@@ -66,6 +70,7 @@ export function AddDoctorDialog() {
         license_number: "",
         years_of_experience: "",
       })
+      onSuccess?.()
       router.refresh()
     } catch (error) {
       toast({

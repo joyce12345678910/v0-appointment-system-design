@@ -234,7 +234,7 @@ export default function MedicalRecordsPage() {
           <p className="text-muted-foreground text-sm md:text-base">View and manage patient medical records</p>
         </div>
         <div className="w-full">
-          <AddMedicalRecordDialog />
+          <AddMedicalRecordDialog onSuccess={fetchData} />
         </div>
       </div>
 
@@ -322,6 +322,7 @@ export default function MedicalRecordsPage() {
                       <DeleteMedicalRecordDialog
                         recordId={record.id}
                         patientName={record.patient?.full_name || "Patient"}
+                        onSuccess={fetchData}
                       />
                     </div>
                   </div>

@@ -421,7 +421,11 @@ function DentalChart({ selectedTeeth, onToothClick }: DentalChartProps) {
   )
 }
 
-export function AddMedicalRecordDialog() {
+interface AddMedicalRecordDialogProps {
+  onSuccess?: () => void
+}
+
+export function AddMedicalRecordDialog({ onSuccess }: AddMedicalRecordDialogProps) {
   const [open, setOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [patients, setPatients] = useState<Profile[]>([])
@@ -571,6 +575,7 @@ export function AddMedicalRecordDialog() {
       setSelectedTeeth([])
       setXrayFile(null)
       setXrayPreview(null)
+      onSuccess?.()
       router.refresh()
     } catch (error) {
       toast({

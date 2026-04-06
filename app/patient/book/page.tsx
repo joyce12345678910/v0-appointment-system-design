@@ -196,6 +196,7 @@ export default function BookAppointmentPage() {
         description: "Your appointment request has been submitted. Please wait for admin approval.",
       })
 
+      router.refresh()
       router.push("/patient")
     } catch (error) {
       console.error("[v0] Error booking appointment:", error)

@@ -24,9 +24,10 @@ import { toast } from "@/hooks/use-toast"
 
 interface EditDoctorDialogProps {
   doctor: Doctor
+  onSuccess?: () => void
 }
 
-export function EditDoctorDialog({ doctor }: EditDoctorDialogProps) {
+export function EditDoctorDialog({ doctor, onSuccess }: EditDoctorDialogProps) {
   const [open, setOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [formData, setFormData] = useState({
@@ -68,6 +69,7 @@ export function EditDoctorDialog({ doctor }: EditDoctorDialogProps) {
       })
 
       setOpen(false)
+      onSuccess?.()
       router.refresh()
     } catch (error) {
       toast({
