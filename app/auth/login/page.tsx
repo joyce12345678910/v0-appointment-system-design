@@ -19,6 +19,31 @@ function LoginContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
 
+  // Check for hash fragment errors (from Supabase auth redirects)
+  useEffect(() => {
+    const hash = window.location.hash.substring(1)
+    if (hash) {
+      const hashParams = new URLSearchParams(hash)
+      const hashError = hashParams.get("error")
+      const errorCode = hashParams.get("error_code")
+      const errorDescription = hashParams.get("error_description")
+      
+      // If there's an OTP expired error, redirect to forgot-password
+      if (hashError === "access_denied" && errorCode === "otp_expired") {
+        // Clear the hash and redirect to forgot-password
+        router.replace("/auth/forgot-password?expired=true")
+        return
+      }
+      
+      // For other auth errors in hash, show a message
+      if (hashError) {
+        setError(errorDescription ? decodeURIComponent(errorDescription.replace(/\+/g, ' ')) : "Authentication error occurred")
+        // Clear the hash from URL
+        window.history.replaceState(null, "", "/auth/login")
+      }
+    }
+  }, [router])
+
   // Check for query params (verified success message only)
   useEffect(() => {
     const verified = searchParams.get("verified")
