@@ -20,12 +20,173 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import type { Doctor, Profile } from "@/lib/types"
-import { Plus, Upload, X, ImageIcon } from "lucide-react"
+import { Plus, X, ImageIcon } from "lucide-react"
 import { toast } from "@/hooks/use-toast"
 
-// Tooth numbers for adult dentition (Universal Numbering System)
-const upperTeeth = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]
-const lowerTeeth = [32, 31, 30, 29, 28, 27, 26, 25, 24, 23, 22, 21, 20, 19, 18, 17]
+// Tooth data with names for Universal Numbering System
+const teethData = {
+  upper: [
+    { number: 1, name: "Third Molar", type: "molar" },
+    { number: 2, name: "Second Molar", type: "molar" },
+    { number: 3, name: "First Molar", type: "molar" },
+    { number: 4, name: "Second Premolar", type: "premolar" },
+    { number: 5, name: "First Premolar", type: "premolar" },
+    { number: 6, name: "Canine", type: "canine" },
+    { number: 7, name: "Lateral Incisor", type: "incisor" },
+    { number: 8, name: "Central Incisor", type: "incisor" },
+    { number: 9, name: "Central Incisor", type: "incisor" },
+    { number: 10, name: "Lateral Incisor", type: "incisor" },
+    { number: 11, name: "Canine", type: "canine" },
+    { number: 12, name: "First Premolar", type: "premolar" },
+    { number: 13, name: "Second Premolar", type: "premolar" },
+    { number: 14, name: "First Molar", type: "molar" },
+    { number: 15, name: "Second Molar", type: "molar" },
+    { number: 16, name: "Third Molar", type: "molar" },
+  ],
+  lower: [
+    { number: 32, name: "Third Molar", type: "molar" },
+    { number: 31, name: "Second Molar", type: "molar" },
+    { number: 30, name: "First Molar", type: "molar" },
+    { number: 29, name: "Second Premolar", type: "premolar" },
+    { number: 28, name: "First Premolar", type: "premolar" },
+    { number: 27, name: "Canine", type: "canine" },
+    { number: 26, name: "Lateral Incisor", type: "incisor" },
+    { number: 25, name: "Central Incisor", type: "incisor" },
+    { number: 24, name: "Central Incisor", type: "incisor" },
+    { number: 23, name: "Lateral Incisor", type: "incisor" },
+    { number: 22, name: "Canine", type: "canine" },
+    { number: 21, name: "First Premolar", type: "premolar" },
+    { number: 20, name: "Second Premolar", type: "premolar" },
+    { number: 19, name: "First Molar", type: "molar" },
+    { number: 18, name: "Second Molar", type: "molar" },
+    { number: 17, name: "Third Molar", type: "molar" },
+  ],
+}
+
+interface ToothProps {
+  tooth: { number: number; name: string; type: string }
+  isSelected: boolean
+  onClick: () => void
+  isUpper: boolean
+}
+
+function Tooth({ tooth, isSelected, onClick, isUpper }: ToothProps) {
+  // Get tooth dimensions based on type
+  const getToothDimensions = () => {
+    switch (tooth.type) {
+      case "molar":
+        return { width: 28, height: 32 }
+      case "premolar":
+        return { width: 22, height: 28 }
+      case "canine":
+        return { width: 18, height: 30 }
+      case "incisor":
+        return { width: 16, height: 26 }
+      default:
+        return { width: 20, height: 28 }
+    }
+  }
+
+  const { width, height } = getToothDimensions()
+
+  // SVG paths for realistic tooth shapes
+  const getToothPath = () => {
+    if (tooth.type === "molar") {
+      if (isUpper) {
+        return "M4,28 Q2,24 2,18 Q2,8 6,4 Q10,0 14,0 Q18,0 22,4 Q26,8 26,18 Q26,24 24,28 Q20,32 14,32 Q8,32 4,28 Z"
+      }
+      return "M4,4 Q2,8 2,14 Q2,24 6,28 Q10,32 14,32 Q18,32 22,28 Q26,24 26,14 Q26,8 24,4 Q20,0 14,0 Q8,0 4,4 Z"
+    }
+    if (tooth.type === "premolar") {
+      if (isUpper) {
+        return "M4,24 Q2,20 2,14 Q2,6 5,3 Q8,0 11,0 Q14,0 17,3 Q20,6 20,14 Q20,20 18,24 Q15,28 11,28 Q7,28 4,24 Z"
+      }
+      return "M4,4 Q2,8 2,14 Q2,22 5,25 Q8,28 11,28 Q14,28 17,25 Q20,22 20,14 Q20,8 18,4 Q15,0 11,0 Q7,0 4,4 Z"
+    }
+    if (tooth.type === "canine") {
+      if (isUpper) {
+        return "M3,26 Q1,22 1,16 Q1,8 4,3 Q7,0 9,0 Q11,0 14,3 Q17,8 17,16 Q17,22 15,26 Q12,30 9,30 Q6,30 3,26 Z"
+      }
+      return "M3,4 Q1,8 1,14 Q1,22 4,27 Q7,30 9,30 Q11,30 14,27 Q17,22 17,14 Q17,8 15,4 Q12,0 9,0 Q6,0 3,4 Z"
+    }
+    // Incisor
+    if (isUpper) {
+      return "M2,22 Q1,18 1,14 Q1,6 4,3 Q6,0 8,0 Q10,0 12,3 Q15,6 15,14 Q15,18 14,22 Q12,26 8,26 Q4,26 2,22 Z"
+    }
+    return "M2,4 Q1,8 1,12 Q1,20 4,23 Q6,26 8,26 Q10,26 12,23 Q15,20 15,12 Q15,8 14,4 Q12,0 8,0 Q4,0 2,4 Z"
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="relative group focus:outline-none"
+      title={`#${tooth.number} - ${tooth.name}`}
+    >
+      <svg
+        width={width}
+        height={height}
+        viewBox={`0 0 ${tooth.type === "molar" ? 28 : tooth.type === "premolar" ? 22 : tooth.type === "canine" ? 18 : 16} ${height}`}
+        className="transition-transform group-hover:scale-110"
+      >
+        <defs>
+          <linearGradient id={`tooth-gradient-${tooth.number}`} x1="0%" y1="0%" x2="100%" y2="100%">
+            {isSelected ? (
+              <>
+                <stop offset="0%" stopColor="#ef4444" />
+                <stop offset="100%" stopColor="#dc2626" />
+              </>
+            ) : (
+              <>
+                <stop offset="0%" stopColor="#fafafa" />
+                <stop offset="50%" stopColor="#f5f5f4" />
+                <stop offset="100%" stopColor="#e7e5e4" />
+              </>
+            )}
+          </linearGradient>
+          <filter id={`shadow-${tooth.number}`} x="-20%" y="-20%" width="140%" height="140%">
+            <feDropShadow dx="0" dy="1" stdDeviation="1" floodOpacity="0.2" />
+          </filter>
+        </defs>
+        <path
+          d={getToothPath()}
+          fill={`url(#tooth-gradient-${tooth.number})`}
+          stroke={isSelected ? "#b91c1c" : "#a8a29e"}
+          strokeWidth="1.5"
+          filter={`url(#shadow-${tooth.number})`}
+          className="transition-all"
+        />
+        {/* Root indication for upper teeth */}
+        {isUpper && (
+          <line
+            x1={tooth.type === "molar" ? 14 : tooth.type === "premolar" ? 11 : tooth.type === "canine" ? 9 : 8}
+            y1={height - 4}
+            x2={tooth.type === "molar" ? 14 : tooth.type === "premolar" ? 11 : tooth.type === "canine" ? 9 : 8}
+            y2={height}
+            stroke={isSelected ? "#b91c1c" : "#d6d3d1"}
+            strokeWidth="2"
+            strokeLinecap="round"
+          />
+        )}
+        {/* Root indication for lower teeth */}
+        {!isUpper && (
+          <line
+            x1={tooth.type === "molar" ? 14 : tooth.type === "premolar" ? 11 : tooth.type === "canine" ? 9 : 8}
+            y1="0"
+            x2={tooth.type === "molar" ? 14 : tooth.type === "premolar" ? 11 : tooth.type === "canine" ? 9 : 8}
+            y2="4"
+            stroke={isSelected ? "#b91c1c" : "#d6d3d1"}
+            strokeWidth="2"
+            strokeLinecap="round"
+          />
+        )}
+      </svg>
+      <span className={`absolute -bottom-4 left-1/2 -translate-x-1/2 text-[10px] font-medium ${isSelected ? "text-red-600" : "text-gray-500"}`}>
+        {tooth.number}
+      </span>
+    </button>
+  )
+}
 
 interface ToothDiagramProps {
   selectedTeeth: number[]
@@ -33,69 +194,58 @@ interface ToothDiagramProps {
 }
 
 function ToothDiagram({ selectedTeeth, onToothClick }: ToothDiagramProps) {
-  const getToothColor = (toothNumber: number) => {
-    if (selectedTeeth.includes(toothNumber)) {
-      return "bg-red-500 text-white border-red-600"
-    }
-    return "bg-white hover:bg-gray-100 border-gray-300"
-  }
-
   return (
-    <div className="space-y-4">
-      <div className="text-center text-sm text-muted-foreground mb-2">
+    <div className="space-y-6">
+      <div className="text-center text-sm text-muted-foreground">
         Click on teeth to mark as extracted/treated
       </div>
       
-      {/* Upper Teeth */}
-      <div className="space-y-1">
-        <div className="text-xs text-center text-muted-foreground">Upper Teeth</div>
-        <div className="flex justify-center gap-1">
-          {upperTeeth.map((tooth) => (
-            <button
-              key={tooth}
-              type="button"
-              onClick={() => onToothClick(tooth)}
-              className={`w-7 h-8 text-xs font-medium border rounded-t-lg transition-colors ${getToothColor(tooth)}`}
-              title={`Tooth ${tooth}`}
-            >
-              {tooth}
-            </button>
+      {/* Upper Jaw */}
+      <div className="space-y-2">
+        <div className="text-xs text-center font-medium text-gray-600 uppercase tracking-wide">Upper Jaw (Maxilla)</div>
+        <div className="flex justify-center items-end gap-0.5 px-2">
+          {teethData.upper.map((tooth) => (
+            <Tooth
+              key={tooth.number}
+              tooth={tooth}
+              isSelected={selectedTeeth.includes(tooth.number)}
+              onClick={() => onToothClick(tooth.number)}
+              isUpper={true}
+            />
           ))}
         </div>
       </div>
 
-      {/* Divider representing gum line */}
-      <div className="flex justify-center">
-        <div className="w-full max-w-md h-1 bg-pink-200 rounded"></div>
+      {/* Gum Line / Bite Line */}
+      <div className="flex justify-center px-4">
+        <div className="w-full max-w-lg h-2 bg-gradient-to-r from-pink-100 via-pink-200 to-pink-100 rounded-full shadow-inner"></div>
       </div>
 
-      {/* Lower Teeth */}
-      <div className="space-y-1">
-        <div className="flex justify-center gap-1">
-          {lowerTeeth.map((tooth) => (
-            <button
-              key={tooth}
-              type="button"
-              onClick={() => onToothClick(tooth)}
-              className={`w-7 h-8 text-xs font-medium border rounded-b-lg transition-colors ${getToothColor(tooth)}`}
-              title={`Tooth ${tooth}`}
-            >
-              {tooth}
-            </button>
+      {/* Lower Jaw */}
+      <div className="space-y-2">
+        <div className="flex justify-center items-start gap-0.5 px-2 mt-4">
+          {teethData.lower.map((tooth) => (
+            <Tooth
+              key={tooth.number}
+              tooth={tooth}
+              isSelected={selectedTeeth.includes(tooth.number)}
+              onClick={() => onToothClick(tooth.number)}
+              isUpper={false}
+            />
           ))}
         </div>
-        <div className="text-xs text-center text-muted-foreground">Lower Teeth</div>
+        <div className="text-xs text-center font-medium text-gray-600 uppercase tracking-wide">Lower Jaw (Mandible)</div>
       </div>
 
       {/* Legend */}
-      <div className="flex items-center justify-center gap-4 text-xs mt-2">
-        <div className="flex items-center gap-1">
-          <div className="w-4 h-4 bg-white border border-gray-300 rounded"></div>
-          <span>Normal</span>
+      <div className="flex items-center justify-center gap-6 text-xs pt-2 border-t">
+        <div className="flex items-center gap-2">
+          <div className="w-5 h-5 rounded bg-gradient-to-br from-gray-50 to-gray-200 border border-gray-300 shadow-sm"></div>
+          <span className="text-gray-600">Normal</span>
         </div>
-        <div className="flex items-center gap-1">
-          <div className="w-4 h-4 bg-red-500 border border-red-600 rounded"></div>
-          <span>Extracted/Treated</span>
+        <div className="flex items-center gap-2">
+          <div className="w-5 h-5 rounded bg-gradient-to-br from-red-400 to-red-600 border border-red-700 shadow-sm"></div>
+          <span className="text-gray-600">Extracted/Treated</span>
         </div>
       </div>
     </div>
@@ -114,7 +264,6 @@ export function AddMedicalRecordDialog() {
   const [formData, setFormData] = useState({
     patient_id: "",
     doctor_id: "",
-    diagnosis: "",
     prescription: "",
     notes: "",
     visit_date: "",
@@ -212,19 +361,25 @@ export function AddMedicalRecordDialog() {
         xrayUrl = await uploadXray()
       }
 
-      // Build diagnosis with tooth info
-      let fullDiagnosis = formData.diagnosis
+      // Build diagnosis from selected teeth
+      let diagnosis = ""
       if (selectedTeeth.length > 0) {
-        const teethInfo = `\n\nAffected Teeth: ${selectedTeeth.sort((a, b) => a - b).join(', ')}`
-        fullDiagnosis += teethInfo
+        const sortedTeeth = selectedTeeth.sort((a, b) => a - b)
+        const teethDetails = sortedTeeth.map(num => {
+          const tooth = [...teethData.upper, ...teethData.lower].find(t => t.number === num)
+          return tooth ? `#${num} (${tooth.name})` : `#${num}`
+        })
+        diagnosis = `Affected Teeth: ${teethDetails.join(', ')}`
+      } else {
+        diagnosis = "General checkup - No specific teeth affected"
       }
 
       const { error } = await supabase.from("medical_records").insert({
         patient_id: formData.patient_id,
         doctor_id: formData.doctor_id,
-        diagnosis: fullDiagnosis,
+        diagnosis: diagnosis,
         prescription: formData.prescription || null,
-        lab_results: xrayUrl || null, // Store X-ray URL in lab_results field
+        lab_results: xrayUrl || null,
         notes: formData.notes || null,
         visit_date: formData.visit_date,
       })
@@ -240,7 +395,6 @@ export function AddMedicalRecordDialog() {
       setFormData({
         patient_id: "",
         doctor_id: "",
-        diagnosis: "",
         prescription: "",
         notes: "",
         visit_date: "",
@@ -268,7 +422,7 @@ export function AddMedicalRecordDialog() {
           Add Medical Record
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Add Medical Record</DialogTitle>
           <DialogDescription>Create a new medical record for a patient</DialogDescription>
@@ -328,39 +482,32 @@ export function AddMedicalRecordDialog() {
               />
             </div>
 
-            {/* Tooth Diagram */}
+            {/* Realistic Tooth Diagram */}
             <div className="space-y-2">
-              <Label>Tooth Diagram</Label>
-              <div className="border rounded-lg p-4 bg-gray-50">
+              <Label>Dental Chart</Label>
+              <div className="border rounded-lg p-4 bg-gradient-to-b from-gray-50 to-white">
                 <ToothDiagram
                   selectedTeeth={selectedTeeth}
                   onToothClick={handleToothClick}
                 />
               </div>
               {selectedTeeth.length > 0 && (
-                <p className="text-sm text-muted-foreground">
-                  Selected teeth: {selectedTeeth.sort((a, b) => a - b).join(', ')}
-                </p>
+                <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+                  <p className="text-sm font-medium text-red-800">
+                    Selected teeth ({selectedTeeth.length}): {selectedTeeth.sort((a, b) => a - b).map(num => {
+                      const tooth = [...teethData.upper, ...teethData.lower].find(t => t.number === num)
+                      return `#${num}`
+                    }).join(', ')}
+                  </p>
+                </div>
               )}
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="diagnosis">Diagnosis *</Label>
-              <Textarea
-                id="diagnosis"
-                placeholder="Enter diagnosis..."
-                value={formData.diagnosis}
-                onChange={(e) => setFormData({ ...formData, diagnosis: e.target.value })}
-                rows={3}
-                required
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="prescription">Prescription</Label>
+              <Label htmlFor="prescription">Treatment / Prescription</Label>
               <Textarea
                 id="prescription"
-                placeholder="Enter prescription details..."
+                placeholder="Enter treatment details or prescription..."
                 value={formData.prescription}
                 onChange={(e) => setFormData({ ...formData, prescription: e.target.value })}
                 rows={3}
@@ -371,7 +518,7 @@ export function AddMedicalRecordDialog() {
             <div className="space-y-2">
               <Label>X-ray Upload</Label>
               {!xrayPreview ? (
-                <div className="border-2 border-dashed rounded-lg p-6 text-center hover:border-primary transition-colors">
+                <div className="border-2 border-dashed rounded-lg p-6 text-center hover:border-primary hover:bg-gray-50 transition-colors">
                   <input
                     type="file"
                     accept="image/*"
@@ -390,7 +537,7 @@ export function AddMedicalRecordDialog() {
                   </label>
                 </div>
               ) : (
-                <div className="relative border rounded-lg p-2">
+                <div className="relative border rounded-lg p-2 bg-black">
                   <button
                     type="button"
                     onClick={removeXray}
@@ -403,7 +550,7 @@ export function AddMedicalRecordDialog() {
                     alt="X-ray preview"
                     className="w-full max-h-48 object-contain rounded"
                   />
-                  <p className="text-sm text-muted-foreground mt-2 text-center">
+                  <p className="text-sm text-gray-400 mt-2 text-center">
                     {xrayFile?.name}
                   </p>
                 </div>
